@@ -172,17 +172,32 @@ fcip_demand_data_controls <- function(df) {
     "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/adm_extracts/fcip_commodity_price.rds",
     adm_price, mode = "wb", quiet = TRUE)
   adm_price <- readRDS(adm_price)
-  adm_price[,price := ifelse(projected_price %in% c(NA,0,Inf,-Inf,NaN),harvest_price,projected_price)]
-  adm_price <- adm_price[, lapply(.SD, mean), by = intersect(names(df),names(adm_price)), .SDcols = c("price")]
+  adm_price <- adm_price[, lapply(.SD, mean), by = intersect(names(df),names(adm_price)), .SDcols = c("projected_price","harvest_price")]
   df <- merge(df,adm_price,by = intersect(names(df),names(adm_price)),all.x = TRUE)
   rm(adm_price);gc()
   
-  # Price imputation within groups
+  # Price imputation 
+  # (1) Using the data from the RMA sources above, the expected price was
+  # first taken as the projected price, if unavailable the harvest price is considered. 
+  df[,price := ifelse(projected_price %in% c(NA,0,Inf,-Inf,NaN),harvest_price,projected_price)]
   df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  
+  # (2) The missing expected price that persists is replaced with averages within groups
   df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
      by = c("commodity_year","state_code","commodity_name","type_code","practice_code")]
+  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  
+  # (3) The missing expected price that persists is replaced with averages within groups
   df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
      by = c("commodity_year","state_code","commodity_name","type_code")]
+  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  
+  # (4) The missing expected price that persists is replaced with averages within groups
+  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
+     by = c("commodity_year","state_code","commodity_name")]
+  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+
+  df <- df[, c("projected_price","harvest_price") := NULL]
   
   # Instruments (tau and benchmark subsidy rates)
   fcip_instruments <- tempfile(fileext = ".rds")
@@ -197,7 +212,7 @@ fcip_demand_data_controls <- function(df) {
            on = c("commodity_year","state_code","county_code","commodity_code"), nomatch = 0]
   rm(fcip_instruments);gc()
   
-  # State rental rates
+  # Per-acre cost of crop production was approximated with state-level rental rates retrieved from NASS Quick Stats.
   df <- df[nass_state_rental_rates[, lapply(.SD, mean), by = intersect(names(df), names(nass_state_rental_rates)), .SDcols = "rent"],
            on = intersect(names(df), names(nass_state_rental_rates)), nomatch = 0]
   
@@ -272,7 +287,7 @@ fcip_demand_data_reconcile_acreage <- function(df){
   
   nass <- nass |> tidyr::spread(statisticcat_desc, value)
   nass <- data.table::as.data.table(nass)
-  
+  nass$commodity_name <- toupper(as.character(nass$commodity_name))
   df <- merge(df, nass,
               by = c("commodity_year","state_code","county_code","commodity_name"),
               all.x = TRUE)
@@ -333,7 +348,7 @@ fcip_demand_data_finalize <- function(df){
   df <- df[!log(tau)                               %in% c(0, NA, Inf, -Inf, NaN)]
   df <- df[!log(subsidy_rate_65)                   %in% c(0, NA, Inf, -Inf, NaN)]
   df <- df[!log(subsidy_rate_75)                   %in% c(0, NA, Inf, -Inf, NaN)]
-  # NOTE: county_acreage filter remains commented out by design.
+  df <- df[!log(county_acreage)                    %in% c(0, NA, Inf, -Inf, NaN)]
   
   # Crop support thresholds 
   available_years <- length(unique(df$commodity_year))
@@ -352,7 +367,7 @@ fcip_demand_data_finalize <- function(df){
   
   df <- na.omit(df, cols = c("pool","commodity_year","net_reporting_level_amount",
                              "coverage_level_percent_aggregate","subsidy_per_premium",
-                             "premium_per_liability","price","tau","subsidy_rate_65","subsidy_rate_75"))
+                             "premium_per_liability","tau","subsidy_rate_65","subsidy_rate_75"))
   
   # Subsidy bins
   step <- 0.02; lo <- 0.40; hi <- 0.80

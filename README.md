@@ -12,11 +12,9 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/ftsiboe/rfcipDemand/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ftsiboe/rfcipDemand/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/ftsiboe/rfcipDemand/graph/badge.svg?token=6MKGP8Z5NB)](https://codecov.io/gh/ftsiboe/rfcipDemand)
-![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![R \>= 4.0](https://img.shields.io/badge/R-%3E=4.0-blue) [![Contributor
 Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
-[![Codecov test
-coverage](https://codecov.io/gh/ftsiboe/rfcipDemand/graph/badge.svg)](https://app.codecov.io/gh/ftsiboe/rfcipDemand)
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 <!-- badges: end -->
 
 # Introduction
@@ -54,16 +52,7 @@ devtools::install_github("ftsiboe/rfcipDemand",force= TRUE,upgrade = "never")
 
 # Examples
 
-**NOTE:** In all examples we use .
-
-## Example 1: Calculations for individual-based basic crop insurance plans
-
-This example shows how to calculate **liabilities**, **premiums**,
-**subsidies**, and **indemnities** using individual-based basic crop
-insurance plans.
-
-We’ll use sample data for **Producer A**, who grows grain corn in
-**Adair County, Iowa** during the **2020 crop year**.
+## Example 1:
 
 *Key Information*
 
@@ -71,19 +60,6 @@ We’ll use sample data for **Producer A**, who grows grain corn in
 
 If you find it useful, please consider staring the repository and citing
 the following studies
-
-- Tsiboe, F. and Turner, D. (2025). [Incorporating buy‐up price loss
-  coverage into the United States farm safety
-  net](https://onlinelibrary.wiley.com/doi/full/10.1002/aepp.13536).
-  Applied Economic Perspectives and Policy.
-- Tsiboe, F., et al. (2025). [Risk reduction impacts of crop insurance
-  in the United
-  States](https://onlinelibrary.wiley.com/doi/full/10.1002/aepp.13513#:~:text=In%20other%20words%2C%20on%20average,%2Dcrop%2Dyear%20revenue%20variability).
-  Applied Economic Perspectives and Policy.
-- Gaku, S. and Tsiboe, F. (2024). [Evaluation of alternative farm safety
-  net program combination
-  strategies](https://www.emerald.com/insight/content/doi/10.1108/afr-11-2023-0150/full/html).
-  Agricultural Finance Review.
 
 # 📬 Contact
 
