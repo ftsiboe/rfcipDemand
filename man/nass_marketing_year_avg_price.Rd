@@ -5,7 +5,7 @@
 \alias{nass_marketing_year_avg_price}
 \title{nass_marketing_year_avg_price}
 \format{
-A data frame with 31145 rows and 7 columns covering 1866-2024.
+A data frame with 31139 rows and 7 columns covering 1866-2024.
 }
 \source{
 USDA NASS Quick Stats

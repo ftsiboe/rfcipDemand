@@ -1,6 +1,6 @@
 rm(list=ls(all=TRUE));gc();library(rfcip);library(data.table);library(dplyr)
 
-dir_data_release <- "C:/GitHub/USFarmSafetyNetLab/data-raw/data_release"
+dir_data_release <- "C:/GitHub/USFarmSafetyNetLab/data-raw/release"
 
 #   Maximum file size (in megabytes) allowed for inclusion.  Any dataset whose
 #   largest yearly file exceeds this threshold is skipped entirely.  Defaults to `1`.

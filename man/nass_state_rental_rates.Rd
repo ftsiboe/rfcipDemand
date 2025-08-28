@@ -5,7 +5,7 @@
 \alias{nass_state_rental_rates}
 \title{nass_state_rental_rates}
 \format{
-A data frame with 1736 rows and 5 columns covering 1994-2024.
+A data frame with 1792 rows and 5 columns covering 1994-2025.
 }
 \source{
 Output from get_state_rental_rates() function

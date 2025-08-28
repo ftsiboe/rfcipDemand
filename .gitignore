@@ -3,10 +3,10 @@
 .Rhistory
 .RData
 .Ruserdata
+rfcipDemand.Rproj
 job_*.sbatch
 slurm-*.out
 data-raw/*
 !data-raw/*.R
-!data-raw/data_release/
-data-raw/data_release/**
-!data-raw/data_release/*.R
+!data-raw/scripts/
+

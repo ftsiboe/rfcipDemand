@@ -6,7 +6,7 @@ rm(list=ls(all=TRUE));gc()
 unlink(c("NAMESPACE","./R/helper_data.R",
          list.files("./data", full.names = TRUE),
          list.files("./man", full.names = TRUE)))
-source("data-raw/build_internal_datasets.R")
+source("data-raw/scripts/build_internal_datasets.R")
 rm(list=ls(all=TRUE))
 devtools::document()
 for(i in list.files("R",full.names = T)){

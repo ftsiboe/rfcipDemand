@@ -24,14 +24,14 @@
 #' @name nass_marketing_year_avg_price
 #' @title nass_marketing_year_avg_price
 #' @description A combined dataset for nass_marketing_year_avg_price
-#' @format A data frame with 31145 rows and 7 columns covering 1866-2024.
+#' @format A data frame with 31139 rows and 7 columns covering 1866-2024.
 #' @source USDA NASS Quick Stats
 #' @usage data(nass_marketing_year_avg_price)
 "nass_marketing_year_avg_price"
 #' @name nass_state_rental_rates
 #' @title nass_state_rental_rates
 #' @description A combined dataset for nass_state_rental_rates
-#' @format A data frame with 1736 rows and 5 columns covering 1994-2024.
+#' @format A data frame with 1792 rows and 5 columns covering 1994-2025.
 #' @source Output from get_state_rental_rates() function
 #' @usage data(nass_state_rental_rates)
 "nass_state_rental_rates"
@@ -59,7 +59,7 @@
 #' @name fcip_recodes_practice
 #' @title fcip_recodes_practice
 #' @description A combined dataset for fcip_recodes_practice
-#' @format A data frame with 28633 rows and 8 columns covering 1997-2025.
+#' @format A data frame with 28639 rows and 8 columns covering 1997-2025.
 #' @source USDA-RMA, Actuarial Data Master - A00510 supplemented data from legacy ADM files
 #' @usage data(fcip_recodes_practice)
 "fcip_recodes_practice"
