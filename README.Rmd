@@ -45,10 +45,9 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/ftsiboe/rfcipDemand/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ftsiboe/rfcipDemand/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/ftsiboe/rfcipDemand/graph/badge.svg?token=6MKGP8Z5NB)](https://codecov.io/gh/ftsiboe/rfcipDemand)
-![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![R >= 4.0](https://img.shields.io/badge/R-%3E=4.0-blue)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
-[![Codecov test coverage](https://codecov.io/gh/ftsiboe/rfcipDemand/graph/badge.svg)](https://app.codecov.io/gh/ftsiboe/rfcipDemand)
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 <!-- badges: end -->
 
 
