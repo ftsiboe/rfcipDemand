@@ -19,11 +19,3 @@ devtools::build_manual(path = getwd())
 
 devtools::check()
 
-devtools::document()
-unique(unlist(layouts_fcip))[
-  !unique(unlist(layouts_fcip)) %in% 
-    c(FCIP_FORCE_CHARACTER_KEYS,
-      FCIP_FORCE_AMOUNT_VARIABLES,
-      FCIP_FORCE_NUMERIC_KEYS,
-      FCIP_INSURANCE_POOL,
-      FCIP_INSURANCE_ELECTION_RCODED)]
