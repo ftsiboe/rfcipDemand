@@ -56,14 +56,7 @@ add \code{commodity_year}, and return the result.
 }
 }
 \seealso{
-\code{\link{estimate_fcip_unloaded_rate}}
-
-Other FCIP Demand Estimation: 
-\code{\link{fcip_demand_data_controls}()},
-\code{\link{fcip_demand_data_dispatcher}()},
-\code{\link{fcip_demand_data_finalize}()},
-\code{\link{fcip_demand_data_prep_sob}()},
-\code{\link{fcip_demand_data_reconcile_acreage}()},
+Other FCIP instruments: 
 \code{\link{get_yu2018_instrument}()}
 }
-\concept{FCIP Demand Estimation}
+\concept{FCIP instruments}

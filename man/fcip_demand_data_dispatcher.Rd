@@ -35,16 +35,4 @@ Aligned with Asche, Bekkerman, & Li (2023), \emph{Food Policy}, 119(3):102505
 (\doi{10.1016/j.foodpol.2023.102505}). Requires internet access to download
 release \code{.rds} assets and several in-memory lookup tables (see stage docs).
 }
-\seealso{
-\code{\link[=fcip_demand_data_prep_sob]{fcip_demand_data_prep_sob()}}, \code{\link[=fcip_demand_data_controls]{fcip_demand_data_controls()}},
-\code{\link[=fcip_demand_data_reconcile_acreage]{fcip_demand_data_reconcile_acreage()}}, \code{\link[=fcip_demand_data_finalize]{fcip_demand_data_finalize()}}
-
-Other FCIP Demand Estimation: 
-\code{\link{estimate_fcip_instruments}()},
-\code{\link{fcip_demand_data_controls}()},
-\code{\link{fcip_demand_data_finalize}()},
-\code{\link{fcip_demand_data_prep_sob}()},
-\code{\link{fcip_demand_data_reconcile_acreage}()},
-\code{\link{get_yu2018_instrument}()}
-}
-\concept{FCIP Demand Estimation}
+\concept{Estimation Data}

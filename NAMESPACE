@@ -2,12 +2,7 @@
 
 export(calculate_mode)
 export(estimate_fcip_instruments)
-export(estimate_fcip_unloaded_rate)
-export(fcip_demand_data_controls)
 export(fcip_demand_data_dispatcher)
-export(fcip_demand_data_finalize)
-export(fcip_demand_data_prep_sob)
-export(fcip_demand_data_reconcile_acreage)
 export(fcip_demand_sys_coeff_table)
 export(fcip_demand_sys_effect)
 export(fcip_demand_sys_estimate)

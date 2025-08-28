@@ -47,17 +47,19 @@
 #'
 #' @return A `data.table` at the chosen identifier grain with coverage aggregates and the
 #'   columns listed under **What this stage produces**.
-#' @family FCIP Demand Estimation
+#' @family Estimation Data
 #' @import data.table
 #' @importFrom utils download.file
-#' @export
+#' @keywords internal
+#' @noRd
 fcip_demand_data_prep_sob <- function(
     study_years = 2001:(as.numeric(format(Sys.Date(), "%Y")) - 1),
     identifiers = c("commodity_year",FCIP_INSURANCE_POOL,"insurance_plan_code","unit_structure_code")
 ) {
+  
   stopifnot(length(study_years) > 0)
   
-  # Download SOBTPU release (no caching) 
+  # Download SOBTPU release 
   df <- tempfile(fileext = ".rds")
   download.file(
     "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/sob/sobtpu_all.rds",
@@ -155,10 +157,11 @@ fcip_demand_data_prep_sob <- function(
 #'   `price`, `tau`, `subsidy_rate_65`, `subsidy_rate_75`, `rent`, `index_for_price_recived`.
 #'
 #' @note Column name `index_for_price_recived` follows the source spelling.
-#' @family FCIP Demand Estimation
+#' @family Estimation Data
 #' @import data.table
 #' @importFrom utils download.file
-#' @export
+#' @keywords internal
+#' @noRd
 fcip_demand_data_controls <- function(df) {
   
   stopifnot(data.table::is.data.table(df))
@@ -218,15 +221,16 @@ fcip_demand_data_controls <- function(df) {
 #' - Linker: `fsa_crop_linker` (columns: `crop_cd_fsa`, `crop`, `crop_yr`)
 #' - Release download: `nass_extracts/nass_production_data.rds`
 #'
-#' @param df A `data.table` from [fcip_demand_data_controls()].
+#' @param df A `data.table` from `fcip_demand_data_controls()'.
 #'
 #' @return The same `data.table` with a single `county_acreage` column and without
 #'   `nassSurvey_AREA_*` or `fsa_planted_acres` intermediates.
-#' @family FCIP Demand Estimation
+#' @family Estimation Data
 #' @import data.table rfsa
 #' @importFrom utils download.file data
 #' @importFrom tidyr spread
-#' @export
+#' @keywords internal
+#' @noRd
 fcip_demand_data_reconcile_acreage <- function(df){
   
   stopifnot(data.table::is.data.table(df))
@@ -237,18 +241,22 @@ fcip_demand_data_reconcile_acreage <- function(df){
   crop_linker <- data.table::as.data.table(crop_linker)
   crop_linker <- crop_linker[!crop_cd %in% NA]
   
-  utils::data(fsaCropAcreage)
-  fsa <- data.table::as.data.table(fsaCropAcreage)
+  if (!exists("fsaCropAcreage", inherits = TRUE)) {
+    utils::data("fsaCropAcreage", package = "rfsa", envir = environment())
+  }
+  fsa <- get("fsaCropAcreage", inherits = TRUE)
+  fsa <- data.table::as.data.table(fsa)
   fsa <- fsa[!crop_cd %in% NA]
   fsa <- fsa[crop_linker, on = c("crop_yr","crop_cd"), nomatch = 0]
   fsa <- fsa[, .(fsa_planted_acres = sum(planted_acres, na.rm = TRUE)),
              by = .(crop_yr, state_cd, county_cd, commodity_name)]
-  
-  data.table::setnames(fsa, old = c("crop_yr","state_cd","county_cd","commodity_name"),
-                       new = c("commodity_year","state_code","county_code","commodity_name"))
+  data.table::setnames(fsa,
+                       old = c("crop_yr","state_cd","county_cd","commodity_name"),
+                       new = c("commodity_year","state_code","county_code","commodity_name")
+  )
   
   df <- merge(df, fsa, by = c("commodity_year","state_code","county_code","commodity_name"), all.x = TRUE)
-  rm(fsa); gc()
+  rm(fsa,crop_linker); gc()
   
   # NASS county series (planted/bearing/harvested)
   nass <- tempfile(fileext = ".rds")
@@ -270,11 +278,18 @@ fcip_demand_data_reconcile_acreage <- function(df){
               all.x = TRUE)
   rm(nass); gc()
   
-  # Choose county_acreage with fallbacks 
-  df[, county_acreage := fsa_planted_acres]
-  df[county_acreage %in% c(NA, Inf, -Inf, NaN, 0), county_acreage := nassSurvey_AREA_PLANTED]
-  df[county_acreage %in% c(NA, Inf, -Inf, NaN, 0), county_acreage := nassSurvey_AREA_BEARING]
-  df[county_acreage %in% c(NA, Inf, -Inf, NaN, 0), county_acreage := nassSurvey_AREA_HARVESTED]
+  # Ensure NASS columns exist
+  needed <- c("nassSurvey_AREA_PLANTED", "nassSurvey_AREA_BEARING", "nassSurvey_AREA_HARVESTED", "fsa_planted_acres")
+  for (nm in needed) if (!nm %in% names(df)) df[, (nm) := NA_real_]
+  df[, (needed) := lapply(.SD, as.numeric), .SDcols = needed]
+  
+  bad2na <- function(v) { v[is.na(v) | !is.finite(v) | v == 0] <- NA_real_; v }
+  df[, county_acreage := data.table::fcoalesce(
+    bad2na(fsa_planted_acres),
+    bad2na(nassSurvey_AREA_PLANTED),
+    bad2na(nassSurvey_AREA_BEARING),
+    bad2na(nassSurvey_AREA_HARVESTED)
+  )]
   
   # Drop intermediates
   df <- df[, c("nassSurvey_AREA_HARVESTED","nassSurvey_AREA_PLANTED","nassSurvey_AREA_BEARING","fsa_planted_acres") := NULL]
@@ -300,11 +315,12 @@ fcip_demand_data_reconcile_acreage <- function(df){
 #' @param df A `data.table` from [fcip_demand_data_reconcile_acreage()].
 #'
 #' @return Final `data.table` ready for estimation.
-#' @family FCIP Demand Estimation
+#' @family Estimation Data
 #' @import data.table
 #' @importFrom stats na.omit
 #' @importFrom usmap fips_info
-#' @export
+#' @keywords internal
+#' @noRd
 fcip_demand_data_finalize <- function(df){
   
   stopifnot(data.table::is.data.table(df))
@@ -320,8 +336,9 @@ fcip_demand_data_finalize <- function(df){
   # NOTE: county_acreage filter remains commented out by design.
   
   # Crop support thresholds 
+  available_years <- length(unique(df$commodity_year))
   croplist <- df[, .(n = length(net_reporting_level_amount)), by = .(commodity_year, commodity_name)][
-    n >= 30L, .(n = length(n)), by = .(commodity_name)][n >= 10L]
+    n >= 30L, .(n = length(n)), by = .(commodity_name)][n >= pmin(available_years,10)]
   df <- df[commodity_name %in% croplist$commodity_name]
   rm(croplist); gc()
   
@@ -402,10 +419,7 @@ fcip_demand_data_finalize <- function(df){
 #'   only when the required keys are included in `identifiers`
 #' 
 #' @return A `data.table` ready for FCIP demand estimation.
-#'
-#' @seealso [fcip_demand_data_prep_sob()], [fcip_demand_data_controls()],
-#'   [fcip_demand_data_reconcile_acreage()], [fcip_demand_data_finalize()]
-#' @family FCIP Demand Estimation
+#' @family Estimation Data
 #' @export
 fcip_demand_data_dispatcher <- function(
     study_years = 2001:(as.numeric(format(Sys.Date(), "%Y")) - 1),

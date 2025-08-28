@@ -32,12 +32,7 @@ national subsidy-rate instruments at specified coverage levels,
 following Yu et al. (2018).
 }
 \seealso{
-Other FCIP Demand Estimation: 
-\code{\link{estimate_fcip_instruments}()},
-\code{\link{fcip_demand_data_controls}()},
-\code{\link{fcip_demand_data_dispatcher}()},
-\code{\link{fcip_demand_data_finalize}()},
-\code{\link{fcip_demand_data_prep_sob}()},
-\code{\link{fcip_demand_data_reconcile_acreage}()}
+Other FCIP instruments: 
+\code{\link{estimate_fcip_instruments}()}
 }
-\concept{FCIP Demand Estimation}
+\concept{FCIP instruments}
