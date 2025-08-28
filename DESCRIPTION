@@ -1,0 +1,36 @@
+Package: rfcipDemand
+Type: Package
+Title: Estimate Federal Crop Insurance Program Demand Models
+Version: 0.0.0.9000
+Author: Francis Tsiboe [aut, cre] (<https://orcid.org/0000-0001-5984-1072>)
+Maintainer: Francis Tsiboe <ftsiboe@hotmail.com>
+Contributor: -
+Reviewer: -
+Creator: Francis Tsiboe
+Description: Tools to construct county–crop–practice–plan–unit panels from the
+    USDA RMA Summary of Business (SOBTPU) and related sources, and to estimate
+    FCIP demand systems with two-way cluster-robust covariance. The pipeline
+    standardizes coverage measures, merges price and instrument variables, adds
+    rental-rate and price-index controls, reconciles county acreage (FSA/NASS),
+    and produces diagnostics including robust first-stage F-tests. Methods align
+    with the empirical design in "The crop insurance demand response to premium
+    subsidies Evidence from U.S. Agriculture" (Food Policy, 2023, 119(3)).
+License: GPL-3 + file LICENSE
+URL: https://github.com/you/rfcipDemand
+BugReports: https://github.com/you/rfcipDemand/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+VignetteBuilder: knitr
+Depends: R (>= 4.1.0)
+Imports: rfsa, data.table, systemfit,sandwich,doBy,car,plyr,usmap,stats,utils, tidyr, nlsur
+Remotes: github::UrbanInstitute/urbnmapr, github::dylan-turner25/rfsa, github::JanMarvin/nlsur
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+LazyData: true
+Cite-us: If you find it useful, please consider staring the repository and citing the following studies
+  - Tsiboe, F. and Turner, D. (2025). "Incorporating buy‐up price loss coverage into the United States
+    farm safety net." Applied Economic Perspectives and Policy.
+  - Tsiboe, F., et al. (2025). "Risk reduction impacts of crop insurance in the United States."
+    Applied Economic Perspectives and Policy.
+  - Gaku, S. and Tsiboe, F. (2024). Evaluation of alternative farm safety net program combination
+    strategies. Agricultural Finance Review.

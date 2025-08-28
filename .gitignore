@@ -1,0 +1,12 @@
+# RStudio cruft
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+job_*.sbatch
+slurm-*.out
+data-raw/*
+!data-raw/*.R
+!data-raw/data_release/
+data-raw/data_release/**
+!data-raw/data_release/*.R

@@ -1,0 +1,38 @@
+^.*\.Rproj$              # RStudio project file
+^\.Rproj\.user$          # RStudio project internals
+^\.Rhistory$             # interactive history
+^\.RData$                # workspace image
+^\.Renviron$             # user environment settings
+^\.DS_Store$             # macOS Finder metadata
+^\.git$                  # Git directory
+^\.gitignore$            # Git ignore rules
+^\.gitattributes$        # Git attributes
+^\.github$               # GitHub workflows, issues templates, etc.
+^README\.Rmd$            # source README (if you render it to README.md)
+^README\.Rmarkdown$      # likewise
+^inst/doc$               # pkgdown‐generated vignettes
+^docs$                   # pkgdown website output
+^vignettes/.*\.html$     # pre‐built vignette HTML
+^pkgdown\\.yml$          # site config
+^.*\\.tar\\.gz$          # old built bundles
+^.*\\.Rcheck$            # check directories
+^renv$                   # (if you’re using renv, ignore the project library)
+^renv\\.lock$            # lockfile for renv
+^coverage$               # test coverage output
+rfcipDemand.Rproj
+^LICENSE\.md$
+^codemeta\.json$
+^\.github$
+data-raw
+replications
+README.Rmd
+data/README.Rmd
+data/README.md
+^SECURITY\.md$
+code_of_conduct.md
+job_lcr_estimations.sbatch
+\\.out$
+^.*\\.pdf$
+^rfcipDemand_.*\.pdf$
+^man/figures/
+
