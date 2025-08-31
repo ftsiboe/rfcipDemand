@@ -17,7 +17,7 @@ Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](c
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 <!-- badges: end -->
 
-## 📖 Introduction
+# 📖 Introduction
 
 `rfcipDemand` provides a reproducible pipeline for analyzing **U.S.
 Federal Crop Insurance Program (FCIP) demand**.
