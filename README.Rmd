@@ -70,7 +70,7 @@ The two most important functions are:
 - `fcip_demand_data_dispatcher()` → assemble the modeling panel  
 - `fcip_demand_sys_estimate()` → estimate demand equations
 
-## Example 1
+## Example 1: Full sample estimation
 Model structure aligned to the approach in [Tsiboe & Turner (2023)](https://doi.org/10.1016/j.foodpol.2023.102505), updated with recent data.  
 **NOTE:** Results may differ from the published articles due to RMA data revisions and pipeline improvements in this package.  
 If you need *exact* replication of a paper, please use that study's dedicated replication package (link to be added).
@@ -103,7 +103,6 @@ for(i in unique(data$commodity_code)){ data[,paste0("Crop_",i)] <- ifelse(data$c
 for(i in unique(data$commodity_year)){ data[,paste0("year_",i)] <- ifelse(data$commodity_year %in% i,1,0) }
 data <- data[names(data)[!names(data) %in% c(paste0("year_",max(data$commodity_year,na.rm=T)),"Crop_41")]]
 
-str(res, max.level = 0)
 ```
 
 **🧮 Estimate the model**
@@ -125,10 +124,8 @@ model <- list(
 # 5) Estimate demand system
 res <- fcip_demand_sys_estimate(model = model, data = data)
 
-write.csv(res,"data-raw/examples/producerA_outcomes1.csv")
+write.csv(res,"data-raw/examples/example1.csv")
 
-# Light-touch inspection
-str(res, max.level = 0)
 ```
 
 **📊 Discussion of Results**
@@ -138,7 +135,7 @@ The outputs from `fcip_demand_sys_estimate()` are structured objects that typica
 - **System coefficients**: Estimated elasticities of demand with respect to premium rates, coverage levels, and control variables.  
 - **Robust inference**: Standard errors clustered by county and year, consistent with best practices in applied demand modeling.  
 - **First-stage diagnostics**: Strength of excluded instruments (e.g., `tau`), ensuring valid identification of the endogenous premium rate.  
-- **Equation-level summaries**: For multi-equation systems, results are returned per outcome (e.g., liability coverage (`Gamma`) and coverage level (`Theta1`)).  
+- **Equation-level summaries**: For multi-equation systems, results are returned per outcome (e.g., insured acreage (`Gamma`) and coverage level (`Theta1`)).  
 
 ***Interpreting key results***
 

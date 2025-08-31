@@ -67,7 +67,7 @@ The two most important functions are:
 - `fcip_demand_data_dispatcher()` → assemble the modeling panel  
 - `fcip_demand_sys_estimate()` → estimate demand equations
 
-## Example 1
+## Example 1: Full sample estimation
 
 Model structure aligned to the approach in [Tsiboe & Turner
 (2023)](https://doi.org/10.1016/j.foodpol.2023.102505), updated with
@@ -146,7 +146,7 @@ that typically include:
   `tau`), ensuring valid identification of the endogenous premium
   rate.  
 - **Equation-level summaries**: For multi-equation systems, results are
-  returned per outcome (e.g., liability coverage (`Gamma`) and coverage
+  returned per outcome (e.g., insured acreage (`Gamma`) and coverage
   level (`Theta1`)).
 
 ***Interpreting key results***
