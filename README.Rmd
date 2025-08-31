@@ -4,8 +4,13 @@ output:
   github_document:
     toc: false
     toc_depth: 3
+  word_document: default
+  html_document:
+    toc: false
+    toc_depth: '3'
+    df_print: paged
+  pdf_document: default
 ---
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
@@ -131,48 +136,58 @@ write.csv(res,"data-raw/examples/example1.csv")
 
 **📊 Discussion of Results**
 
-The outputs from `fcip_demand_sys_estimate()` are structured objects that typically include:
+The outputs (see Table 1 below) from `fcip_demand_sys_estimate()` are structured objects that typically include:
 
 - **System coefficients**: Estimated elasticities of demand with respect to premium rates, coverage levels, and control variables.  
 - **Robust inference**: Standard errors clustered by county and year, consistent with best practices in applied demand modeling.  
 - **First-stage diagnostics**: Strength of excluded instruments (e.g., `tau`), ensuring valid identification of the endogenous premium rate.  
-- **Equation-level summaries**: For multi-equation systems, results are returned per outcome (e.g., insured acreage (`Gamma`) and coverage level (`Theta1`)).  
+- **Equation-level summaries**: For multi-equation systems, results are returned per outcome (e.g., insured acreage (`Gamma`) and coverage level (`Theta1`)). 
 
-```r
-# Example 1 Output
-    demand                 coef                        Estimate     StdError      Zvalue  Pvalue    model endogenous     FE     name  disag  level
-    <char>               <char>                           <num>        <num>       <num>   <num>   <char>     <char> <lgcl>   <char> <char> <char>
- 1:  Gamma          (Intercept)       0.00000000000000009620557 0.0049082100  0.00000000 1.00000 demo_sys       rate   TRUE demo_sys   FCIP      1
- 2:  Gamma           tilda_rate      -0.47598862988030482545909 2.2599672784 -0.21061749 0.83319 demo_sys       rate   TRUE demo_sys   FCIP      1
- 3:  Gamma tilda_county_acreage       0.02375448208427862958891 0.0115885905  2.04981633 0.04038 demo_sys       rate   TRUE demo_sys   FCIP      1
- 4:  Gamma          tilda_price       0.00188388106365355574405 0.0082705724  0.22778122 0.81982 demo_sys       rate   TRUE demo_sys   FCIP      1
- 5:  Gamma           tilda_rent       0.42348960204379315630518 2.9927121999  0.14150696 0.88747 demo_sys       rate   TRUE demo_sys   FCIP      1
- 6:  Theta          (Intercept)       0.00000000000000040452071 0.0023858346  0.00000000 1.00000 demo_sys       rate   TRUE demo_sys   FCIP      1
- 7:  Theta           tilda_rate      -0.35874792372045244404077 0.4228440492 -0.84841663 0.39621 demo_sys       rate   TRUE demo_sys   FCIP      1
- 8:  Theta tilda_county_acreage      -0.00060714094882705787505 0.0005801842 -1.04646233 0.29535 demo_sys       rate   TRUE demo_sys   FCIP      1
- 9:  Theta          tilda_price      -0.00015009695900695911174 0.0012070329 -0.12435200 0.90104 demo_sys       rate   TRUE demo_sys   FCIP      1
-10:  Theta           tilda_rent       0.01307193589246588398545 0.5185976994  0.02520631 0.97989 demo_sys       rate   TRUE demo_sys   FCIP      1
-11:  Total           tilda_rate      -0.66397662091665499151105 1.6478758704 -0.40292878 0.68700 demo_sys       rate   TRUE demo_sys   FCIP      1
-12:  Total tilda_county_acreage       0.02313291881666002663964 0.0118048770  1.95960694 0.05004 demo_sys       rate   TRUE demo_sys   FCIP      1
-13:  Total          tilda_price       0.00173350133982781142925 0.0085377154  0.20304042 0.83910 demo_sys       rate   TRUE demo_sys   FCIP      1
-14:  Total           tilda_rent       0.44209736686530137772522 3.6720340147  0.12039577 0.90417 demo_sys       rate   TRUE demo_sys   FCIP      1
-15:                           N 1917600.00000000000000000000000           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
-16:                         NFE       1.00000000000000000000000           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
-17:                 residCov_11       1.34892891790689017916804           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
-18:                 residCov_22       0.00612981995488134055738           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
-19:                 residCov_12       0.01361366587160771704501           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
-20:                       JTest       0.00000000000000000000000           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
-21:                       FTest     125.04411846437918143237766           NA          NA 0.00000 demo_sys       rate   TRUE demo_sys   FCIP      1
-    demand                 coef                        Estimate     StdError      Zvalue  Pvalue    model endogenous     FE     name  disag  level
+**Table 1: Crop Insurance Demand System for US Federal Crop Insurance Pools (2001/24)**
+
+```{r quick-start-format-results, include=T, warning=FALSE}
+devtools::document()
+library(knitr)
+example1 <- readr::read_csv("data-raw/examples/example1.csv", show_col_types = FALSE)
+
+# Variable name mapping
+var_labels <- c(
+  "(Intercept)"            = "(Intercept)",
+  "tilda_rate"             = "Paid premium rate",
+  "tilda_county_acreage"   = "County planted acres",
+  "tilda_price"            = "Expected crop price",
+  "tilda_rent"             = "State rental rate for land",
+  "residCov_11"            = "σ_aa",
+  "residCov_22"            = "σ_θθ",
+  "residCov_12"            = "σ_θa",
+  "N"                      = "Number of observations",
+  "NFE"                    = "Number of insurance pools",
+  "JTest"                  = "J-test",
+  "FTest"                  = "Weak-instrument: F-statistics"
+)
+
+final_tbl <- format_fcip_demand_table(example1, var_labels)
+
+# Print table
+kable(final_tbl,
+      col.names = c("Variables","Estimates"),
+      format = "pipe",  # <- ensures compatibility with GitHub markdown
+      align = c("l","c"))
+
 ```
+<sub>**Notes:** Crop insurance demand is modeled via a multi-equation structural model of crop insurance demand at the intensive and extensive margins measured by coverage level and insured acres. An insurance pool is defined as the unique combinations of crops (almonds, apples, barley, blueberries, cabbage, canola, corn, cotton, dry beans, dry peas, flax, forage production, fresh nectarines, grain sorghum, grapes, millet, oats, olives, onions, oranges, peaches, peanuts, pears, plums, potatoes, rice, rye, safflower, soybeans, sugar beets, sugarcane, sunflowers, sweet corn, tobacco, tomatoes, walnuts, and wheat), county, insurance unit (optional units [OU], basic units [BU], or enterprise units [EU]), insurance plan, irrigation practice (irrigated, non-irrigated, or unspecified), and organic practice (organic certified, organic transition, or unspecified). The data used was constructed by the authors using primary data from (1) Risk Management Agency’s summary of business files that contain insurance metrics aggregated by county, crop, crop type, production practice, insurance plan, coverage level, and insurance unit, actuarial data master, and price addendums, (2) Farm Service Agency’s crop acreage data, and (3) NASS Quick Stats. The preferred model is ††.  
+Significance levels – *p&lt;0.1, **p&lt;0.05, ***p&lt;0.01. Standard errors in parentheses are clustered by insurance pool and year.</sub>
 
-***Interpreting key results***
 
-- A **negative and significant coefficient on `rate`** implies that higher premium rates reduce demand for coverage, consistent with economic theory.  
-- Significant coefficients on controls like `county_acreage` and `rent` highlight how local production environments affect insurance demand.  
-- **Instrument strength (F-statistics)** should be monitored to validate the causal interpretation of `rate` coefficients.  
+The results from the preferred specification highlight distinct responses across the intensive and extensive margins of crop insurance demand. At the intensive margin (coverage level, ln θ_it), the producer-paid premium rate enters with the expected negative sign (-0.359), implying that a 1% increase in the premium rate is associated with a 0.36% decrease in chosen coverage levels. However, the effect is statistically insignificant, reflecting the limited responsiveness of coverage choices to cost signals. Other covariates, including county planted acres, crop price, and rental rates, are similarly imprecise and not distinguishable from zero.
 
----
+At the extensive margin (insured acres, ln a_it), scale effects dominate. County planted acres exhibit a positive and statistically significant coefficient (0.024, p < 0.05), meaning that a 1% increase in planting area raises insured acreage by about 0.024%. The premium rate again shows a negative effect (-0.476), suggesting a 1% increase in rates reduces insured acreage by nearly 0.48%, though the standard error is large and the estimate is not significant.
+
+For the total protection response, county planted acres remain a key driver (0.023, p < 0.10), indicating that scale continues to push overall demand upward by roughly 0.023% for each 1% increase in planted acres. The premium rate reduces total protection (-0.664), implying that a 1% increase in paid premiums reduces total protection demand by about 0.66%, though again, the estimate is not statistically precise.
+
+The covariance matrix provides additional insight. The positive cross-covariance (σ_θa = 0.014) indicates that unobserved factors increasing demand for coverage level also raise demand for insured acres, and vice versa. However, the relationship is asymmetric: the variance of insured acres (σ_aa = 1.349) dwarfs that of coverage level (σ_θθ = 0.006), suggesting that shocks to acreage drive most of the variation in joint demand.
+
+Overall, these estimates point to farm size (planted acres) as the most consistent determinant of insurance demand, while the dampened and imprecisely estimated response to premium rates underscores how subsidies mute price sensitivity. The positive covariance between margins further suggests complementarities in demand, but the dominant source of variation lies in the extensive margin, highlighting the central role of scale in shaping crop insurance participation.
 
 # 📚 Citation
 

@@ -1,0 +1,468 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\usepackage{svg}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={rfcipDemand},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{rfcipDemand}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\href{https://www.repostatus.org/\#active}{\pandocbounded{\includesvg[keepaspectratio]{https://www.repostatus.org/badges/latest/active.svg}}}
+\href{https://lifecycle.r-lib.org/articles/stages.html\#experimental}{\pandocbounded{\includesvg[keepaspectratio]{https://img.shields.io/badge/lifecycle-experimental-orange.svg}}}
+\href{https://github.com/ftsiboe/rfcipDemand/actions/workflows/R-CMD-check.yaml}{\pandocbounded{\includesvg[keepaspectratio]{https://github.com/ftsiboe/rfcipDemand/actions/workflows/R-CMD-check.yaml/badge.svg}}}
+\href{https://codecov.io/gh/ftsiboe/rfcipDemand}{\pandocbounded{\includegraphics[keepaspectratio]{https://codecov.io/gh/ftsiboe/rfcipDemand/graph/badge.svg?token=6MKGP8Z5NB}}}
+\pandocbounded{\includegraphics[keepaspectratio]{https://img.shields.io/badge/R-\%3E=4.0-blue}}
+\href{code_of_conduct.md}{\pandocbounded{\includesvg[keepaspectratio]{https://img.shields.io/badge/Contributor\%20Covenant-2.1-4baaaa.svg}}}
+\pandocbounded{\includesvg[keepaspectratio]{https://img.shields.io/badge/License-GPLv3-blue.svg}}
+
+\section{📖 Introduction}\label{introduction}
+
+\texttt{rfcipDemand} provides a reproducible pipeline for analyzing
+\textbf{U.S. Federal Crop Insurance Program (FCIP) demand}.
+
+Its functionalities are grounded in the empirical strategies developed
+in:
+
+\begin{itemize}
+\item
+  Tsiboe, F., \& Turner, D. (2023).
+  \href{https://doi.org/10.1016/j.foodpol.2023.102505}{\textbf{The crop
+  insurance demand response to premium subsidies: Evidence from U.S.
+  Agriculture}} Food Policy, 119(3).
+\item
+  Tsiboe, F., \& Turner, D. (2023).
+  \href{https://doi.org/10.1017/age.2023.13}{\textbf{Econometric
+  identification of crop insurance participation}} Agricultural and
+  Resource Economics Review
+\end{itemize}
+
+Specifically, the package helps you:
+
+\begin{itemize}
+\tightlist
+\item
+  🧩 Build county--crop--practice--plan--unit panels from \textbf{USDA
+  RMA SOBTPU} and related sources\\
+\item
+  🔗 Merge \textbf{price and instrument variables}\\
+\item
+  🌾 Reconcile \textbf{acreage} using FSA and NASS data\\
+\item
+  📊 Estimate \textbf{FCIP demand systems} with fixed effects and
+  two-way cluster-robust covariance\\
+\item
+  ✅ Produce diagnostics, including robust first-stage strength
+\end{itemize}
+
+\textbf{Disclaimer:} This package uses USDA data but is not endorsed by
+or affiliated with USDA or the Federal Government.\\
+See \url{LICENSE} for terms.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{📦 Installation}\label{installation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install from GitHub}
+\ControlFlowTok{if}\NormalTok{ (}\SpecialCharTok{!}\FunctionTok{requireNamespace}\NormalTok{(}\StringTok{"devtools"}\NormalTok{, }\AttributeTok{quietly =} \ConstantTok{TRUE}\NormalTok{)) }\FunctionTok{install.packages}\NormalTok{(}\StringTok{"devtools"}\NormalTok{)}
+\NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{install\_github}\NormalTok{(}\StringTok{"ftsiboe/rfcipDemand"}\NormalTok{, }\AttributeTok{force =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{upgrade =} \StringTok{"never"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{🚀 Quick Start}\label{quick-start}
+
+The two most important functions are:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{fcip\_demand\_data\_dispatcher()} → assemble the modeling
+  panel\\
+\item
+  \texttt{fcip\_demand\_sys\_estimate()} → estimate demand equations
+\end{itemize}
+
+\subsection{Example 1: Full sample
+estimation}\label{example-1-full-sample-estimation}
+
+Model structure aligned to the approach in
+\href{https://doi.org/10.1016/j.foodpol.2023.102505}{Tsiboe \& Turner
+(2023)}, updated with recent data.\\
+\textbf{NOTE:} Results may differ from the published articles due to RMA
+data revisions and pipeline improvements in this package.\\
+If you need \emph{exact} replication of a paper, please use that study's
+dedicated replication package (link to be added).
+
+\textbf{Data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# library(rfcipDemand)}
+\NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{document}\NormalTok{()}
+\CommentTok{\# 1) Identify fields for panel building}
+\NormalTok{FCIP\_INSURANCE\_POOL }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"state\_code"}\NormalTok{,}\StringTok{"county\_code"}\NormalTok{,}\StringTok{"commodity\_code"}\NormalTok{,}\StringTok{"type\_code"}\NormalTok{,}\StringTok{"practice\_code"}\NormalTok{)}
+
+\CommentTok{\# 2) Build data (example years {-} keep short so examples are fast)}
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{fcip\_demand\_data\_dispatcher}\NormalTok{(}
+  \AttributeTok{study\_years =} \DecValTok{2001}\SpecialCharTok{:}\DecValTok{2024}\NormalTok{,}
+  \AttributeTok{identifiers =} \FunctionTok{c}\NormalTok{(}\StringTok{"commodity\_year"}\NormalTok{, FCIP\_INSURANCE\_POOL, }\StringTok{"insurance\_plan\_code"}\NormalTok{, }\StringTok{"unit\_structure\_code"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 3) Prep variables (toy scaling for demo)}
+\NormalTok{data                }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(df)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{Gamma          }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{net\_reporting\_level\_amount }\SpecialCharTok{/} \DecValTok{10000}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{Theta1         }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{coverage\_level\_percent\_aggregate}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{rate           }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{premium\_per\_liability}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{data}\SpecialCharTok{$}\NormalTok{subsidy\_per\_premium)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{county\_acreage }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{county\_acreage }\SpecialCharTok{/} \DecValTok{10000}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{rent           }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{rent }\SpecialCharTok{/} \DecValTok{1000}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{trend          }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{commodity\_year }\SpecialCharTok{{-}} \FunctionTok{min}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{commodity\_year, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{FCIP           }\OtherTok{\textless{}{-}} \DecValTok{1}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{tauS0        }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{tau}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{((data}\SpecialCharTok{$}\NormalTok{subsidy\_rate\_65}\SpecialCharTok{+}\NormalTok{data}\SpecialCharTok{$}\NormalTok{subsidy\_rate\_75)}\SpecialCharTok{/}\DecValTok{2}\NormalTok{))}
+
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \FunctionTok{unique}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{commodity\_code))\{ data[,}\FunctionTok{paste0}\NormalTok{(}\StringTok{"Crop\_"}\NormalTok{,i)] }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{commodity\_code }\SpecialCharTok{\%in\%}\NormalTok{ i,}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{)}\SpecialCharTok{*}\NormalTok{data}\SpecialCharTok{$}\NormalTok{trend \}}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \FunctionTok{unique}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{commodity\_year))\{ data[,}\FunctionTok{paste0}\NormalTok{(}\StringTok{"year\_"}\NormalTok{,i)] }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{commodity\_year }\SpecialCharTok{\%in\%}\NormalTok{ i,}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{) \}}
+\NormalTok{data }\OtherTok{\textless{}{-}}\NormalTok{ data[}\FunctionTok{names}\NormalTok{(data)[}\SpecialCharTok{!}\FunctionTok{names}\NormalTok{(data) }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"year\_"}\NormalTok{,}\FunctionTok{max}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{commodity\_year,}\AttributeTok{na.rm=}\NormalTok{T)),}\StringTok{"Crop\_41"}\NormalTok{)]]}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{🧮 Estimate the model}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 4) Specify the system}
+
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{name       =} \StringTok{"demo\_sys"}\NormalTok{,}
+  \AttributeTok{FE         =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{outcome    =} \FunctionTok{c}\NormalTok{(}\StringTok{"Gamma"}\NormalTok{,}\StringTok{"Theta1"}\NormalTok{),}
+  \AttributeTok{endogenous =} \StringTok{"rate"}\NormalTok{,}
+  \AttributeTok{excluded   =} \StringTok{"tauS0"}\NormalTok{,}
+  \AttributeTok{partial    =} \FunctionTok{c}\NormalTok{(}\StringTok{"trend"}\NormalTok{,}\FunctionTok{names}\NormalTok{(data)[}\FunctionTok{grepl}\NormalTok{(}\StringTok{"Crop\_"}\NormalTok{,}\FunctionTok{names}\NormalTok{(data))],}\FunctionTok{names}\NormalTok{(data)[}\FunctionTok{grepl}\NormalTok{(}\StringTok{"year\_"}\NormalTok{,}\FunctionTok{names}\NormalTok{(data))]),}
+  \AttributeTok{disag      =} \StringTok{"FCIP"}\NormalTok{,}
+  \AttributeTok{included   =} \FunctionTok{c}\NormalTok{(}\StringTok{"county\_acreage"}\NormalTok{,}\StringTok{"price"}\NormalTok{,}\StringTok{"rent"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 5) Estimate demand system}
+\NormalTok{res }\OtherTok{\textless{}{-}} \FunctionTok{fcip\_demand\_sys\_estimate}\NormalTok{(}\AttributeTok{model =}\NormalTok{ model, }\AttributeTok{data =}\NormalTok{ data)}
+
+\FunctionTok{write.csv}\NormalTok{(res,}\StringTok{"data{-}raw/examples/example1.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{📊 Discussion of Results}
+
+The outputs (see Table 1 below) from
+\texttt{fcip\_demand\_sys\_estimate()} are structured objects that
+typically include:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{System coefficients}: Estimated elasticities of demand with
+  respect to premium rates, coverage levels, and control variables.\\
+\item
+  \textbf{Robust inference}: Standard errors clustered by county and
+  year, consistent with best practices in applied demand modeling.\\
+\item
+  \textbf{First-stage diagnostics}: Strength of excluded instruments
+  (e.g., \texttt{tau}), ensuring valid identification of the endogenous
+  premium rate.\\
+\item
+  \textbf{Equation-level summaries}: For multi-equation systems, results
+  are returned per outcome (e.g., insured acreage (\texttt{Gamma}) and
+  coverage level (\texttt{Theta1})).
+\end{itemize}
+
+\textbf{Table 1: Crop Insurance Demand System for US Federal Crop
+Insurance Pools (2001/24)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{document}\NormalTok{()}
+\CommentTok{\#\textgreater{} i Updating rfcipDemand documentation}
+\CommentTok{\#\textgreater{} i Loading rfcipDemand}
+\CommentTok{\#\textgreater{} Writing \textquotesingle{}format\_fcip\_demand\_table.Rd\textquotesingle{}}
+\FunctionTok{library}\NormalTok{(knitr)}
+\NormalTok{example1 }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(}\StringTok{"data{-}raw/examples/example1.csv"}\NormalTok{, }\AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{)}
+\CommentTok{\#\textgreater{} New names:}
+\CommentTok{\#\textgreater{} * \textasciigrave{}\textasciigrave{} {-}\textgreater{} \textasciigrave{}...1\textasciigrave{}}
+
+\CommentTok{\# Variable name mapping}
+\NormalTok{var\_labels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"(Intercept)"}            \OtherTok{=} \StringTok{"(Intercept)"}\NormalTok{,}
+  \StringTok{"tilda\_rate"}             \OtherTok{=} \StringTok{"Paid premium rate"}\NormalTok{,}
+  \StringTok{"tilda\_county\_acreage"}   \OtherTok{=} \StringTok{"County planted acres"}\NormalTok{,}
+  \StringTok{"tilda\_price"}            \OtherTok{=} \StringTok{"Expected crop price"}\NormalTok{,}
+  \StringTok{"tilda\_rent"}             \OtherTok{=} \StringTok{"State rental rate for land"}\NormalTok{,}
+  \StringTok{"residCov\_11"}            \OtherTok{=} \StringTok{"σ\_aa"}\NormalTok{,}
+  \StringTok{"residCov\_22"}            \OtherTok{=} \StringTok{"σ\_θθ"}\NormalTok{,}
+  \StringTok{"residCov\_12"}            \OtherTok{=} \StringTok{"σ\_θa"}\NormalTok{,}
+  \StringTok{"N"}                      \OtherTok{=} \StringTok{"Number of observations"}\NormalTok{,}
+  \StringTok{"NFE"}                    \OtherTok{=} \StringTok{"Number of insurance pools"}\NormalTok{,}
+  \StringTok{"JTest"}                  \OtherTok{=} \StringTok{"J{-}test"}\NormalTok{,}
+  \StringTok{"FTest"}                  \OtherTok{=} \StringTok{"Weak{-}instrument: F{-}statistics"}
+\NormalTok{)}
+
+\NormalTok{final\_tbl }\OtherTok{\textless{}{-}} \FunctionTok{format\_fcip\_demand\_table}\NormalTok{(example1, var\_labels)}
+
+\CommentTok{\# Print table}
+\FunctionTok{kable}\NormalTok{(final\_tbl,}
+      \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Variables"}\NormalTok{,}\StringTok{"Estimates"}\NormalTok{),}
+      \AttributeTok{format =} \StringTok{"pipe"}\NormalTok{,  }\CommentTok{\# \textless{}{-} ensures compatibility with GitHub markdown}
+      \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"l"}\NormalTok{,}\StringTok{"c"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lc@{}}
+\toprule\noalign{}
+Variables & Estimates \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Coverage level (ln θ\_it) & \\
+(Intercept) & 0.000 (0.002) \\
+Paid premium rate & -0.359 (0.423) \\
+County planted acres & -0.001 (0.001) \\
+Expected crop price & -0.000 (0.001) \\
+State rental rate for land & 0.013 (0.519) \\
+Insured acres (ln a\_it) & \\
+(Intercept) & 0.000 (0.005) \\
+Paid premium rate & -0.476 (2.260) \\
+County planted acres & 0.024** (0.012) \\
+Expected crop price & 0.002 (0.008) \\
+State rental rate for land & 0.423 (2.993) \\
+Total protection response & \\
+Paid premium rate & -0.664 (1.648) \\
+County planted acres & 0.023* (0.012) \\
+Expected crop price & 0.002 (0.009) \\
+State rental rate for land & 0.442 (3.672) \\
+Covariance matrix & \\
+σ\_aa & 1.349 \\
+σ\_θθ & 0.006 \\
+σ\_θa & 0.014 \\
+Additional statistics & \\
+Number of observations & 1917600.000 \\
+Number of insurance pools & 1.000 \\
+J-test & 0.000 \\
+Weak-instrument: F-statistics & 125.044 \\
+\end{longtable}
+
+\textbf{Notes:} Crop insurance demand is modeled via a multi-equation
+structural model of crop insurance demand at the intensive and extensive
+margins measured by coverage level and insured acres. An insurance pool
+is defined as the unique combinations of crops (almonds, apples, barley,
+blueberries, cabbage, canola, corn, cotton, dry beans, dry peas, flax,
+forage production, fresh nectarines, grain sorghum, grapes, millet,
+oats, olives, onions, oranges, peaches, peanuts, pears, plums, potatoes,
+rice, rye, safflower, soybeans, sugar beets, sugarcane, sunflowers,
+sweet corn, tobacco, tomatoes, walnuts, and wheat), county, insurance
+unit (optional units {[}OU{]}, basic units {[}BU{]}, or enterprise units
+{[}EU{]}), insurance plan, irrigation practice (irrigated,
+non-irrigated, or unspecified), and organic practice (organic certified,
+organic transition, or unspecified). The data used was constructed by
+the authors using primary data from (1) Risk Management Agency's summary
+of business files that contain insurance metrics aggregated by county,
+crop, crop type, production practice, insurance plan, coverage level,
+and insurance unit, actuarial data master, and price addendums, (2) Farm
+Service Agency's crop acreage data, and (3) NASS Quick Stats. The
+preferred model is ††.\\
+Significance levels -- \emph{p\textless0.1, \textbf{p\textless0.05,
+}}p\textless0.01. Standard errors in parentheses are clustered by
+insurance pool and year.
+
+The results from the preferred specification highlight distinct
+responses across the intensive and extensive margins of crop insurance
+demand. At the intensive margin (coverage level, ln θ\_it), the
+producer-paid premium rate enters with the expected negative sign
+(-0.359), implying that a 1\% increase in the premium rate is associated
+with a 0.36\% decrease in chosen coverage levels. However, the effect is
+statistically insignificant, reflecting the limited responsiveness of
+coverage choices to cost signals. Other covariates, including county
+planted acres, crop price, and rental rates, are similarly imprecise and
+not distinguishable from zero.
+
+At the extensive margin (insured acres, ln a\_it), scale effects
+dominate. County planted acres exhibit a positive and statistically
+significant coefficient (0.024, p \textless{} 0.05), meaning that a 1\%
+increase in planting area raises insured acreage by about 0.024\%. The
+premium rate again shows a negative effect (-0.476), suggesting a 1\%
+increase in rates reduces insured acreage by nearly 0.48\%, though the
+standard error is large and the estimate is not significant.
+
+For the total protection response, county planted acres remain a key
+driver (0.023, p \textless{} 0.10), indicating that scale continues to
+push overall demand upward by roughly 0.023\% for each 1\% increase in
+planted acres. The premium rate reduces total protection (-0.664),
+implying that a 1\% increase in paid premiums reduces total protection
+demand by about 0.66\%, though again, the estimate is not statistically
+precise.
+
+The covariance matrix provides additional insight. The positive
+cross-covariance (σ\_θa = 0.014) indicates that unobserved factors
+increasing demand for coverage level also raise demand for insured
+acres, and vice versa. However, the relationship is asymmetric: the
+variance of insured acres (σ\_aa = 1.349) dwarfs that of coverage level
+(σ\_θθ = 0.006), suggesting that shocks to acreage drive most of the
+variation in joint demand.
+
+Overall, these estimates point to farm size (planted acres) as the most
+consistent determinant of insurance demand, while the dampened and
+imprecisely estimated response to premium rates underscores how
+subsidies mute price sensitivity. The positive covariance between
+margins further suggests complementarities in demand, but the dominant
+source of variation lies in the extensive margin, highlighting the
+central role of scale in shaping crop insurance participation.
+
+\section{📚 Citation}\label{citation}
+
+If you use \texttt{rfcipDemand} in your research, please cite:
+
+\begin{itemize}
+\item
+  Tsiboe, F., \& Turner, D. (2023).
+  \href{https://doi.org/10.1016/j.foodpol.2023.102505}{\textbf{The crop
+  insurance demand response to premium subsidies: Evidence from U.S.
+  Agriculture}} Food Policy, 119(3).
+\item
+  Tsiboe, F., \& Turner, D. (2023).
+  \href{https://doi.org/10.1017/age.2023.13}{\textbf{Econometric
+  identification of crop insurance participation}} Agricultural and
+  Resource Economics Review
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{🤝 Contributing}\label{contributing}
+
+Contributions, issues, and feature requests are welcome. Please see the
+\href{code_of_conduct.md}{Code of Conduct}.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{📬 Contact}\label{contact}
+
+Questions or collaboration ideas?\\
+Email \textbf{Francis Tsiboe} at
+\href{mailto:ftsiboe@hotmail.com}{\nolinkurl{ftsiboe@hotmail.com}}.\\
+Star the repo ⭐ if you find it useful!
+
+\end{document}

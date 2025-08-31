@@ -25,9 +25,11 @@ rfcipDemand.Rproj
 ^\.github$
 data-raw
 replications
-README.Rmd
-data/README.Rmd
-data/README.md
+README.docx
+README.log
+README.md
+README.Rmd             
+README.tex
 ^SECURITY\.md$
 code_of_conduct.md
 job_lcr_estimations.sbatch
