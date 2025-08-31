@@ -18,18 +18,7 @@ format_fcip_demand_table(df, var_labels)
 \item \code{Pvalue} (dbl): p-values used to add significance stars.
 }}
 
-\item{var_labels}{A named character vector mapping raw names to display labels,
-e.g. \code{c("tilda_rate" = "Paid premium rate",
-               "tilda_county_acreage" = "County planted acres",
-               "tilda_price" = "Expected crop price",
-               "tilda_rent" = "State rental rate for land",
-               "residCov_11" = "σ_aa",
-               "residCov_22" = "σ_θθ",
-               "residCov_12" = "σ_θa",
-               "N" = "Number of observations",
-               "NFE" = "Number of insurance pools",
-               "JTest" = "J-test",
-               "FTest" = "Weak-instrument: F-statistics")}.}
+\item{var_labels}{A named character vector mapping raw names to display labels,}
 }
 \value{
 A tibble with two columns, \code{Variables} and \code{Estimates},
@@ -46,27 +35,4 @@ and additional statistics. Coefficients are formatted as
 \details{
 Designed for README/output knitted as \code{github_document}; use with
 \code{knitr::kable(..., format = "pipe")} to avoid HTML-only features.
-
-Panels are labeled as:
-\itemize{
-\item Coverage level: \code{demand == "Theta"} (shown as \emph{Coverage level (ln θ_it)}).
-\item Insured acres: \code{demand == "Gamma"} (shown as \emph{Insured acres (ln a_it)}).
-\item Total protection response: \code{demand == "Total"}.
-\item Covariance matrix: rows whose labeled \code{coef} match
-\code{σ_aa}, mfhUJOhPV8Q4mwLYGwpPqxMyKUoREEOe-8\code{σ_θa}.
-  \item Additional statistics: e.g., number of observations/pools, J-test, weak-instrument F.
-}
-}
-\examples{
-# Build the table and print as a GitHub-safe pipe table:
-final_tbl <- format_crop_insurance_demand_table(example1, var_labels)
-knitr::kable(final_tbl,
-             col.names = c("Variables","Estimates"),
-             caption   = "Table: Crop Insurance Demand System for US Federal Crop Insurance Pools (2001/22)",
-             format    = "pipe",
-             align     = c("l","c"))
-
-}
-\seealso{
-\code{\link[knitr]{kable}}
 }

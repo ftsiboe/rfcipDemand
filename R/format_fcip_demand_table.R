@@ -20,32 +20,11 @@
 #'     \item \code{Pvalue} (dbl): p-values used to add significance stars.
 #'   }
 #' @param var_labels A named character vector mapping raw names to display labels,
-#'   e.g. \code{c("tilda_rate" = "Paid premium rate",
-#'                "tilda_county_acreage" = "County planted acres",
-#'                "tilda_price" = "Expected crop price",
-#'                "tilda_rent" = "State rental rate for land",
-#'                "residCov_11" = "σ_aa",
-#'                "residCov_22" = "σ_θθ",
-#'                "residCov_12" = "σ_θa",
-#'                "N" = "Number of observations",
-#'                "NFE" = "Number of insurance pools",
-#'                "JTest" = "J-test",
-#'                "FTest" = "Weak-instrument: F-statistics")}.
-#'
+#' 
 #' @return A tibble with two columns, \code{Variables} and \code{Estimates},
 #'   where panel headers have empty \code{Estimates} to enable bolding (if rendered
 #'   in HTML) and coefficients are formatted as \code{"estimate*** (se)"}.
 #'
-#' @details
-#' Panels are labeled as:
-#' \itemize{
-#'   \item Coverage level: \code{demand == "Theta"} (shown as \emph{Coverage level (ln θ_it)}).
-#'   \item Insured acres: \code{demand == "Gamma"} (shown as \emph{Insured acres (ln a_it)}).
-#'   \item Total protection response: \code{demand == "Total"}.
-#'   \item Covariance matrix: rows whose labeled \code{coef} match
-#'         \code{σ_aa}, \code{σ_θθ}, \code{σ_θa}.
-#'   \item Additional statistics: e.g., number of observations/pools, J-test, weak-instrument F.
-#' }
 #' @export
 format_fcip_demand_table <- function(df, var_labels) {
   stopifnot(all(c("demand","coef","Estimate","StdError","Pvalue") %in% names(df)))
@@ -70,8 +49,8 @@ format_fcip_demand_table <- function(df, var_labels) {
                                         var_labels[coef], coef))
   
   panel_labels <- c(
-    Theta = "Coverage level (ln θ_it)",
-    Gamma = "Insured acres (ln a_it)",
+    Theta = "Coverage level",
+    Gamma = "Insured acres",
     Total = "Total protection response"
   )
   
