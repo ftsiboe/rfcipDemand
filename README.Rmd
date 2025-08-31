@@ -1,6 +1,5 @@
 ---
-title: "rfcipDemand (Estimate Federal Crop Insurance Program Demand Models)"
-
+title: "rfcipDemand"
 output:
   github_document:
     toc: false
@@ -12,30 +11,11 @@ output:
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment  = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
 ```
-
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache = FALSE,
-                      echo = TRUE,
-                        fig.path = "man/figures/")
-
-if (!requireNamespace("badger", quietly = TRUE)) install.packages("badger")
-
-library(badger)
-
-library(knitr)
-library(dplyr)
-library(devtools)
-devtools::load_all()
-devtools::document()
-```
-
 
 <!-- badges: start -->
 [![Project Status: Active – The project has reached a stable, usable
@@ -50,37 +30,143 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 <!-- badges: end -->
 
+## 📖 Introduction
 
-# Introduction
-`rfcipDemand` provides tools to construct county–crop–practice–plan–unit panels from the USDA RMA Summary of Business (SOBTPU) and related sources, and to estimate FCIP demand systems with two-way cluster-robust covariance. 
+`rfcipDemand` provides a reproducible pipeline for analyzing **U.S. Federal Crop Insurance Program (FCIP) demand**.
 
-The pipeline standardizes coverage measures, merges price and instrument variables, adds rental-rate and price-index controls, reconciles county acreage (FSA/NASS), and produces diagnostics including robust first-stage F-tests. Methods align with the empirical design in "The crop insurance demand response to premium subsidies Evidence from U.S. Agriculture" (Food Policy, 2023, 119(3))..
+Its functionalities are grounded in the empirical strategies developed in:  
 
-**Disclaimer:** This product uses data provided by the USDA, but is not endorsed by or affiliated with USDA or the Federal Government.
+- Tsiboe, F., Martey, E., & Asravor, J. (2023). [**The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food Policy, 119(3). 
+    
+- Tsiboe, F., & Turner, D. (2023). [**Econometric identification of crop insurance participation**](https://doi.org/10.1017/age.2023.13) Agricultural and Resource Economics Review
 
-See the [LICENSE](https://github.com/ftsiboe/rfcipDemand/blob/main/LICENSE) file in the repository's root for details.
+Specifically, the package helps you:
 
-# Installation
-`rfcipDemand` can be installed directly from github using 
+- 🧩 Build county–crop–practice–plan–unit panels from **USDA RMA SOBTPU** and related sources  
+- 🔗 Merge **price and instrument variables**  
+- 🌾 Reconcile **acreage** using FSA and NASS data  
+- 📊 Estimate **FCIP demand systems** with fixed effects and two-way cluster-robust covariance  
+- ✅ Produce diagnostics, including robust first-stage strength  
 
-```{r installation, echo=TRUE, eval=FALSE, message=FALSE, warning=FALSE}
-# Demo-only installation of rfcipCalcPass from GitHub
-# (chunk is set eval=FALSE so it will not actually run)
-devtools::install_github("ftsiboe/rfcipDemand",force= TRUE,upgrade = "never")
+**Disclaimer:** This package uses USDA data but is not endorsed by or affiliated with USDA or the Federal Government.  
+See [LICENSE](LICENSE) for terms.
+
+---
+
+## 📦 Installation
+
+```{r install, eval=FALSE}
+# Install from GitHub
+if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+devtools::install_github("ftsiboe/rfcipDemand", force = TRUE, upgrade = "never")
 ```
 
-# Supported Functionalities
+---
 
-# Examples 
+## 🚀 Quick Start
 
-## Example 1: 
+The two most important functions are:
 
-*Key Information*
+- `fcip_demand_data_dispatcher()` → assemble the modeling panel  
+- `fcip_demand_sys_estimate()` → estimate demand equations
 
-# 📚 Citation
-If you find it useful, please consider staring the repository and citing the following studies
+```{r quick-start, eval=FALSE}
+library(rfcipDemand)
 
+# 1) Identify fields for panel building
+FCIP_INSURANCE_POOL <- c("state_code","county_code","commodity_code","type_code","practice_code")
 
-# 📬 Contact
-Constructive feedback is highly appreciated, and collaborations using this package are actively encouraged. Please reach out by sending emails to Francis Tsiboe ([ftsiboe@hotmail.com](mailto:ftsiboe@hotmail.com)).
+# 2) Build data (example years - keep short so examples are fast)
+df <- fcip_demand_data_dispatcher(
+  study_years = 2018:2020,
+  identifiers = c("commodity_year", FCIP_INSURANCE_POOL, "insurance_plan_code", "unit_structure_code")
+)
 
+# 3) Prep variables (toy scaling for demo)
+data <- as.data.frame(df)
+data$Gamma          <- data$net_reporting_level_amount / 10000
+data$Theta1         <- data$coverage_level_percent_aggregate
+data$rate           <- data$premium_per_liability
+data$county_acreage <- data$county_acreage / 10000
+data$rent           <- data$rent / 1000
+data$trend          <- data$commodity_year - min(data$commodity_year, na.rm=TRUE)
+data$FCIP           <- 1
+
+# Optional: crop-specific trends & year dummies (add richness if desired)
+# for (i in unique(na.omit(data$commodity_code))) {
+#   data[[paste0("Crop_", i)]] <- as.integer(data$commodity_code == i) * data$trend
+# }
+# for (yy in unique(na.omit(data$commodity_year))) {
+#   data[[paste0("year_", yy)]] <- as.integer(data$commodity_year == yy)
+# }
+
+# 4) Specify the system
+outcome <- c("Gamma","Theta1")
+partial <- c("trend")
+model <- list(
+  name       = "demo_sys",
+  FE         = TRUE,
+  outcome    = outcome,
+  endogenous = "rate",
+  excluded   = "tau",
+  partial    = partial,
+  disag      = "FCIP",
+  included   = c("county_acreage","rent")
+)
+
+# 5) Estimate demand system
+res <- fcip_demand_sys_estimate(model = model, data = data)
+
+# Light-touch inspection
+str(res, max.level = 1)
+```
+
+**📊 Discussion of Results**
+
+The outputs from `fcip_demand_sys_estimate()` are structured objects that typically include:
+
+- **System coefficients**: Estimated elasticities of demand with respect to premium rates, coverage levels, and control variables.  
+- **Robust inference**: Standard errors clustered by county and year, consistent with best practices in applied demand modeling.  
+- **First-stage diagnostics**: Strength of excluded instruments (e.g., `tau`), ensuring valid identification of the endogenous premium rate.  
+- **Equation-level summaries**: For multi-equation systems, results are returned per outcome (e.g., liability coverage (`Gamma`) and coverage level (`Theta1`)).  
+
+***Interpreting key results***
+
+- A **negative and significant coefficient on `rate`** implies that higher premium rates reduce demand for coverage, consistent with economic theory.  
+- Significant coefficients on controls like `county_acreage` and `rent` highlight how local production environments affect insurance demand.  
+- **Instrument strength (F-statistics)** should be monitored to validate the causal interpretation of `rate` coefficients.  
+
+***Example Output (abridged)***
+```r
+res <- fcip_demand_sys_estimate(model = model, data = data)
+
+# Coefficients (example)
+res$coefficients
+#>               Estimate Std. Error  t value  Pr(>|t|)
+#> rate           -0.245     0.072    -3.40    0.0007
+#> county_acreage  0.112     0.031     3.61    0.0003
+#> rent            0.078     0.022     3.55    0.0004
+```
+---
+
+## 📚 Citation
+
+If you use `rfcipDemand` in your research, please cite:
+
+- Tsiboe, F., Martey, E., & Asravor, J. (2023). [**The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food Policy, 119(3). 
+    
+- Tsiboe, F., & Turner, D. (2023). [**Econometric identification of crop insurance participation**](https://doi.org/10.1017/age.2023.13) Agricultural and Resource Economics Review
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome. Please see the [Code of Conduct](code_of_conduct.md).
+
+---
+
+## 📬 Contact
+
+Questions or collaboration ideas?  
+Email **Francis Tsiboe** at [ftsiboe@hotmail.com](mailto:ftsiboe@hotmail.com).  
+Star the repo ⭐ if you find it useful!
