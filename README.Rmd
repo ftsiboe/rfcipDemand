@@ -36,7 +36,7 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 
 Its functionalities are grounded in the empirical strategies developed in:  
 
-- Tsiboe, F., Martey, E., & Asravor, J. (2023). [**The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food Policy, 119(3). 
+- Tsiboe, F., & Turner, D. (2023). [**The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food Policy, 119(3). 
     
 - Tsiboe, F., & Turner, D. (2023). [**Econometric identification of crop insurance participation**](https://doi.org/10.1017/age.2023.13) Agricultural and Resource Economics Review
 
@@ -53,7 +53,7 @@ See [LICENSE](LICENSE) for terms.
 
 ---
 
-## 📦 Installation
+# 📦 Installation
 
 ```{r install, eval=FALSE}
 # Install from GitHub
@@ -63,27 +63,34 @@ devtools::install_github("ftsiboe/rfcipDemand", force = TRUE, upgrade = "never")
 
 ---
 
-## 🚀 Quick Start
+# 🚀 Quick Start
 
 The two most important functions are:
 
 - `fcip_demand_data_dispatcher()` → assemble the modeling panel  
 - `fcip_demand_sys_estimate()` → estimate demand equations
 
-```{r quick-start, eval=FALSE}
-library(rfcipDemand)
+## Example 1
+Model structure aligned to the approach in [Tsiboe & Turner (2023)](https://doi.org/10.1016/j.foodpol.2023.102505), updated with recent data.  
+**NOTE:** Results may differ from the published articles due to RMA data revisions and pipeline improvements in this package.  
+If you need *exact* replication of a paper, please use that study's dedicated replication package (link to be added).
 
+**Data**
+
+```{r quick-start-data, eval=FALSE, warning=FALSE}
+# library(rfcipDemand)
+devtools::document()
 # 1) Identify fields for panel building
 FCIP_INSURANCE_POOL <- c("state_code","county_code","commodity_code","type_code","practice_code")
 
 # 2) Build data (example years - keep short so examples are fast)
 df <- fcip_demand_data_dispatcher(
-  study_years = 2018:2020,
+  study_years = 2001:2024,
   identifiers = c("commodity_year", FCIP_INSURANCE_POOL, "insurance_plan_code", "unit_structure_code")
 )
 
 # 3) Prep variables (toy scaling for demo)
-data <- as.data.frame(df)
+data                <- as.data.frame(df)
 data$Gamma          <- data$net_reporting_level_amount / 10000
 data$Theta1         <- data$coverage_level_percent_aggregate
 data$rate           <- data$premium_per_liability
@@ -92,24 +99,25 @@ data$rent           <- data$rent / 1000
 data$trend          <- data$commodity_year - min(data$commodity_year, na.rm=TRUE)
 data$FCIP           <- 1
 
-# Optional: crop-specific trends & year dummies (add richness if desired)
-# for (i in unique(na.omit(data$commodity_code))) {
-#   data[[paste0("Crop_", i)]] <- as.integer(data$commodity_code == i) * data$trend
-# }
-# for (yy in unique(na.omit(data$commodity_year))) {
-#   data[[paste0("year_", yy)]] <- as.integer(data$commodity_year == yy)
-# }
+for(i in unique(data$commodity_code)){ data[,paste0("Crop_",i)] <- ifelse(data$commodity_code %in% i,1,0)*data$trend }
+for(i in unique(data$commodity_year)){ data[,paste0("year_",i)] <- ifelse(data$commodity_year %in% i,1,0) }
+data <- data[names(data)[!names(data) %in% c(paste0("year_",max(data$commodity_year,na.rm=T)),"Crop_41")]]
 
+str(res, max.level = 0)
+```
+
+**🧮 Estimate the model**
+
+```{r quick-start-estimate, eval=FALSE, warning=FALSE}
 # 4) Specify the system
-outcome <- c("Gamma","Theta1")
-partial <- c("trend")
+
 model <- list(
   name       = "demo_sys",
   FE         = TRUE,
-  outcome    = outcome,
+  outcome    = c("Gamma","Theta1"),
   endogenous = "rate",
   excluded   = "tau",
-  partial    = partial,
+  partial    = c("trend",names(data)[grepl("Crop_",names(data))],names(data)[grepl("year_",names(data))]),
   disag      = "FCIP",
   included   = c("county_acreage","rent")
 )
@@ -117,8 +125,10 @@ model <- list(
 # 5) Estimate demand system
 res <- fcip_demand_sys_estimate(model = model, data = data)
 
+write.csv(res,"data-raw/examples/producerA_outcomes1.csv")
+
 # Light-touch inspection
-str(res, max.level = 1)
+str(res, max.level = 0)
 ```
 
 **📊 Discussion of Results**
@@ -149,23 +159,23 @@ res$coefficients
 ```
 ---
 
-## 📚 Citation
+# 📚 Citation
 
 If you use `rfcipDemand` in your research, please cite:
 
-- Tsiboe, F., Martey, E., & Asravor, J. (2023). [**The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food Policy, 119(3). 
+- Tsiboe, F., & Turner, D. (2023). [**The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food Policy, 119(3). 
     
 - Tsiboe, F., & Turner, D. (2023). [**Econometric identification of crop insurance participation**](https://doi.org/10.1017/age.2023.13) Agricultural and Resource Economics Review
 
 ---
 
-## 🤝 Contributing
+# 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome. Please see the [Code of Conduct](code_of_conduct.md).
 
 ---
 
-## 📬 Contact
+# 📬 Contact
 
 Questions or collaboration ideas?  
 Email **Francis Tsiboe** at [ftsiboe@hotmail.com](mailto:ftsiboe@hotmail.com).  
