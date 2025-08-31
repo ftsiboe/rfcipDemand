@@ -95,17 +95,16 @@ df <- fcip_demand_data_dispatcher(
 data                <- as.data.frame(df)
 data$Gamma          <- data$net_reporting_level_amount / 10000
 data$Theta1         <- data$coverage_level_percent_aggregate
-data$rate           <- data$premium_per_liability
+data$rate           <- data$premium_per_liability*(1-data$subsidy_per_premium)
 data$county_acreage <- data$county_acreage / 10000
 data$rent           <- data$rent / 1000
 data$trend          <- data$commodity_year - min(data$commodity_year, na.rm=TRUE)
 data$FCIP           <- 1
+data$tauS0        <- data$tau*(1-((data$subsidy_rate_65+data$subsidy_rate_75)/2))
 
 for(i in unique(data$commodity_code)){ data[,paste0("Crop_",i)] <- ifelse(data$commodity_code %in% i,1,0)*data$trend }
 for(i in unique(data$commodity_year)){ data[,paste0("year_",i)] <- ifelse(data$commodity_year %in% i,1,0) }
 data <- data[names(data)[!names(data) %in% c(paste0("year_",max(data$commodity_year,na.rm=T)),"Crop_41")]]
-
-str(res, max.level = 0)
 ```
 
 **🧮 Estimate the model**
@@ -118,19 +117,16 @@ model <- list(
   FE         = TRUE,
   outcome    = c("Gamma","Theta1"),
   endogenous = "rate",
-  excluded   = "tau",
+  excluded   = "tauS0",
   partial    = c("trend",names(data)[grepl("Crop_",names(data))],names(data)[grepl("year_",names(data))]),
   disag      = "FCIP",
-  included   = c("county_acreage","rent")
+  included   = c("county_acreage","price","rent")
 )
 
 # 5) Estimate demand system
 res <- fcip_demand_sys_estimate(model = model, data = data)
 
-write.csv(res,"data-raw/examples/producerA_outcomes1.csv")
-
-# Light-touch inspection
-str(res, max.level = 0)
+write.csv(res,"data-raw/examples/example1.csv")
 ```
 
 **📊 Discussion of Results**
@@ -149,6 +145,34 @@ that typically include:
   returned per outcome (e.g., insured acreage (`Gamma`) and coverage
   level (`Theta1`)).
 
+``` r
+# Example 1 Output
+    demand                 coef                        Estimate     StdError      Zvalue  Pvalue    model endogenous     FE     name  disag  level
+    <char>               <char>                           <num>        <num>       <num>   <num>   <char>     <char> <lgcl>   <char> <char> <char>
+ 1:  Gamma          (Intercept)       0.00000000000000009620557 0.0049082100  0.00000000 1.00000 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 2:  Gamma           tilda_rate      -0.47598862988030482545909 2.2599672784 -0.21061749 0.83319 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 3:  Gamma tilda_county_acreage       0.02375448208427862958891 0.0115885905  2.04981633 0.04038 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 4:  Gamma          tilda_price       0.00188388106365355574405 0.0082705724  0.22778122 0.81982 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 5:  Gamma           tilda_rent       0.42348960204379315630518 2.9927121999  0.14150696 0.88747 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 6:  Theta          (Intercept)       0.00000000000000040452071 0.0023858346  0.00000000 1.00000 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 7:  Theta           tilda_rate      -0.35874792372045244404077 0.4228440492 -0.84841663 0.39621 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 8:  Theta tilda_county_acreage      -0.00060714094882705787505 0.0005801842 -1.04646233 0.29535 demo_sys       rate   TRUE demo_sys   FCIP      1
+ 9:  Theta          tilda_price      -0.00015009695900695911174 0.0012070329 -0.12435200 0.90104 demo_sys       rate   TRUE demo_sys   FCIP      1
+10:  Theta           tilda_rent       0.01307193589246588398545 0.5185976994  0.02520631 0.97989 demo_sys       rate   TRUE demo_sys   FCIP      1
+11:  Total           tilda_rate      -0.66397662091665499151105 1.6478758704 -0.40292878 0.68700 demo_sys       rate   TRUE demo_sys   FCIP      1
+12:  Total tilda_county_acreage       0.02313291881666002663964 0.0118048770  1.95960694 0.05004 demo_sys       rate   TRUE demo_sys   FCIP      1
+13:  Total          tilda_price       0.00173350133982781142925 0.0085377154  0.20304042 0.83910 demo_sys       rate   TRUE demo_sys   FCIP      1
+14:  Total           tilda_rent       0.44209736686530137772522 3.6720340147  0.12039577 0.90417 demo_sys       rate   TRUE demo_sys   FCIP      1
+15:                           N 1917600.00000000000000000000000           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
+16:                         NFE       1.00000000000000000000000           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
+17:                 residCov_11       1.34892891790689017916804           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
+18:                 residCov_22       0.00612981995488134055738           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
+19:                 residCov_12       0.01361366587160771704501           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
+20:                       JTest       0.00000000000000000000000           NA          NA      NA demo_sys       rate   TRUE demo_sys   FCIP      1
+21:                       FTest     125.04411846437918143237766           NA          NA 0.00000 demo_sys       rate   TRUE demo_sys   FCIP      1
+    demand                 coef                        Estimate     StdError      Zvalue  Pvalue    model endogenous     FE     name  disag  level
+```
+
 ***Interpreting key results***
 
 - A **negative and significant coefficient on `rate`** implies that
@@ -158,19 +182,6 @@ that typically include:
   highlight how local production environments affect insurance demand.  
 - **Instrument strength (F-statistics)** should be monitored to validate
   the causal interpretation of `rate` coefficients.
-
-***Example Output (abridged)***
-
-``` r
-res <- fcip_demand_sys_estimate(model = model, data = data)
-
-# Coefficients (example)
-res$coefficients
-#>               Estimate Std. Error  t value  Pr(>|t|)
-#> rate           -0.245     0.072    -3.40    0.0007
-#> county_acreage  0.112     0.031     3.61    0.0003
-#> rent            0.078     0.022     3.55    0.0004
-```
 
 ------------------------------------------------------------------------
 
