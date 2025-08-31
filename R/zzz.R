@@ -32,7 +32,7 @@
     projected_price reporting_level_type standardized_liability_amount
     state_cd state_code statisticcat_desc subsidy_amount subsidy_bins
     subsidy_per_premium subsidy_rate subsidy_rate_65 subsidy_rate_75 tau
-    tau_adm tau_c tau_sob total_premium_amount triger_level value
+    tau_adm tau_c tau_sob total_premium_amount triger_level value Estimate Estimates Pvalue StdError demand
       ",
         "\\s+"
       )[[1]]
