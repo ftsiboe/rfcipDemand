@@ -46,17 +46,6 @@
 #'         \code{σ_aa}, \code{σ_θθ}, \code{σ_θa}.
 #'   \item Additional statistics: e.g., number of observations/pools, J-test, weak-instrument F.
 #' }
-#'
-#' @examples
-#' # Build the table and print as a GitHub-safe pipe table:
-#' final_tbl <- format_crop_insurance_demand_table(example1, var_labels)
-#' knitr::kable(final_tbl,
-#'              col.names = c("Variables","Estimates"),
-#'              caption   = "Table: Crop Insurance Demand System for US Federal Crop Insurance Pools (2001/22)",
-#'              format    = "pipe",
-#'              align     = c("l","c"))
-#'
-#' @seealso \code{\link[knitr]{kable}}
 #' @export
 format_fcip_demand_table <- function(df, var_labels) {
   stopifnot(all(c("demand","coef","Estimate","StdError","Pvalue") %in% names(df)))
