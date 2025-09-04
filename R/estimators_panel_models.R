@@ -49,15 +49,15 @@ fixed_effect_model_data_prep <- function(
   # 4) drop panels with only one obs, count panels remaining
   dt[, obs := .N, by = panel]
   dt <- dt[obs > 1]
-  NFE <- dt[, uniqueN(panel)]
-  
+  NFE <- nrow(unique(dt[, c(panel), with = FALSE]))
+
   # 5) compute within-panel means (_mean_i)
   mean_vars <- c(output, varlist)
   dt[, paste0(mean_vars, "_mean_i") := lapply(.SD, mean),by = panel, .SDcols = mean_vars]
   
   # 6) compute overall sample means (_mean)
   dt[, ALL := 1L]
-  dt[, paste0(mean_vars, "_mean") := lapply(.SD, mean),by = ALL, .SDcols = mean_vars]
+  dt[, paste0(mean_vars, "_mean") := lapply(.SD, mean),by = ALL, .SDcols = paste0(mean_vars, "_mean_i")]
   
   # 7) demean each variable in varlist
   dt[, (varlist) := lapply(varlist, function(v)

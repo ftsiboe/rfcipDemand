@@ -24,9 +24,14 @@ variable \code{e}: \code{e ~ 1 + partial + included + excluded}, storing the
 fitted values as \code{instr_e}. If \code{partial} is non-empty, it then
 regresses \code{instr_e ~ 1 + partial} and replaces
 \code{instr_e <- instr_e - fitted(instr_e ~ partial)} (i.e., removes the
-partial component; conceptually \eqn{\widehat{\mathrm{instr}}_e(\text{partial})}
-but expressed here without raw LaTeX macros).
+partial component; conceptually \eqn{\widehat{\mathrm{instr}}_e(\text{partial})}).
 
 Outcomes, included, and endogenous variables are residualized on
 \code{partial} to create \code{tilda_<var>} (or copied if \code{partial} is empty).
+}
+\details{
+Uses defensive checks so absent columns are ignored (with a warning) rather than erroring.
+If \code{partial} is empty, residualization is a no-op and \code{tilda_*} simply copy
+the originals. Formulas are constructed via \code{stats::reformulate()} to avoid
+paste/quoting pitfalls.
 }

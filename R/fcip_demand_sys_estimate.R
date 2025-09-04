@@ -74,8 +74,7 @@ fcip_demand_sys_level_prep <- function(data, fields, level) {
 #' fitted values as \code{instr_e}. If \code{partial} is non-empty, it then
 #' regresses \code{instr_e ~ 1 + partial} and replaces
 #' \code{instr_e <- instr_e - fitted(instr_e ~ partial)} (i.e., removes the
-#' partial component; conceptually \eqn{\widehat{\mathrm{instr}}_e(\text{partial})}
-#' but expressed here without raw LaTeX macros).
+#' partial component; conceptually \eqn{\widehat{\mathrm{instr}}_e(\text{partial})}).
 #'
 #' Outcomes, included, and endogenous variables are residualized on
 #' \code{partial} to create \code{tilda_<var>} (or copied if \code{partial} is empty).
@@ -87,59 +86,97 @@ fcip_demand_sys_level_prep <- function(data, fields, level) {
 #' @return List with \code{data}, \code{tilda_included}, \code{tilda_endogenous},
 #'   \code{tilda_excluded}.
 #'
-#' @importFrom stats lm as.formula residuals predict
+#' @details
+#' Uses defensive checks so absent columns are ignored (with a warning) rather than erroring.
+#' If \code{partial} is empty, residualization is a no-op and \code{tilda_*} simply copy
+#' the originals. Formulas are constructed via \code{stats::reformulate()} to avoid
+#' paste/quoting pitfalls.
+#'
+#' @importFrom stats lm reformulate residuals predict as.formula
 #' @export
 fcip_demand_sys_partial <- function(data, fields, partial_override = NULL) {
+  stopifnot(is.data.frame(data))
+  
   with(fields, {
-    partial_now <- partial_override
-    if (is.null(partial_now)) partial_now <- partial
+    `%||%` <- function(a, b) if (!is.null(a)) a else b
+    
+    partial_now <- partial_override %||% partial
     if (!is.null(partial_now) && !length(partial_now)) partial_now <- NULL
     
-    rhs <- function(vars) if (length(vars)) paste("1 +", paste(vars, collapse = "+")) else "1"
-    add_col <- function(df, nm, val) { df[[nm]] <- val; df }
+    present <- function(v) {
+      if (is.null(v)) return(character())
+      unique(intersect(v, names(data)))
+    }
     
-    present <- function(v) intersect(v, names(data))
-    
+    # resolve columns that actually exist
     inc_now <- present(included)
     end_now <- present(endogenous)
-    par_now <- if (is.null(partial_now)) NULL else present(partial_now)
+    par_now <- present(partial_now)
     exc_now <- present(excluded)
     
-    # First-stage instruments
-    if (!is.null(exc_now) && length(exc_now) && length(end_now)) {
+    # warn about missing columns (non-fatal)
+    missing_cols <- unique(c(
+      setdiff(included %||% character(), names(data)),
+      setdiff(endogenous %||% character(), names(data)),
+      setdiff(excluded %||% character(), names(data)),
+      setdiff(partial_now %||% character(), names(data))
+    ))
+    if (length(missing_cols)) {
+      warning("Ignoring missing columns: ", paste(missing_cols, collapse = ", "))
+    }
+    
+    # tiny helpers
+    add_col <- function(df, nm, val) { df[[nm]] <- val; df }
+    make_formula <- function(lhs, rhs_vars) {
+      # use reformulate to avoid paste bugs; NULL/character(0) -> intercept-only
+      stats::as.formula(stats::reformulate(rhs_vars, response = lhs))
+    }
+    
+    # -------- First-stage instruments --------
+    instr_names <- character(0)
+    
+    # build RHS once per endogenous loop: partial + included + excluded
+    rhs1_vars_base <- unique(c(par_now, inc_now, exc_now))
+    
+    if (length(exc_now) && length(end_now) && length(rhs1_vars_base)) {
       for (e in end_now) {
-        rhs1 <- present(c(par_now, inc_now, exc_now))
-        f1   <- stats::as.formula(paste(e, "~", rhs(rhs1)))
+        # e ~ 1 + partial + included + excluded
+        f1 <- make_formula(e, rhs1_vars_base)
         fit1 <- stats::lm(f1, data = data)
-        data <- add_col(data, paste0("instr_", e), stats::predict(fit1))
         
-        if (!is.null(par_now) && length(par_now)) {
-          f2   <- stats::as.formula(paste0("instr_", e, " ~ ", rhs(par_now)))
+        nm_instr <- paste0("instr_", e)
+        data <- add_col(data, nm_instr, stats::predict(fit1))
+        instr_names <- c(instr_names, nm_instr)
+        
+        # If partial present, subtract fitted component of instr_e on partial
+        if (length(par_now)) {
+          f2 <- make_formula(nm_instr, par_now)
           fit2 <- stats::lm(f2, data = data)
-          data[[paste0("instr_", e)]] <- data[[paste0("instr_", e)]] - stats::predict(fit2)
+          data[[nm_instr]] <- data[[nm_instr]] - stats::predict(fit2)
         }
       }
     }
     
-    # Residualize to build tilda_*
+    # -------- Residualize to build tilda_* --------
     targets <- present(unique(c(outcome, inc_now, end_now)))
-    if (!is.null(par_now) && length(par_now)) {
+    
+    if (length(par_now)) {
       for (v in targets) {
-        f  <- stats::as.formula(paste(v, "~", rhs(par_now)))
-        m  <- stats::lm(f, data = data)
+        f <- make_formula(v, par_now)
+        m <- stats::lm(f, data = data)
         data[[paste0("tilda_", v)]] <- stats::residuals(m)
       }
     } else {
-      for (v in targets) data[[paste0("tilda_", v)]] <- data[[v]]
+      # no partial: copy originals
+      for (v in targets) {
+        data[[paste0("tilda_", v)]] <- data[[v]]
+      }
     }
     
-    tilda_included   <- intersect(paste0("tilda_", included),   names(data))
-    tilda_endogenous <- intersect(paste0("tilda_", endogenous), names(data))
-    instr_cols       <- paste0("instr_", endogenous)
-    tilda_excluded   <- {
-      cols <- intersect(instr_cols, names(data))
-      if (length(cols)) cols else NULL
-    }
+    tilda_included   <- intersect(paste0("tilda_", included %||% character()),   names(data))
+    tilda_endogenous <- intersect(paste0("tilda_", endogenous %||% character()), names(data))
+    # return only the instrument columns we actually created
+    tilda_excluded   <- if (length(instr_names)) instr_names else NULL
     
     list(
       data             = data,
@@ -149,6 +186,7 @@ fcip_demand_sys_partial <- function(data, fields, partial_override = NULL) {
     )
   })
 }
+
 
 
 #' Build systemfit formulas and estimate the system
@@ -646,7 +684,7 @@ fcip_demand_sys_level_run <- function(base_data, fields, level) {
   
   fito <- fcip_demand_sys_fit(dd, fields, tilda_included = tI, tilda_endogenous = tE, tilda_excluded  = tX)
   fit  <- fito$fit; g <- fito$g; h <- fito$h
-  
+
   n_eq      <- length(fit$eq)
   n_partial <- if(is.null(partial_now)) 0L else length(partial_now)
   
