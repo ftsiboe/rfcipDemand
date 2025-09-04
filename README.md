@@ -93,14 +93,13 @@ df <- fcip_demand_data_dispatcher(
 
 # 3) Prep variables (toy scaling for demo)
 data                <- as.data.frame(df)
-data$Gamma          <- data$net_reporting_level_amount / 10000
-data$Theta1         <- data$coverage_level_percent_aggregate
-data$rate           <- data$premium_per_liability*(1-data$subsidy_per_premium)
-data$county_acreage <- data$county_acreage / 10000
-data$rent           <- data$rent / 1000
+data$Gamma          <- log(data$net_reporting_level_amount/10000)
+data$Theta1         <- log(data$coverage_level_percent_aggregate)
+data$rate           <- log(data$premium_per_liability*(1-data$subsidy_per_premium))
+data$county_acreage <- log(data$county_acreage/10000)
+data$rent           <- log(data$rent/1000)
+data$tauS0          <- log(data$tau*(1-((data$subsidy_rate_65+data$subsidy_rate_75)/2)))
 data$trend          <- data$commodity_year - min(data$commodity_year, na.rm=TRUE)
-data$FCIP           <- 1
-data$tauS0        <- data$tau*(1-((data$subsidy_rate_65+data$subsidy_rate_75)/2))
 
 for(i in unique(data$commodity_code)){ data[,paste0("Crop_",i)] <- ifelse(data$commodity_code %in% i,1,0)*data$trend }
 for(i in unique(data$commodity_year)){ data[,paste0("year_",i)] <- ifelse(data$commodity_year %in% i,1,0) }
@@ -119,7 +118,7 @@ model <- list(
   endogenous = "rate",
   excluded   = "tauS0",
   partial    = c("trend",names(data)[grepl("Crop_",names(data))],names(data)[grepl("year_",names(data))]),
-  disag      = "FCIP",
+  disag      = NULL,
   included   = c("county_acreage","price","rent")
 )
 
@@ -152,7 +151,6 @@ Pools (2001/24)**
 devtools::document()
 #> ℹ Updating rfcipDemand documentation
 #> ℹ Loading rfcipDemand
-#> Writing 'format_fcip_demand_table.Rd'
 library(knitr)
 example1 <- readr::read_csv("data-raw/examples/example1.csv", show_col_types = FALSE)
 #> New names:
@@ -183,34 +181,34 @@ kable(final_tbl,
       align = c("l","c"))
 ```
 
-| Variables                     |     Estimates     |
-|:------------------------------|:-----------------:|
-| Coverage level (ln θ_it)      |                   |
-| (Intercept)                   |   0.000 (0.002)   |
-| Paid premium rate             |  -0.359 (0.423)   |
-| County planted acres          |  -0.001 (0.001)   |
-| Expected crop price           |  -0.000 (0.001)   |
-| State rental rate for land    |   0.013 (0.519)   |
-| Insured acres (ln a_it)       |                   |
-| (Intercept)                   |   0.000 (0.005)   |
-| Paid premium rate             |  -0.476 (2.260)   |
-| County planted acres          | 0.024\*\* (0.012) |
-| Expected crop price           |   0.002 (0.008)   |
-| State rental rate for land    |   0.423 (2.993)   |
-| Total protection response     |                   |
-| Paid premium rate             |  -0.664 (1.648)   |
-| County planted acres          |  0.023\* (0.012)  |
-| Expected crop price           |   0.002 (0.009)   |
-| State rental rate for land    |   0.442 (3.672)   |
-| Covariance matrix             |                   |
-| σ_aa                          |       1.349       |
-| σ_θθ                          |       0.006       |
-| σ_θa                          |       0.014       |
-| Additional statistics         |                   |
-| Number of observations        |    1917600.000    |
-| Number of insurance pools     |       1.000       |
-| J-test                        |       0.000       |
-| Weak-instrument: F-statistics |      125.044      |
+| Variables                     |      Estimates      |
+|:------------------------------|:-------------------:|
+| Coverage level                |                     |
+| (Intercept)                   |   -0.000 (0.003)    |
+| Paid premium rate             | -0.035\*\* (0.014)  |
+| County planted acres          | -0.003\*\* (0.002)  |
+| Expected crop price           |   -0.667 (1.192)    |
+| State rental rate for land    |    0.001 (0.069)    |
+| Insured acres                 |                     |
+| (Intercept)                   |   -0.000 (0.037)    |
+| Paid premium rate             |   -0.161 (0.120)    |
+| County planted acres          | 0.355\*\*\* (0.055) |
+| Expected crop price           |   13.419 (19.757)   |
+| State rental rate for land    |   -0.029 (0.543)    |
+| Total protection response     |                     |
+| Paid premium rate             |   -0.190 (0.121)    |
+| County planted acres          | 0.351\*\*\* (0.056) |
+| Expected crop price           |   3.806 (21.600)    |
+| State rental rate for land    |   -0.028 (0.596)    |
+| Covariance matrix             |                     |
+| σ_aa                          |        3.718        |
+| σ_θθ                          |        0.014        |
+| σ_θa                          |        0.041        |
+| Additional statistics         |                     |
+| Number of observations        |     958800.000      |
+| Number of insurance pools     |        1.000        |
+| J-test                        |        0.000        |
+| Weak-instrument: F-statistics |      1026.121       |
 
 <sub>**Notes:** Crop insurance demand is modeled via a multi-equation
 structural model of crop insurance demand at the intensive and extensive

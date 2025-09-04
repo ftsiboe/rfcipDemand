@@ -331,8 +331,7 @@ fcip_demand_sys_coeff_table <- function(fit, vcMat, p_digits = 5) {
   p  <- round(2 * stats::pnorm(abs(z), lower.tail = FALSE), p_digits)
   
   prefix <- sub("_.*$", "", cn)
-  demand <- ifelse(prefix == "Gamma", "Gamma",
-                   ifelse(grepl("^Theta\\d*$", prefix), "Theta", prefix))
+  demand <- ifelse(prefix == "Gamma", "Gamma", ifelse(grepl("^Theta\\d*$", prefix), "Theta", prefix))
   coef_plain <- sub("^[^_]*_", "", cn)
   
   data.frame(
@@ -497,13 +496,9 @@ fcip_demand_sys_restricted <- function(restrict, res, fit, data, outcome, tilda_
 #'
 #' @importFrom stats residuals coef nobs model.matrix terms pf pchisq lm
 #' @export
-fcip_demand_sys_tests <- function(g, h, data, fit, NFE, approx_j = FALSE) {
+fcip_demand_sys_tests <- function(g, h, data, fit, NFE, approx_j = FALSE){
   
   # Helpers
-  get_N <- function(fit) {
-    r <- stats::residuals(fit)
-    if (is.list(r)) sum(vapply(r, length, 1L)) else NROW(r)
-  }
   term_labels <- function(fr) {
     tl <- attr(stats::terms(fr), "term.labels")
     if (is.null(tl)) character(0) else tl
@@ -531,14 +526,14 @@ fcip_demand_sys_tests <- function(g, h, data, fit, NFE, approx_j = FALSE) {
   }
   
   rows <- list(
-    data.frame(demand="", coef="N",           Estimate = get_N(fit),        StdError=NA, Zvalue=NA, Pvalue=NA),
+    data.frame(demand="", coef="N",           Estimate = nrow(stats::residuals(fit)), StdError=NA, Zvalue=NA, Pvalue=NA),
     data.frame(demand="", coef="NFE",         Estimate = NFE,               StdError=NA, Zvalue=NA, Pvalue=NA),
     data.frame(demand="", coef="residCov_11", Estimate = fit$residCov[1,1], StdError=NA, Zvalue=NA, Pvalue=NA),
     data.frame(demand="", coef="residCov_22", Estimate = fit$residCov[2,2], StdError=NA, Zvalue=NA, Pvalue=NA),
     data.frame(demand="", coef="residCov_12", Estimate = fit$residCov[1,2], StdError=NA, Zvalue=NA, Pvalue=NA)
   )
   
-  all_terms  <- unique(unlist(lapply(h, term_labels)))
+  all_terms   <- unique(unlist(lapply(h, term_labels)))
   instr_terms <- grep("^instr_", all_terms, value = TRUE)
   inc_terms   <- grep("^tilda_", all_terms, value = TRUE)
   if (!length(instr_terms)) {
@@ -649,25 +644,18 @@ fcip_demand_sys_level_run <- function(base_data, fields, level) {
   tE <- pt$tilda_endogenous
   tX <- pt$tilda_excluded
   
-  fito <- fcip_demand_sys_fit(dd, fields,
-                              tilda_included = tI,
-                              tilda_endogenous = tE,
-                              tilda_excluded  = tX)
-  fit <- fito$fit; g <- fito$g; h <- fito$h
+  fito <- fcip_demand_sys_fit(dd, fields, tilda_included = tI, tilda_endogenous = tE, tilda_excluded  = tX)
+  fit  <- fito$fit; g <- fito$g; h <- fito$h
   
   n_eq      <- length(fit$eq)
-  n_partial <- if (is.null(partial_now)) 0L else length(partial_now)
+  n_partial <- if(is.null(partial_now)) 0L else length(partial_now)
   
-  vc <- fcip_demand_sys_vcov(object = fit, data = dd,
-                             kind = "systemfit",
-                             NFE = NFE, n_partial = n_partial, n_eq = n_eq)
+  vc <- fcip_demand_sys_vcov(object = fit, data = dd,kind = "systemfit", NFE = NFE, n_partial = n_partial, n_eq = n_eq)
   
   tab <- fcip_demand_sys_coeff_table(fit, vc)
   tot <- fcip_demand_sys_effect(fit, vc, fields, dd)
   rst <- fcip_demand_sys_restricted(fields$restrict, tab, fit, dd, fields$outcome, tE, tX, tI)
-  
-  tst <- fcip_demand_sys_tests(g = g, h = h, data = dd, fit = fit,
-                               NFE = NFE, approx_j = TRUE)
+  tst <- fcip_demand_sys_tests(g = g, h = h, data = dd, fit = fit, NFE = NFE, approx_j = TRUE)
   
   res <- rbind(tab, tot, tst, rst)
   rownames(res) <- NULL
@@ -708,8 +696,12 @@ fcip_demand_sys_estimate <- function(model, data) {
   excluded   <- model$excluded %||% NULL
   partial    <- model$partial  %||% NULL
   restrict   <- isTRUE(model$restrict)
-  disag      <- model$disag
-  
+  if(is.null(model$disag)){
+    data$full_sample <- 1
+    model$disag      <- "full_sample"
+  }
+  disag   <- model$disag
+ 
   # Ensure disaggregation key is character
   data[[disag]] <- as.character(data[[disag]])
   

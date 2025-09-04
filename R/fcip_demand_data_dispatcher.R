@@ -196,7 +196,10 @@ fcip_demand_data_controls <- function(df) {
   df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
      by = c("commodity_year","state_code","commodity_name")]
   df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
-
+  
+  # (5) Normalize price to sample mean by commodity
+  df[, price := price/mean(price, na.rm = TRUE), by = c("commodity_code")]
+  
   df <- df[, c("projected_price","harvest_price") := NULL]
   
   # Instruments (tau and benchmark subsidy rates)
@@ -219,6 +222,10 @@ fcip_demand_data_controls <- function(df) {
   # NASS index for price received
   df <- df[nass_index_for_price_recived[, lapply(.SD, mean), by = intersect(names(df), names(nass_index_for_price_recived)), .SDcols = "index_for_price_recived"],
            on = intersect(names(df), names(nass_index_for_price_recived)), nomatch = 0]
+  
+  # Convert to real terms
+  df[, price := price/index_for_price_recived]
+  df[, rent  := rent/index_for_price_recived]
   
   df[]
 }
