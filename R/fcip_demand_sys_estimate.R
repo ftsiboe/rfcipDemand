@@ -24,7 +24,7 @@ fcip_demand_sys_level_prep <- function(data, fields, level) {
     }
     
     # Complete cases on required variables
-    dd <- dd[stats::complete.cases(dd[, need, drop = FALSE]), , drop = FALSE]
+    dd <- dd[stats::complete.cases(dd[, need, with = FALSE]), , drop = FALSE]
     
     # Sanity filters for Inf/NA; drop constant partials
     if (!is.null(partial) && length(partial)) {
@@ -57,7 +57,7 @@ fcip_demand_sys_level_prep <- function(data, fields, level) {
       dd  <- as.data.frame(dm$data)
       need_present <- need[need %in% names(dd)]
       if (length(need_present)) {
-        dd <- dd[stats::complete.cases(dd[, need_present, drop = FALSE]), , drop = FALSE]
+        dd <- dd[stats::complete.cases(dd[, need_present, with = FALSE]), , drop = FALSE]
       }
     }
     
