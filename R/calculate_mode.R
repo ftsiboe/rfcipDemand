@@ -31,4 +31,3 @@ calculate_mode <- function(x, na.rm = TRUE) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
-

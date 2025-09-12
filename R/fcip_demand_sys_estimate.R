@@ -431,79 +431,6 @@ fcip_demand_sys_effect <- function(fit, vcMat, fields, data) {
 }
 
 
-#' Optional restricted NLSUR step (when \code{restrict = TRUE})
-#'
-#' @description
-#' If enabled and feasible, estimates a nonlinear SUR with re-parameterized
-#' coefficients (negative exponents) using the optional \pkg{nlsur} package and
-#' appends "restricted_" rows to the results. Skips gracefully if \pkg{nlsur}
-#' is not installed or the step fails.
-#'
-#' @param restrict Logical flag; when \code{TRUE} attempt the restricted step.
-#' @param res  Coefficient table from the unrestricted system (used to check signs).
-#' @param fit  Fitted \code{systemfit} object from the unrestricted system.
-#' @param data Estimation data used to fit the restricted NLSUR model.
-#' @param outcome Character vector of outcome equation names (length 2 expected).
-#' @param tilda_endogenous Character vector of endogenous regressors used in the
-#'   tilded system (e.g., \code{"tilda_z1"}).
-#' @param tilda_excluded Character vector of excluded instruments (e.g., \code{"instr_z1"}).
-#' @param tilda_included Character vector of included regressors (\code{"tilda_x1"}, ...).
-#'
-#' @return A \code{data.frame} with rows for \code{gamma}, \code{theta}, and \code{total}
-#'   labeled \code{restricted_*}, or an empty \code{data.frame} if skipped.
-#'
-#' @note This step uses \code{nlsur::nlsur()} if available; it is optional and
-#'       should be listed under \code{Suggests} in \code{DESCRIPTION}.
-#' @importFrom utils head
-#' @export
-fcip_demand_sys_restricted <- function(restrict, res, fit, data, outcome, tilda_endogenous, tilda_excluded, tilda_included) {
-  if (!isTRUE(restrict)) return(data.frame())
-  keep <- tryCatch(max(res[paste0(outcome, "_", tilda_endogenous), "Estimate"]) > 0, error = function(e) FALSE)
-  if (!keep) return(data.frame())
-  
-  out <- tryCatch({
-    strv <- coef(fit)
-    eq1  <- paste0("tilda_", outcome[1], "~a0")
-    eq2  <- paste0("tilda_", outcome[2], "~b0")
-    
-    names(strv)[names(strv) %in% paste0(outcome[1], "_(Intercept)")] <- "a0"
-    names(strv)[names(strv) %in% paste0(outcome[2], "_(Intercept)")] <- "b0"
-    
-    for (x in seq_along(tilda_excluded)) {
-      eq1 <- paste0(eq1, "-exp(ae", x, ")*", tilda_excluded[x])
-      eq2 <- paste0(eq2, "-exp(be", x, ")*", tilda_excluded[x])
-      names(strv)[names(strv) %in% paste0(outcome[1], "_", tilda_endogenous[x])] <- paste0("ae", x)
-      names(strv)[names(strv) %in% paste0(outcome[2], "_", tilda_endogenous[x])] <- paste0("be", x)
-    }
-    for (x in seq_along(tilda_included)) {
-      eq1 <- paste0(eq1, "+ai", x, "*", tilda_included[x])
-      eq2 <- paste0(eq2, "+bi", x, "*", tilda_included[x])
-      names(strv)[names(strv) %in% paste0(outcome[1], "_", tilda_included[x])] <- paste0("ai", x)
-      names(strv)[names(strv) %in% paste0(outcome[2], "_", tilda_included[x])] <- paste0("bi", x)
-    }
-    
-    # simple numeric "lag" for start values for ae*/be*
-    shift1 <- function(v) c(NA_real_, head(v, -1))
-    sv <- strv
-    sv[grepl("^ae\\d+$", names(sv))] <- shift1(abs(sv[grepl("^ae\\d+$", names(sv))]))
-    sv[grepl("^be\\d+$", names(sv))] <- shift1(abs(sv[grepl("^be\\d+$", names(sv))]))
-    
-    fitc <- nlsur::nlsur(eqns = list(stats::as.formula(eq1), stats::as.formula(eq2)),
-                             data = data, type = "IFGNLS", startvalues = sv, maxiter = 50)
-    cf   <- coef(fitc)
-    cf   <- cf[grepl("^a[e]\\d+$|^b[e]\\d+$", names(cf))]
-    cf   <- -exp(cf); cf[3] <- cf[1] + cf[2] + cf[1] * cf[2]
-    
-    data.frame(
-      demand   = c("gamma","theta","total"),
-      coef     = paste0("restricted_", tilda_endogenous),
-      Estimate = cf, StdError = NA, Zvalue = NA, Pvalue = NA
-    )
-  }, error = function(e) data.frame())
-  out
-}
-
-
 #' System diagnostics: two-way robust first-stage F (+ optional approx. J)
 #'
 #' @description
@@ -689,10 +616,10 @@ fcip_demand_sys_run <- function(data, fields) {
   
   tab <- fcip_demand_sys_coeff_table(fit, vc)
   tot <- fcip_demand_sys_effect(fit, vc, fields, dd)
-  rst <- fcip_demand_sys_restricted(fields$restrict, tab, fit, dd, fields$outcome, tE, tX, tI)
   tst <- fcip_demand_sys_tests(g = g, h = h, data = dd, fit = fit, NFE = NFE, approx_j = TRUE)
   
-  res <- rbind(tab, tot, tst, rst)
+  res <- rbind(tab, tot, tst)
+  # res <- rbind(res, fcip_demand_sys_restricted(fields$restrict, tab, fit, dd, fields$outcome, tE, tX, tI))
   rownames(res) <- NULL
   res$model      <- fields$name
   res$endogenous <- paste(fields$endogenous, collapse = ",")
@@ -701,22 +628,177 @@ fcip_demand_sys_run <- function(data, fields) {
   res
 }
 
+#' Calibrate FCIP demand elasticities via IV-SEM (lavaan)
+#'
+#' Fits a just-identified IV-style SEM where `instr_rate` instruments `tilda_rate`,
+#' and `tilda_rate` enters two outcome equations (`tilda_ghamma`, `tilda_theta`).
+#' Endogeneity is encoded via residual correlations between `tilda_rate` and each outcome.
+#' The instrument is excluded from the outcome disturbances.
+#'
+#' Constraints imposed:
+#'   1) b1 < 0,  2) b2 < 0,  3) b1 + b2 + b1*b2 < 0
+#'
+#' @param data data.frame with cols: instr_rate, tilda_rate, tilda_gamma, tilda_theta
+#' @param estimator "ML" or "MLR" (default "MLR" = robust SE/tests)
+#' @param missing   "fiml" or "listwise" (default "fiml")
+#' @return A data.table of parameter estimates and logical convergence flag
+#' @import data.table
+#' @export
+fcip_demand_elasticities_lavaan <- function(
+    data,
+    estimator = c("ML", "MLR"),
+    missing   = c("fiml", "listwise")
+){
+  # required columns
+  need <- c("instr_rate", "tilda_rate", "tilda_gamma", "tilda_theta")
+  miss <- setdiff(need, names(data))
+  if (length(miss)) stop("Missing required columns: ", paste(miss, collapse = ", "))
+  
+  estimator <- match.arg(estimator)
+  missing   <- match.arg(missing)
+  
+  model <- '
+    # first stage (instrument relevance)
+    tilda_rate ~ a*instr_rate
+
+    # outcome equations (elasticities of interest)
+    tilda_gamma  ~ b1*tilda_rate
+    tilda_theta ~ b2*tilda_rate
+
+    # encode endogeneity (residual correlations)
+    tilda_rate ~~ r1*tilda_gamma
+    tilda_rate ~~ r2*tilda_theta
+
+    # exclusion: instrument uncorrelated with outcome disturbances
+    instr_rate ~~ 0*tilda_gamma
+    instr_rate ~~ 0*tilda_theta
+
+    # allow correlation between outcome disturbances
+    tilda_gamma ~~ tilda_theta
+
+    # means (optional)
+    tilda_gamma ~ 1
+    tilda_theta ~ 1
+  '
+  
+  ineq <- "b1 < 0\nb2 < 0\nb1 + b2 + b1*b2 < 0"
+  
+  fit <- lavaan::sem(
+    model         = model,
+    data          = data,
+    estimator     = estimator,   # "ML" or "MLR"
+    missing       = missing,     # "fiml" or "listwise"
+    fixed.x       = FALSE,
+    meanstructure = TRUE,
+    constraints   = ineq
+  )
+  
+  pe  <- as.data.table(lavaan::parameterEstimates(fit, standardized = TRUE))
+  # rsq <- tryCatch(lavaan::inspect(fit, "rsquare"), error = function(e) NULL)
+  
+  pe <- pe[grepl("tilda_rate",rhs)]
+  pe <- pe[op %in% "~"]
+  pe <- pe[grepl("gamma|theta",lhs)]
+  
+  pe[,lhs := gsub("tilda_","",lhs)]
+  
+  pe <- data.table::rbindlist(
+    list(pe, data.table(est=pe[grepl("gamma",lhs)][["est"]] + pe[grepl("theta",lhs)][["est"]] + 
+                          pe[grepl("gamma",lhs)][["est"]]*pe[grepl("theta",lhs)][["est"]],
+                        lhs="total",
+                        coef="tilda_rate")),fill = TRUE)
+  
+  setnames(pe,
+           old = c("lhs","rhs","est","se","z","pvalue"),
+           new = c("demand","coef","Estimate_lavaan","StdError","Zvalue","Pvalue"))
+  
+  # list(
+  #   fit       = fit,
+  #   pe        = pe,
+  #   rsq       = rsq,
+  #   converged = isTRUE(lavaan::inspect(fit, "converged"))
+  # )
+  
+  pe
+}
+
 
 #' System estimator (modular wrapper; preserves original outputs)
 #'
 #' @description
-#' Runs: per-level prep -> partial/tilda -> systemfit -> clustered VCOV ->
-#' delta-method totals -> (optional) restricted NLSUR -> diagnostics -> bind rows.
+#' Estimates a two-equation system with an endogenous regressor across
+#' disaggregation levels. The pipeline is:
+#'  (1) per-level sample selection (min n per `commodity_year`),
+#'  (2) partialling-out / tilda transforms,
+#'  (3) system estimation (e.g., IV/3SLS via internal helpers),
+#'  (4) clustered variance estimation,
+#'  (5) delta-method totals,
+#'  (6) optional constrained re-estimation of elasticities (lavaan),
+#'  (7) diagnostics, and
+#'  (8) row-binding results across levels.
 #'
-#' @param model List with elements: `outcome`, `endogenous`, `included`,
-#'   `excluded` (opt), `partial` (opt), `FE` (logical), `disag` (string colname),
-#'   optional `restrict` (logical), `name` (string).
-#' @param data  Input data.frame/data.table with all referenced columns plus `pool` and `commodity_year`.
-#' @return A data.frame aggregating results across all disaggregation levels.
+#' @param model List specifying the system; required elements are:
+#'   - `outcome` (character(2)): names of the two outcomes in `data`.
+#'   - `endogenous` (character(1)): endogenous regressor name.
+#'   - `included` (character): included (exogenous) regressors.
+#'   - `disag` (character(1) or `NULL`): disaggregation key column in `data`.
+#'   - `FE` (logical): include fixed effects in the internal run (handled by helpers).
+#'   Optional elements:
+#'   - `excluded` (character or `NULL`): excluded instruments.
+#'   - `partial`  (character or `NULL`): variables to partial out (tilda).
+#'   - `restrict` (logical): pass-through to internal restricted estimation.
+#'   - `name`     (character(1)): label carried to the output.
+#' @param data `data.frame`/`data.table` containing all referenced columns in
+#'   `model` plus `pool` and `commodity_year`. Columns in `model$outcome`,
+#'   `model$endogenous`, `model$included`, and (if used) `model$excluded` and
+#'   `model$partial` must exist in `data`.
+#' @param constrained_elasticities Logical (default `FALSE`). If `TRUE`, re-estimate the
+#'   elasticities via a constrained SEM (lavaan) and, where applicable, replace
+#'   positive elasticity estimates with constrained ones. See **Constrained
+#'   elasticities (optional)**.
+#'   
+#' @details
+#' **Inputs and preprocessing**
+#' - `model$outcome` must be a character vector of length 2 giving the two
+#'   outcome column names in `data`. Internally these are mapped to
+#'   `gamma` and `theta` for estimation convenience.
+#' - `model$disag` is the name of the disaggregation key. If `NULL`, a dummy
+#'   `"full_sample"` key is created.
+#' - The disaggregation key is coerced to `character`.
+#' - For each level of `model$disag`, the function keeps only levels that have
+#'   **at least 30 observations per `commodity_year`** (computed via
+#'   `doBy::summaryBy`). Levels failing this threshold are dropped.
+#'
+#' **Per-level estimation**
+#' For each retained level, the function calls internal helpers
+#' (`fcip_demand_sys_run`, etc.) to (i) partially out controls if requested,
+#' and (ii) estimate the system with clustered VCOV and delta-method totals.
+#' Errors at the level are caught and the level is skipped (no hard stop).
+#'
+#' **Constrained elasticities (optional)**
+#' When `constrained = TRUE`, elasticities on the endogenous regressor are
+#' re-estimated per level via a lavaan SEM with sign restrictions (internal
+#' helper `fcip_demand_elasticities_lavaan`, using `estimator = "MLR"`,
+#' `missing = "listwise"`). The constrained estimates replace any positive
+#' system estimates for the elasticities; a logical flag `constrained` marks
+#' levels where a replacement occurred. The returned columns are reduced to
+#' `disag`, `level`, `demand`, `constrained`, and `Estimate`.
+#'
+#' **Returned shape**
+#' - If `constrained_elasticities = FALSE` (default), returns the full per-level system
+#'   output from `fcip_demand_sys_run` with additional columns:
+#'   `disag`, `level`, and rounded `Zvalue`, `Pvalue`.
+#' - If `constrained = TRUE`, returns a compact table with
+#'   `disag`, `level`, `demand`, `constrained`, `Estimate` after merging the
+#'   constrained elasticities.
+#'
+#' @return A `data.table` aggregating results across all disaggregation levels.
+#'   The column set depends on `constrained` (see **Returned shape**).
 #' @import data.table
 #' @importFrom doBy summaryBy
 #' @export
-fcip_demand_sys_estimate <- function(model, data) {
+fcip_demand_sys_estimate <- function(
+    model, data, constrained_elasticities = FALSE){
   
   stopifnot(all(c("outcome","endogenous","included","disag","FE") %in% names(model)))
   
@@ -765,6 +847,34 @@ fcip_demand_sys_estimate <- function(model, data) {
         res
       }, error = function(e) { NULL })}),fill = TRUE)
   
+  if (isTRUE(constrained_elasticities)) {
+    
+    res_lavaan <- data.table::rbindlist(
+      lapply(unique(data[[disag]]), function(i) {
+        tryCatch({
+          # i <- "1"
+          pd <- fcip_demand_sys_prep(data = data[data[[disag]] %in% i, , drop = FALSE], fields = fields)
+          pt <- fcip_demand_sys_partial(data = pd$data, fields = fields, partial_override = pd$partial)$data
+          pe <- fcip_demand_elasticities_lavaan(data = pt,estimator = "MLR", missing   = "listwise")
+          pe[,endogenous := fields$endogenous]
+          pe[,FE := fields$FE]
+          pe[,name := fields$name]
+          pe[,disag := fields$disag]
+          pe[,level := i]
+          pe <- pe[, c("demand","coef","Estimate_lavaan","StdError","Zvalue","Pvalue","endogenous","FE","name","disag","level"), with = FALSE]
+          pe
+        }, error = function(e) { NULL })}),fill = TRUE)
 
-  as.data.table(res)
+    res <- res[grepl("tilda_rate",coef), c("disag","level","demand","Estimate"), with = FALSE][
+      unique(res_lavaan[, c("disag","level","demand","Estimate_lavaan"), with = FALSE]),
+      on = c("disag","level","demand"),nomatch = 0]
+
+    res[, constrained := max(Estimate > 0), by = c("disag","level")]
+    
+    res[constrained %in% TRUE, Estimate := Estimate_lavaan]
+    
+    res <- res[, c("disag","level","demand","constrained","Estimate"), with = FALSE]
+  }
+
+  return(as.data.table(res))
 }

@@ -49,9 +49,9 @@ format_fcip_demand_table <- function(df, var_labels) {
                                         var_labels[coef], coef))
   
   panel_labels <- c(
-    Theta = "Coverage level",
-    Gamma = "Insured acres",
-    Total = "Total protection response"
+    theta = "Coverage level",
+    gamma = "Insured acres",
+    total = "Total protection response"
   )
   
   covar_keys_raw <- c("residCov_11","residCov_22","residCov_12")
@@ -63,15 +63,15 @@ format_fcip_demand_table <- function(df, var_labels) {
                                 var_labels[other_keys_raw], other_keys_raw))
   
   coverage <- df_fmt |>
-    dplyr::filter(demand == "Theta") |>
+    dplyr::filter(demand == "theta") |>
     dplyr::select(Variables = coef, Estimates)
   
   insured <- df_fmt |>
-    dplyr::filter(demand == "Gamma") |>
+    dplyr::filter(demand == "gamma") |>
     dplyr::select(Variables = coef, Estimates)
   
   total <- df_fmt |>
-    dplyr::filter(demand == "Total") |>
+    dplyr::filter(demand == "total") |>
     dplyr::select(Variables = coef, Estimates)
   
   covar <- df_fmt |>
@@ -83,11 +83,11 @@ format_fcip_demand_table <- function(df, var_labels) {
     dplyr::select(Variables = coef, Estimates)
   
   dplyr::bind_rows(
-    tibble::tibble(Variables = panel_labels[["Theta"]], Estimates = ""),
+    tibble::tibble(Variables = panel_labels[["theta"]], Estimates = ""),
     coverage,
-    tibble::tibble(Variables = panel_labels[["Gamma"]], Estimates = ""),
+    tibble::tibble(Variables = panel_labels[["gamma"]], Estimates = ""),
     insured,
-    tibble::tibble(Variables = panel_labels[["Total"]], Estimates = ""),
+    tibble::tibble(Variables = panel_labels[["total"]], Estimates = ""),
     total,
     tibble::tibble(Variables = "Covariance matrix", Estimates = ""),
     covar,

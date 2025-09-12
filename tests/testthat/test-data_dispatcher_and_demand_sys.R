@@ -43,7 +43,7 @@ test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
                 disag      = "FCIP", 
                 included   =  c("price","county_acreage","rent"))
   
-  res <- fcip_demand_sys_estimate(model=model,data=data)
+  res <- fcip_demand_sys_estimate(model=model,data=data, constrained_elasticities = TRUE)
   
   expect_true(nrow(res) > 0)
   
