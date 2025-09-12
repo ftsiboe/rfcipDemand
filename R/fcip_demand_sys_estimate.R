@@ -9,6 +9,7 @@
 #'   `partial` (opt), `FE` (logical), `disag` (column name).
 #' @param level One element of the disaggregation levels.
 #' @return A list: `data` (prepped), `NFE` (number of FE), `partial` (possibly reduced).
+#' @import data.table
 #' @importFrom stats complete.cases sd
 #' @export
 fcip_demand_sys_level_prep <- function(data, fields, level) {
@@ -54,7 +55,7 @@ fcip_demand_sys_level_prep <- function(data, fields, level) {
         output = outcome
       )
       NFE <- dm$NFE
-      dd  <- as.data.frame(dm$data)
+      dd  <- as.data.table(dm$data)
       need_present <- need[need %in% names(dd)]
       if (length(need_present)) {
         dd <- dd[stats::complete.cases(dd[, need_present, with = FALSE]), , drop = FALSE]
@@ -726,7 +727,7 @@ fcip_demand_sys_level_run <- function(base_data, fields, level) {
 #'   - `pe`:  parameter estimates (including standardized if requested)
 #'   - `rsq`: R-squareds (first-stage strength)
 #'   - `converged`: logical convergence flag
-#' @import lavaan data.table
+#' @import data.table
 #' @export
 fcip_demand_elasticities_calibrate <- function(
     data,

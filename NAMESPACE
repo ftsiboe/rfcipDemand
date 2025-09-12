@@ -3,6 +3,7 @@
 export(calculate_mode)
 export(estimate_fcip_instruments)
 export(fcip_demand_data_dispatcher)
+export(fcip_demand_elasticities_calibrate)
 export(fcip_demand_sys_coeff_table)
 export(fcip_demand_sys_effect)
 export(fcip_demand_sys_estimate)

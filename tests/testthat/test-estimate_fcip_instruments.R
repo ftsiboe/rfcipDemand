@@ -5,7 +5,6 @@ test_that("generate_fcip_instruments works", {
     fcip_contiguous_county, mode = "wb", quiet = TRUE)
   fcip_contiguous_county <- readRDS(fcip_contiguous_county)
   
-  
   sobcov_all <- tempfile(fileext = ".rds")
   download.file(
     "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/sob/sobcov_all.rds",
