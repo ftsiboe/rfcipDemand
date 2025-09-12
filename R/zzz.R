@@ -30,7 +30,7 @@
     net_reporting_level_amount obs period_farmbill planted_acres pool
     potential_liability_amount premium_per_liability price
     projected_price reporting_level_type standardized_liability_amount
-    state_cd state_code statisticcat_desc subsidy_amount subsidy_bins
+    state_cd state_code statisticcat_desc subsidy_amount subsidy_bins Estimate_lavaan FE constrained level name
     subsidy_per_premium subsidy_rate subsidy_rate_65 subsidy_rate_75 tau index_for_price_recived lhs op rent rhs
     tau_adm tau_c tau_sob total_premium_amount triger_level value Estimate Estimates Pvalue StdError demand
       ",

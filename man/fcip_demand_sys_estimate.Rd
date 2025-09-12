@@ -4,19 +4,85 @@
 \alias{fcip_demand_sys_estimate}
 \title{System estimator (modular wrapper; preserves original outputs)}
 \usage{
-fcip_demand_sys_estimate(model, data)
+fcip_demand_sys_estimate(model, data, constrained_elasticities = FALSE)
 }
 \arguments{
-\item{model}{List with elements: \code{outcome}, \code{endogenous}, \code{included},
-\code{excluded} (opt), \code{partial} (opt), \code{FE} (logical), \code{disag} (string colname),
-optional \code{restrict} (logical), \code{name} (string).}
+\item{model}{List specifying the system; required elements are:
+\itemize{
+\item \code{outcome} (character(2)): names of the two outcomes in \code{data}.
+\item \code{endogenous} (character(1)): endogenous regressor name.
+\item \code{included} (character): included (exogenous) regressors.
+\item \code{disag} (character(1) or \code{NULL}): disaggregation key column in \code{data}.
+\item \code{FE} (logical): include fixed effects in the internal run (handled by helpers).
+Optional elements:
+\item \code{excluded} (character or \code{NULL}): excluded instruments.
+\item \code{partial}  (character or \code{NULL}): variables to partial out (tilda).
+\item \code{restrict} (logical): pass-through to internal restricted estimation.
+\item \code{name}     (character(1)): label carried to the output.
+}}
 
-\item{data}{Input data.frame/data.table with all referenced columns plus \code{pool} and \code{commodity_year}.}
+\item{data}{\code{data.frame}/\code{data.table} containing all referenced columns in
+\code{model} plus \code{pool} and \code{commodity_year}. Columns in \code{model$outcome},
+\code{model$endogenous}, \code{model$included}, and (if used) \code{model$excluded} and
+\code{model$partial} must exist in \code{data}.}
+
+\item{constrained_elasticities}{Logical (default \code{FALSE}). If \code{TRUE}, re-estimate the
+elasticities via a constrained SEM (lavaan) and, where applicable, replace
+positive elasticity estimates with constrained ones. See \strong{Constrained
+elasticities (optional)}.}
 }
 \value{
-A data.frame aggregating results across all disaggregation levels.
+A \code{data.table} aggregating results across all disaggregation levels.
+The column set depends on \code{constrained} (see \strong{Returned shape}).
 }
 \description{
-Runs: per-level prep -> partial/tilda -> systemfit -> clustered VCOV ->
-delta-method totals -> (optional) restricted NLSUR -> diagnostics -> bind rows.
+Estimates a two-equation system with an endogenous regressor across
+disaggregation levels. The pipeline is:
+(1) per-level sample selection (min n per \code{commodity_year}),
+(2) partialling-out / tilda transforms,
+(3) system estimation (e.g., IV/3SLS via internal helpers),
+(4) clustered variance estimation,
+(5) delta-method totals,
+(6) optional constrained re-estimation of elasticities (lavaan),
+(7) diagnostics, and
+(8) row-binding results across levels.
+}
+\details{
+\strong{Inputs and preprocessing}
+\itemize{
+\item \code{model$outcome} must be a character vector of length 2 giving the two
+outcome column names in \code{data}. Internally these are mapped to
+\code{gamma} and \code{theta} for estimation convenience.
+\item \code{model$disag} is the name of the disaggregation key. If \code{NULL}, a dummy
+\code{"full_sample"} key is created.
+\item The disaggregation key is coerced to \code{character}.
+\item For each level of \code{model$disag}, the function keeps only levels that have
+\strong{at least 30 observations per \code{commodity_year}} (computed via
+\code{doBy::summaryBy}). Levels failing this threshold are dropped.
+}
+
+\strong{Per-level estimation}
+For each retained level, the function calls internal helpers
+(\code{fcip_demand_sys_run}, etc.) to (i) partially out controls if requested,
+and (ii) estimate the system with clustered VCOV and delta-method totals.
+Errors at the level are caught and the level is skipped (no hard stop).
+
+\strong{Constrained elasticities (optional)}
+When \code{constrained = TRUE}, elasticities on the endogenous regressor are
+re-estimated per level via a lavaan SEM with sign restrictions (internal
+helper \code{fcip_demand_elasticities_lavaan}, using \code{estimator = "MLR"},
+\code{missing = "listwise"}). The constrained estimates replace any positive
+system estimates for the elasticities; a logical flag \code{constrained} marks
+levels where a replacement occurred. The returned columns are reduced to
+\code{disag}, \code{level}, \code{demand}, \code{constrained}, and \code{Estimate}.
+
+\strong{Returned shape}
+\itemize{
+\item If \code{constrained_elasticities = FALSE} (default), returns the full per-level system
+output from \code{fcip_demand_sys_run} with additional columns:
+\code{disag}, \code{level}, and rounded \code{Zvalue}, \code{Pvalue}.
+\item If \code{constrained = TRUE}, returns a compact table with
+\code{disag}, \code{level}, \code{demand}, \code{constrained}, \code{Estimate} after merging the
+constrained elasticities.
+}
 }
