@@ -93,10 +93,9 @@ calibrate_fcip_demand_elasticities <- function(
   if (length(cols_to_drop)) data[, (cols_to_drop) := NULL]
 
   # (optional but safer) drop non-finite rows before estimation
-  keep <- is.finite(gamma) & is.finite(theta) & is.finite(price) &
-    is.finite(rent) & is.finite(county_acreage) &
-    is.finite(rate) & is.finite(tau0)
-  data <- data[keep]
+  data <- data[is.finite(gamma) & is.finite(theta) & is.finite(price) &
+                 is.finite(rent) & is.finite(county_acreage) &
+                 is.finite(rate) & is.finite(tau0)]
 
   elast <- rfcipDemand::fcip_demand_sys_estimate(
     model = list(
