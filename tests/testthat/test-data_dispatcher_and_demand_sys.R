@@ -18,7 +18,7 @@ test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
   
   # rescale data so that each varaiable is on a similar scale
   data$rent <- data$rent/1000
-  data$Gamma <- data$net_reporting_level_amount/10000
+  data$net_reporting_level_amount <- data$net_reporting_level_amount/10000
   data$county_acreage <- data$county_acreage/10000
   
   data <- data[!data$singleton %in% 1,]
@@ -27,11 +27,11 @@ test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
   data$commodity_code  <- as.numeric(as.character(data$commodity_code))
   data$trend <- data$commodity_year - min(data$commodity_year,na.rm=TRUE)
   data$FCIP <- 1
-  data$Theta1 <- data$coverage_level_percent_aggregate
+  #data$theta <- data$coverage_level_percent_aggregate
 
   data <- as.data.table(data)
   
-  outcome  <- c("Gamma","Theta1")
+  outcome  <- c("net_reporting_level_amount","coverage_level_percent_aggregate")
   partial  <- c("trend")
 
   model <- list(name       = "test" ,

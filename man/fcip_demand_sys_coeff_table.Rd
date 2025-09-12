@@ -25,8 +25,8 @@ Estimates come from \code{coef(fit)}, standard errors from \code{diag(vcMat)}, t
 Z-scores and two-sided normal p-values are computed. The \code{demand} column is
 inferred from the equation prefix in the coefficient names:
 \itemize{
-\item \code{"Gamma_*"} to \code{"Gamma"}
-\item \code{"Theta_*"}, \code{"Theta1_*"}, \code{"Theta2_*"}, ... to \code{"Theta"}
+\item \code{"gamma_*"} to \code{"gamma"}
+\item \code{"theta_*"} to \code{"theta"}
 Otherwise the prefix itself is used.
 }
 }

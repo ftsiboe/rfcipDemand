@@ -327,8 +327,8 @@ fcip_demand_sys_vcov <- function(object, data,
 #' Estimates come from `coef(fit)`, standard errors from `diag(vcMat)`, then
 #' Z-scores and two-sided normal p-values are computed. The `demand` column is
 #' inferred from the equation prefix in the coefficient names:
-#'   - `"Gamma_*"` to `"Gamma"`
-#'   - `"Theta_*"`, `"Theta1_*"`, `"Theta2_*"`, ... to `"Theta"`
+#'   - `"gamma_*"` to `"gamma"`
+#'   - `"theta_*"` to `"theta"`
 #' Otherwise the prefix itself is used.
 #'
 #' @param fit   A fitted `systemfit` object.
@@ -367,7 +367,7 @@ fcip_demand_sys_coeff_table <- function(fit, vcMat, p_digits = 5) {
   p  <- round(2 * stats::pnorm(abs(z), lower.tail = FALSE), p_digits)
   
   prefix <- sub("_.*$", "", cn)
-  demand <- ifelse(prefix == "Gamma", "Gamma", ifelse(grepl("^Theta\\d*$", prefix), "Theta", prefix))
+  demand <- tolower(prefix) #ifelse(prefix == "Gamma", "Gamma", ifelse(grepl("^Theta\\d*$", prefix), "Theta", prefix))
   coef_plain <- sub("^[^_]*_", "", cn)
   
   data.frame(
@@ -386,7 +386,7 @@ fcip_demand_sys_coeff_table <- function(fit, vcMat, p_digits = 5) {
 #' Delta-method "total protection response"
 #'
 #' @description
-#' Combines equation-specific effects into a single "Total" effect for each
+#' Combines equation-specific effects into a single "total" effect for each
 #' regressor in \code{c(fields$endogenous, fields$included)} using
 #' \code{car::deltaMethod} and a supplied covariance matrix.
 #'
@@ -398,7 +398,7 @@ fcip_demand_sys_coeff_table <- function(fit, vcMat, p_digits = 5) {
 #' @param data  Estimation data used to check variable availability and build
 #'   delta-method expressions.
 #'
-#' @return A \code{data.frame} with rows \code{demand="Total"} and columns:
+#' @return A \code{data.frame} with rows \code{demand="total"} and columns:
 #'   \code{demand}, \code{coef}, \code{Estimate}, \code{StdError}, \code{Zvalue}, \code{Pvalue}.
 #'
 #' @importFrom car deltaMethod
@@ -422,7 +422,7 @@ fcip_demand_sys_effect <- function(fit, vcMat, fields, data) {
     k   <- ncol(val)
     ret <- val[, c(-(k-1), -k)][c("Estimate","SE")]
     names(ret) <- c("Estimate","StdError")
-    ret$demand <- "Total"
+    ret$demand <- "total"
     ret$coef   <- paste0("tilda_", efflist)
     ret$Zvalue <- ret$Estimate / ret$StdError
     ret$Pvalue <- round(2 * stats::pnorm(q = abs(ret$Zvalue), lower.tail = FALSE), 5)
@@ -449,7 +449,7 @@ fcip_demand_sys_effect <- function(fit, vcMat, fields, data) {
 #' @param tilda_excluded Character vector of excluded instruments (e.g., \code{"instr_z1"}).
 #' @param tilda_included Character vector of included regressors (\code{"tilda_x1"}, ...).
 #'
-#' @return A \code{data.frame} with rows for \code{Gamma}, \code{Theta}, and \code{Total}
+#' @return A \code{data.frame} with rows for \code{gamma}, \code{theta}, and \code{total}
 #'   labeled \code{restricted_*}, or an empty \code{data.frame} if skipped.
 #'
 #' @note This step uses \code{nlsur::nlsur()} if available; it is optional and
@@ -495,7 +495,7 @@ fcip_demand_sys_restricted <- function(restrict, res, fit, data, outcome, tilda_
     cf   <- -exp(cf); cf[3] <- cf[1] + cf[2] + cf[1] * cf[2]
     
     data.frame(
-      demand   = c("Gamma","Theta","Total"),
+      demand   = c("gamma","theta","total"),
       coef     = paste0("restricted_", tilda_endogenous),
       Estimate = cf, StdError = NA, Zvalue = NA, Pvalue = NA
     )
@@ -734,7 +734,12 @@ fcip_demand_sys_estimate <- function(model, data) {
     model$disag      <- "full_sample"
   }
   disag   <- model$disag
- 
+  
+  # Ensure outcome names
+  data[["gamma"]] <- data[[model$outcome[1]]]
+  data[["theta"]] <- data[[model$outcome[2]]]
+  outcome <- c("gamma","theta")
+
   # Ensure disaggregation key is character
   data[[disag]] <- as.character(data[[disag]])
   

@@ -34,7 +34,7 @@ tilded system (e.g., \code{"tilda_z1"}).}
 \item{tilda_included}{Character vector of included regressors (\code{"tilda_x1"}, ...).}
 }
 \value{
-A \code{data.frame} with rows for \code{Gamma}, \code{Theta}, and \code{Total}
+A \code{data.frame} with rows for \code{gamma}, \code{theta}, and \code{total}
 labeled \code{restricted_*}, or an empty \code{data.frame} if skipped.
 }
 \description{
