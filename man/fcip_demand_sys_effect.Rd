@@ -19,11 +19,11 @@ fcip_demand_sys_effect(fit, vcMat, fields, data)
 delta-method expressions.}
 }
 \value{
-A \code{data.frame} with rows \code{demand="Total"} and columns:
+A \code{data.frame} with rows \code{demand="total"} and columns:
 \code{demand}, \code{coef}, \code{Estimate}, \code{StdError}, \code{Zvalue}, \code{Pvalue}.
 }
 \description{
-Combines equation-specific effects into a single "Total" effect for each
+Combines equation-specific effects into a single "total" effect for each
 regressor in \code{c(fields$endogenous, fields$included)} using
 \code{car::deltaMethod} and a supplied covariance matrix.
 }
