@@ -19,34 +19,3 @@ devtools::build_manual(path = getwd())
 
 devtools::check()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
