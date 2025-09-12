@@ -1,21 +1,19 @@
-#' Prepare data for a single level
+#' Prepare data for analysis 
 #'
 #' @description
-#' Filters to one disaggregation `level`, drops incomplete/invalid rows,
-#' removes constant partials, and optionally demeans via a fixed-effects helper.
+#' Drops incomplete/invalid rows, removes constant partials, and optionally demeans via a fixed-effects helper.
 #'
 #' @param data Estimation dataset that already contains all columns referenced by `fields`.
 #' @param fields Named list: `outcome`, `endogenous`, `included`, `excluded` (opt),
 #'   `partial` (opt), `FE` (logical), `disag` (column name).
-#' @param level One element of the disaggregation levels.
 #' @return A list: `data` (prepped), `NFE` (number of FE), `partial` (possibly reduced).
 #' @import data.table
 #' @importFrom stats complete.cases sd
 #' @export
-fcip_demand_sys_level_prep <- function(data, fields, level) {
+fcip_demand_sys_prep <- function(data, fields) {
   with(fields, {
-    # Keep level
-    dd <- data[data[[disag]] %in% level, , drop = FALSE]
+    # copy data
+    dd <- copy(data)
     
     # Vars we require (unique + only those present)
     need <- unique(c(outcome, endogenous, included, excluded, partial))
@@ -187,7 +185,6 @@ fcip_demand_sys_partial <- function(data, fields, partial_override = NULL) {
     )
   })
 }
-
 
 
 #' Build systemfit formulas and estimate the system
@@ -652,27 +649,26 @@ fcip_demand_sys_tests <- function(g, h, data, fit, NFE, approx_j = FALSE){
 }
 
 
-#' Orchestrate one disaggregation level
+#' Orchestrate analysis
 #'
 #' @description
-#' Runs the full pipeline for a single level: level prep -> partial/tilda creation ->
+#' Runs the full pipeline: prep -> partial/tilda creation ->
 #' systemfit -> two-way clustered VCOV -> delta-method totals -> optional restricted
 #' step -> diagnostics; then returns a tidy coefficient table with metadata.
 #'
-#' @param base_data Full estimation dataset (before subsetting to the level).
+#' @param data Estimation dataset 
 #' @param fields Named list carrying model fields (see \code{fcip_demand_estimation()}),
 #'   including \code{disag}, \code{FE}, \code{outcome}, \code{endogenous}, \code{included},
 #'   optional \code{excluded}, \code{partial}, \code{restrict}, and \code{name}.
-#' @param level One value of \code{fields$disag} to estimate for (e.g., a crop name).
 #'
 #' @return A \code{data.frame} with columns \code{demand}, \code{coef},
 #'   \code{Estimate}, \code{StdError}, \code{Zvalue}, \code{Pvalue} and
 #'   meta-columns \code{model}, \code{endogenous}, \code{FE}, \code{name},
-#'   \code{disag}, \code{level}.
+#'   \code{disag}
 #'
 #' @export
-fcip_demand_sys_level_run <- function(base_data, fields, level) {
-  prep <- fcip_demand_sys_level_prep(base_data, fields, level)
+fcip_demand_sys_run <- function(data, fields) {
+  prep <- fcip_demand_sys_prep(data=data, fields=fields)
   dd   <- prep$data
   NFE  <- prep$NFE
   partial_now <- prep$partial
@@ -702,8 +698,6 @@ fcip_demand_sys_level_run <- function(base_data, fields, level) {
   res$endogenous <- paste(fields$endogenous, collapse = ",")
   res$FE         <- fields$FE
   res$name       <- fields$name
-  res$disag      <- fields$disag
-  res$level      <- level
   res
 }
 
@@ -750,19 +744,22 @@ fcip_demand_sys_estimate <- function(model, data) {
   disagMap <- disagMap[disagMap[["commodity_year.length"]] >= 30, , drop = FALSE]
   
   data   <- data[data[[disag]] %in% disagMap[[disag]], , drop = FALSE]
-  levels <- unique(data[[disag]])
-  
+
   fields <- list(outcome=outcome, endogenous=endogenous, included=included,
                  excluded=excluded, partial=partial, FE=model$FE,
                  restrict=restrict, disag=disag, name=model$name %||% NA_character_)
   
   res <- data.table::rbindlist(
-    lapply(levels, function(level) {
+    lapply(unique(data[[disag]]), function(i) {
       tryCatch({
-        fcip_demand_sys_level_run(base_data = data, fields = fields, level = level)
+        res <- as.data.frame( fcip_demand_sys_run(data = data[data[[disag]] %in% i, , drop = FALSE], fields = fields))
+        res$disag <- fields$disag
+        res$level <- i
+        res$Zvalue <- round(res$Zvalue,8)
+        res$Pvalue <- round(res$Pvalue,8)
+        res
       }, error = function(e) { NULL })}),fill = TRUE)
   
-  res$Zvalue <- round(res$Zvalue,8)
-  res$Pvalue <- round(res$Pvalue,8)
+
   as.data.table(res)
 }
