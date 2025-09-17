@@ -802,6 +802,8 @@ fcip_demand_sys_estimate <- function(
   
   stopifnot(all(c("outcome","endogenous","included","disag","FE") %in% names(model)))
   
+  data <- as.data.table(data)
+  
   # Residual helper: NULL-coalescing
   `%||%` <- function(a, b) if (!is.null(a)) a else b
   
@@ -847,7 +849,7 @@ fcip_demand_sys_estimate <- function(
         res
       }, error = function(e) { NULL })}),fill = TRUE)
   
-  if (isTRUE(constrained_elasticities)) {
+  if(isTRUE(constrained_elasticities)) {
     
     res_lavaan <- data.table::rbindlist(
       lapply(unique(data[[disag]]), function(i) {

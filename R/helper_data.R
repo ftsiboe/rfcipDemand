@@ -77,3 +77,10 @@
 #' @source Generated internally, using harmonize_crop_type_codes()
 #' @usage data(fcip_recodes_type)
 "fcip_recodes_type"
+#' @name premium_subsidy_schedule
+#' @title premium_subsidy_schedule
+#' @description A combined dataset for premium_subsidy_schedule
+#' @format A data frame with 5528 rows and 7 columns covering 2010-2025.
+#' @source USDA-RMA, Actuarial Data Master supplemented data from legacy ADM files
+#' @usage data(premium_subsidy_schedule)
+"premium_subsidy_schedule"
