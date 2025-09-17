@@ -92,6 +92,13 @@ adjust_agent_outcomes_by_elasticity <- function(
     insured_acres <- pmax(insured_acres, 0)
   }
 
+  # Reset both variables to zero if either insured_acres or coverage_level_percent is missing (NA) or equals zero. 
+  if(is.na(insured_acres) || insured_acres == 0 ||
+     is.na(coverage_level_percent) || coverage_level_percent == 0) {
+    coverage_level_percent <- 0
+    insured_acres <- 0
+  }
+  
   # Adjust per-acre liability/indemnity for the (possibly) new coverage
   adjust_res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = coverage_level_percent,
