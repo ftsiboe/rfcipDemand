@@ -1,12 +1,12 @@
 #' Adjust FCIP outcomes by price elasticities
 #'
-#' Simulate FCIP outcomes—coverage level, insured acres, liability, premium,
-#' subsidy, and indemnity—under an alternative premium-per-liability using
+#' Simulate FCIP outcomes-coverage level, insured acres, liability, premium,
+#' subsidy, and indemnity-under an alternative premium-per-liability using
 #' elasticities for insured acres and/or coverage level.
 #'
 #' Assumptions (set via `assumption`):
 #' \itemize{
-#'   \item \code{0}: Fixed demand — coverage and acres stay at baseline.
+#'   \item \code{0}: Fixed demand - coverage and acres stay at baseline.
 #'   \item \code{1}: Acres respond to price (gamma); coverage fixed.
 #'   \item \code{2}: Coverage responds to price (theta); acres fixed.
 #'   \item \code{3}: Both acres and coverage respond.
@@ -14,11 +14,11 @@
 #'
 #' Price response is applied using the percent change in price:
 #' \deqn{\%\Delta p = 100 \times \left(\frac{\text{alt}}{\text{base}} - 1\right),}
-#' so that, for quantity \(q\) with elasticity \( \varepsilon_q \),
-#' \deqn{q_{\text{new}} = q_{\text{base}} \left[1 + \left(\varepsilon_q \times \frac{\%\Delta p}{100}\right)\right].}
+#' so that, for quantity \code{q} with elasticity \code{e_q},
+#' \deqn{q_{\text{new}} = q_{\text{base}} \left[1 + \left(e_q \times \frac{\%\Delta p}{100}\right)\right].}
 #'
-#' Coverage adjustments are rounded to the nearest 0.05 and truncated to \([0,\,0.85]\).
-#' Values \textless{} 0.50 are set to \code{0} (i.e., no coverage). Per-acre liability
+#' Coverage adjustments are rounded to the nearest 0.05 and truncated to \((0,\,0.85)\).
+#' Values less than 0.50 are set to \code{0} (i.e., no coverage). Per-acre liability
 #' and indemnity are updated via \code{\link{adjust_indemnity_liability_per_acre}}.
 #'
 #' Optional schedules allow coverage-specific scaling:
@@ -43,14 +43,14 @@
 #' @param baseline_premium_per_liability Numeric. Baseline premium per dollar of liability.
 #' @param baseline_subsidy_per_premium Numeric in (0,1). Subsidy share of total premium.
 #' @param baseline_indemnity_per_acre Numeric. Baseline indemnity per acre.
-#' @param revenue_per_acre Numeric. Revenue per acre (used by the indemnity adjustment).
+#' @param final_revenue_per_acre Numeric. Revenue per acre (used by the indemnity adjustment).
 #' @param assumption Integer (0,1,2,3). Scenario selector (see above). Default \code{0}.
 #' @param premium_subsidy_schedule Optional numeric vector of length 8 corresponding to
 #'   coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
-#'   \code{baseline_subsidy_per_premium} at the scenario coverage. Defaults to 1’s.
+#'   \code{baseline_subsidy_per_premium} at the scenario coverage. Defaults to 1's.
 #' @param rate_differential_schedule Optional numeric vector of length 8 corresponding to
 #'   coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
-#'   \code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1’s.
+#'   \code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1's.
 #'
 #' @return A list with:
 #' \describe{
@@ -82,10 +82,10 @@ adjust_agent_outcomes_by_elasticity <- function(
     baseline_premium_per_liability,
     baseline_subsidy_per_premium,
     baseline_indemnity_per_acre,
-    revenue_per_acre,
+    final_revenue_per_acre,
     assumption = 0,
     premium_subsidy_schedule = NULL,
-    rate_differential_schedule  = NULL,
+    rate_differential_schedule  = NULL
 ){
  
   stopifnot(
@@ -177,7 +177,7 @@ adjust_agent_outcomes_by_elasticity <- function(
   # Adjust per-acre liability and indemnity
   adjust_res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = coverage_level_percent,
-    revenue_per_acre            = revenue_per_acre,
+    final_revenue_per_acre      = final_revenue_per_acre,
     baseline_coverage_level     = baseline_coverage_level,
     baseline_liability_per_acre = baseline_liability_per_acre,
     baseline_indemnity_per_acre = baseline_indemnity_per_acre

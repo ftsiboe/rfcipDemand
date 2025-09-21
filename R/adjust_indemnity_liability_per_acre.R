@@ -6,7 +6,7 @@
 #' cases via \code{data.table::fcase()}.
 #'
 #' @param coverage_level_percent Numeric vector; alternative coverage level (proportion in (0,1)).
-#' @param revenue_per_acre Numeric vector; revenue per acre at harvest (used when baseline had no indemnity and baseline coverage is lower).
+#' @param final_revenue_per_acre Numeric vector; revenue per acre at harvest (used when baseline had no indemnity and baseline coverage is lower).
 #' @param baseline_coverage_level Numeric vector; baseline coverage level (proportion in (0,1)).
 #' @param baseline_liability_per_acre Numeric vector; baseline liability per acre.
 #' @param baseline_indemnity_per_acre Numeric vector; baseline indemnity per acre.
@@ -27,14 +27,14 @@
 #' @export
 adjust_indemnity_liability_per_acre <- function(
     coverage_level_percent,
-    revenue_per_acre,
+    final_revenue_per_acre,
     baseline_coverage_level,
     baseline_liability_per_acre,
     baseline_indemnity_per_acre
 ){
   # --- input recycling (allow lengths 1 or n) ---
   lens <- vapply(
-    list(coverage_level_percent, revenue_per_acre, baseline_coverage_level,
+    list(coverage_level_percent, final_revenue_per_acre, baseline_coverage_level,
          baseline_liability_per_acre, baseline_indemnity_per_acre),
     length, integer(1)
   )
@@ -45,7 +45,7 @@ adjust_indemnity_liability_per_acre <- function(
     else stop("All inputs must have length 1 or the same length.", call. = FALSE)
   }
   coverage_level_percent      <- recycle(coverage_level_percent)
-  revenue_per_acre            <- recycle(revenue_per_acre)
+  final_revenue_per_acre            <- recycle(final_revenue_per_acre)
   baseline_coverage_level     <- recycle(baseline_coverage_level)
   baseline_liability_per_acre <- recycle(baseline_liability_per_acre)
   baseline_indemnity_per_acre <- recycle(baseline_indemnity_per_acre)
@@ -83,7 +83,7 @@ adjust_indemnity_liability_per_acre <- function(
 
     # Lower baseline coverage; baseline had no indemnity = alt liability - revenue
     baseline_coverage_level <  coverage_level_percent & baseline_indemnity_per_acre == 0,
-    adj_Liability_per_acre - revenue_per_acre,
+    adj_Liability_per_acre - final_revenue_per_acre,
 
     # Fallback for any unmatched/NA cases
     default = NA_real_

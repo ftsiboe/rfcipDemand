@@ -6,7 +6,7 @@
 \usage{
 adjust_indemnity_liability_per_acre(
   coverage_level_percent,
-  revenue_per_acre,
+  final_revenue_per_acre,
   baseline_coverage_level,
   baseline_liability_per_acre,
   baseline_indemnity_per_acre
@@ -15,7 +15,7 @@ adjust_indemnity_liability_per_acre(
 \arguments{
 \item{coverage_level_percent}{Numeric vector; alternative coverage level (proportion in (0,1)).}
 
-\item{revenue_per_acre}{Numeric vector; revenue per acre at harvest (used when baseline had no indemnity and baseline coverage is lower).}
+\item{final_revenue_per_acre}{Numeric vector; revenue per acre at harvest (used when baseline had no indemnity and baseline coverage is lower).}
 
 \item{baseline_coverage_level}{Numeric vector; baseline coverage level (proportion in (0,1)).}
 

@@ -1,4 +1,3 @@
-# remotes::install_github("dylan-turner25/rmaADM", force = TRUE,upgrade="never")
 # remotes::install_github("dylan-turner25/rfcip", force = TRUE,upgrade="never")
 # remotes::install_github("dylan-turner25/rfsa", force = TRUE,upgrade="never")
 # usethis::use_github_action()
@@ -23,5 +22,4 @@ for(i in list.files("R",full.names = T)){
 devtools::check_man()
 devtools::build_manual(path = getwd())
 #devtools::test()
-
 devtools::check()

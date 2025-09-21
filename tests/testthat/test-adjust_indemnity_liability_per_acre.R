@@ -1,7 +1,7 @@
 test_that("returns named list with correct lengths", {
   res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = 0.7,
-    revenue_per_acre            = 60,
+    final_revenue_per_acre            = 60,
     baseline_coverage_level     = 0.8,
     baseline_liability_per_acre = 100,
     baseline_indemnity_per_acre = 0
@@ -18,7 +18,7 @@ test_that("covers the five mutually exclusive indemnity cases", {
   # 2) baseline > alt, baseline indemnity >  0   -> adj indm = base indm - (base liab - adj liab)
   # 3) baseline == alt                           -> adj indm = base indm
   # 4) baseline < alt, baseline indemnity >  0   -> adj indm = adj liab - production_to_count
-  # 5) baseline < alt, baseline indemnity == 0   -> adj indm = adj liab - revenue_per_acre
+  # 5) baseline < alt, baseline indemnity == 0   -> adj indm = adj liab - final_revenue_per_acre
   baseline_cov <- c(0.80, 0.80, 0.75, 0.70, 0.70)
   alt_cov      <- c(0.70, 0.70, 0.75, 0.80, 0.80)
   base_liab    <- rep(100, 5)
@@ -27,7 +27,7 @@ test_that("covers the five mutually exclusive indemnity cases", {
   
   res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = alt_cov,
-    revenue_per_acre            = revenue_pa,
+    final_revenue_per_acre            = revenue_pa,
     baseline_coverage_level     = baseline_cov,
     baseline_liability_per_acre = base_liab,
     baseline_indemnity_per_acre = base_indm
@@ -61,7 +61,7 @@ test_that("recycles scalars to vector length", {
   # Scalar alt coverage & revenue recycled over vector baselines
   res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = 0.8,       # scalar → recycle
-    revenue_per_acre            = 60,        # scalar → recycle
+    final_revenue_per_acre            = 60,        # scalar → recycle
     baseline_coverage_level     = c(0.8, 0.7),
     baseline_liability_per_acre = c(100, 120),
     baseline_indemnity_per_acre = c(0, 10)
@@ -85,7 +85,7 @@ test_that("length mismatch throws an error", {
   expect_error(
     adjust_indemnity_liability_per_acre(
       coverage_level_percent      = c(0.7, 0.8),   # length 2
-      revenue_per_acre            = 60,            # scalar ok
+      final_revenue_per_acre            = 60,            # scalar ok
       baseline_coverage_level     = c(0.8, 0.8, 0.8), # length 3 → mismatch
       baseline_liability_per_acre = 100,
       baseline_indemnity_per_acre = 0
@@ -98,7 +98,7 @@ test_that("guardrail warning when baseline_coverage_level <= 0", {
   expect_warning(
     adjust_indemnity_liability_per_acre(
       coverage_level_percent      = 0.7,
-      revenue_per_acre            = 60,
+      final_revenue_per_acre            = 60,
       baseline_coverage_level     = 0,   # triggers warning
       baseline_liability_per_acre = 100,
       baseline_indemnity_per_acre = 0
@@ -110,7 +110,7 @@ test_that("guardrail warning when baseline_coverage_level <= 0", {
 test_that("NA inputs fall through to default = NA for adjusted indemnity", {
   res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = 0.8,
-    revenue_per_acre            = 60,
+    final_revenue_per_acre            = 60,
     baseline_coverage_level     = 0.8,
     baseline_liability_per_acre = 100,
     baseline_indemnity_per_acre = NA_real_  # makes all fcase conditions NA

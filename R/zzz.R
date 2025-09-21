@@ -26,7 +26,7 @@
     fsa_crop_linker fsa_planted_acres harvest_price insurance_plan_code
     insured_area lcr liability_amount n nassSurvey_AREA_BEARING
     nassSurvey_AREA_HARVESTED nassSurvey_AREA_PLANTED
-    nass_index_for_price_recived nass_state_rental_rates
+    nass_index_for_price_recived nass_state_rental_rates coverage rd sp
     net_reporting_level_amount obs period_farmbill planted_acres pool
     potential_liability_amount premium_per_liability price
     projected_price reporting_level_type standardized_liability_amount drawID gamma_elasticity rate rp_eligible tau0 theta trend

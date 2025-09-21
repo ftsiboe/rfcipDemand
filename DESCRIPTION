@@ -4,8 +4,6 @@ Title: Estimate Federal Crop Insurance Program Demand Models
 Version: 0.0.0.9000
 Author: Francis Tsiboe [aut, cre] (<https://orcid.org/0000-0001-5984-1072>)
 Maintainer: Francis Tsiboe <ftsiboe@hotmail.com>
-Contributor: -
-Reviewer: -
 Creator: Francis Tsiboe
 Description: Tools to construct county–crop–practice–plan–unit panels from the
     USDA RMA Summary of Business (SOBTPU) and related sources, and to estimate
@@ -28,9 +26,7 @@ Remotes: github::UrbanInstitute/urbnmapr, github::dylan-turner25/rfsa, github::J
 Suggests: knitr, rmarkdown, tibble, dplyr, lavaan, testthat (>= 3.0.0)
 LazyData: true
 Cite-us: If you find it useful, please consider staring the repository and citing the following studies
-  - Tsiboe, F. and Turner, D. (2025). "Incorporating buy‐up price loss coverage into the United States
-    farm safety net." Applied Economic Perspectives and Policy.
-  - Tsiboe, F., et al. (2025). "Risk reduction impacts of crop insurance in the United States."
-    Applied Economic Perspectives and Policy.
-  - Gaku, S. and Tsiboe, F. (2024). Evaluation of alternative farm safety net program combination
-    strategies. Agricultural Finance Review.
+  - Tsiboe, F., & Turner, D. (2023). "The crop insurance demand response to premium subsidies - 
+    Evidence from U.S. Agriculture". Food Policy, 119(3). doi.org/10.1016/j.foodpol.2023.102505
+  - Tsiboe, F., & Turner, D. (2023). Econometric identification of crop insurance participation. 
+    Agricultural and Resource Economics Review. 52(3) 476-497. doi.org/10.1017/age.2023.13

@@ -2,7 +2,7 @@
 % Please edit documentation in R/adjust_agent_outcomes_by_elasticity.R
 \name{adjust_agent_outcomes_by_elasticity}
 \alias{adjust_agent_outcomes_by_elasticity}
-\title{Adjust FCIP outcomes by elasticity}
+\title{Adjust FCIP outcomes by price elasticities}
 \usage{
 adjust_agent_outcomes_by_elasticity(
   alternate_premium_per_liability,
@@ -14,8 +14,10 @@ adjust_agent_outcomes_by_elasticity(
   baseline_premium_per_liability,
   baseline_subsidy_per_premium,
   baseline_indemnity_per_acre,
-  revenue_per_acre,
-  assumption = 0
+  final_revenue_per_acre,
+  assumption = 0,
+  premium_subsidy_schedule = NULL,
+  rate_differential_schedule = NULL
 )
 }
 \arguments{
@@ -37,9 +39,17 @@ adjust_agent_outcomes_by_elasticity(
 
 \item{baseline_indemnity_per_acre}{Numeric. Baseline indemnity per acre.}
 
-\item{revenue_per_acre}{Numeric. Revenue per acre (used by the indemnity adjustment).}
+\item{final_revenue_per_acre}{Numeric. Revenue per acre (used by the indemnity adjustment).}
 
 \item{assumption}{Integer (0,1,2,3). Scenario selector (see above). Default \code{0}.}
+
+\item{premium_subsidy_schedule}{Optional numeric vector of length 8 corresponding to
+coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
+\code{baseline_subsidy_per_premium} at the scenario coverage. Defaults to 1's.}
+
+\item{rate_differential_schedule}{Optional numeric vector of length 8 corresponding to
+coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
+\code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1's.}
 }
 \value{
 A list with:
@@ -56,23 +66,43 @@ A list with:
 }
 }
 \description{
-Simulate FCIP outcomes (coverage level, insured acres, liability, premium,
-subsidy, and indemnity) under an alternative premium-per-liability, using
+Simulate FCIP outcomes-coverage level, insured acres, liability, premium,
+subsidy, and indemnity-under an alternative premium-per-liability using
 elasticities for insured acres and/or coverage level.
 }
 \details{
-Assumptions:
+Assumptions (set via \code{assumption}):
 \itemize{
-\item \code{0} - Fixed demand (coverage and acres stay at baseline).
-\item \code{1} - Acres respond to price (gamma), coverage fixed.
-\item \code{2} - Coverage responds to price (theta), acres fixed.
-\item \code{3} - Both acres and coverage respond.
+\item \code{0}: Fixed demand - coverage and acres stay at baseline.
+\item \code{1}: Acres respond to price (gamma); coverage fixed.
+\item \code{2}: Coverage responds to price (theta); acres fixed.
+\item \code{3}: Both acres and coverage respond.
 }
 
-Price response uses percent change in price:
-\deqn{\% \Delta p = 100 \times \left(\frac{\text{alt}}{\text{base}} - 1\right).}
+Price response is applied using the percent change in price:
+\deqn{\%\Delta p = 100 \times \left(\frac{\text{alt}}{\text{base}} - 1\right),}
+so that, for quantity \code{q} with elasticity \code{e_q},
+\deqn{q_{\text{new}} = q_{\text{base}} \left[1 + \left(e_q \times \frac{\%\Delta p}{100}\right)\right].}
 
-Coverage adjustments are rounded to 0.05 increments and truncated to [0, 0.85]
-(values < 0.5 set to 0). Per-acre liability/indemnity are updated via
-\code{adjust_indemnity_liability_per_acre()}.
+Coverage adjustments are rounded to the nearest 0.05 and truncated to \((0,\,0.85)\).
+Values less than 0.50 are set to \code{0} (i.e., no coverage). Per-acre liability
+and indemnity are updated via \code{\link{adjust_indemnity_liability_per_acre}}.
+
+Optional schedules allow coverage-specific scaling:
+\itemize{
+\item \code{premium_subsidy_schedule}: length-8 numeric for coverage levels
+\code{0.50, 0.55, ..., 0.85}; multiplies \code{baseline_subsidy_per_premium}
+at the scenario coverage.
+\item \code{rate_differential_schedule}: length-8 numeric for the same grid;
+multiplies \code{alternate_premium_per_liability} at the scenario coverage.
+}
+
+Missing or zero coverage/acres: if either \code{insured_acres} or
+\code{coverage_level_percent} is \code{NA} or \code{0} after adjustment, both are
+reset to \code{0} and all dollar outcomes become \code{0}.
+
+Elasticities are applied multiplicatively to the baseline quantities using the
+computed \code{price_change_pct}. Coverage is then snapped to the 0.05 grid and
+truncated. When schedules are supplied, the alternative premium-per-liability and/or
+the baseline subsidy share are scaled at the resulting coverage level.
 }

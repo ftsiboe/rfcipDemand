@@ -9,7 +9,7 @@ test_that("returns named list with expected elements", {
     baseline_premium_per_liability    = 0.08,
     baseline_subsidy_per_premium      = 0.60,
     baseline_indemnity_per_acre       = 50,
-    revenue_per_acre                  = 120,
+    final_revenue_per_acre                  = 120,
     assumption                        = 0
   )
   expect_type(res, "list")
@@ -32,7 +32,7 @@ test_that("price_change_pct is computed correctly", {
     baseline_premium_per_liability    = 0.08,
     baseline_subsidy_per_premium      = 0.60,
     baseline_indemnity_per_acre       = 50,
-    revenue_per_acre                  = 120,
+    final_revenue_per_acre                  = 120,
     assumption                        = 0
   )
   expect_equal(res$price_change_pct, 25)  # 100*((0.10/0.08) - 1)
@@ -53,7 +53,7 @@ test_that("assumption 0: coverage and acres fixed; totals consistent", {
     baseline_premium_per_liability    = base_p,
     baseline_subsidy_per_premium      = base$subs_share,
     baseline_indemnity_per_acre       = base$indm_pa,
-    revenue_per_acre                  = base$rev_pa,
+    final_revenue_per_acre                  = base$rev_pa,
     assumption                        = 0
   )
   
@@ -63,7 +63,7 @@ test_that("assumption 0: coverage and acres fixed; totals consistent", {
   # Cross-check via adjust_indemnity_liability_per_acre (same coverage → per-acre unchanged)
   adj <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = base$cov,
-    revenue_per_acre            = base$rev_pa,
+    final_revenue_per_acre            = base$rev_pa,
     baseline_coverage_level     = base$cov,
     baseline_liability_per_acre = base$liab_pa,
     baseline_indemnity_per_acre = base$indm_pa
@@ -89,7 +89,7 @@ test_that("assumption 1: only acres respond to price", {
     baseline_premium_per_liability    = base_p,
     baseline_subsidy_per_premium      = base$subs,
     baseline_indemnity_per_acre       = base$indm_pa,
-    revenue_per_acre                  = base$rev_pa,
+    final_revenue_per_acre                  = base$rev_pa,
     assumption                        = 1
   )
   
@@ -100,7 +100,7 @@ test_that("assumption 1: only acres respond to price", {
   # per-acre unchanged (coverage unchanged)
   adj <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = base$cov,
-    revenue_per_acre            = base$rev_pa,
+    final_revenue_per_acre            = base$rev_pa,
     baseline_coverage_level     = base$cov,
     baseline_liability_per_acre = base$liab_pa,
     baseline_indemnity_per_acre = base$indm_pa
@@ -127,7 +127,7 @@ test_that("assumption 2: only coverage responds with rounding and caps", {
     baseline_premium_per_liability    = base_p,
     baseline_subsidy_per_premium      = base$subs,
     baseline_indemnity_per_acre       = base$indm_pa,
-    revenue_per_acre                  = base$rev_pa,
+    final_revenue_per_acre                  = base$rev_pa,
     assumption                        = 2
   )
   
@@ -137,7 +137,7 @@ test_that("assumption 2: only coverage responds with rounding and caps", {
   # Cross-check totals via adjust_indemnity_liability_per_acre with new coverage
   adj <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = exp_cov,
-    revenue_per_acre            = base$rev_pa,
+    final_revenue_per_acre            = base$rev_pa,
     baseline_coverage_level     = base$cov,
     baseline_liability_per_acre = base$liab_pa,
     baseline_indemnity_per_acre = base$indm_pa
@@ -160,7 +160,7 @@ test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
     baseline_premium_per_liability    = 0.08,
     baseline_subsidy_per_premium      = 0.50,
     baseline_indemnity_per_acre       = 0,
-    revenue_per_acre                  = 0,
+    final_revenue_per_acre                  = 0,
     assumption                        = 2
   )
   expect_equal(res_cap$coverage_level_percent, 0.85) # 0.7 * 1.25 = 0.875 → round 0.90 → cap 0.85
@@ -176,7 +176,7 @@ test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
     baseline_premium_per_liability    = 0.08,
     baseline_subsidy_per_premium      = 0.50,
     baseline_indemnity_per_acre       = 0,
-    revenue_per_acre                  = 0,
+    final_revenue_per_acre                  = 0,
     assumption                        = 2
   )
   expect_equal(res_floor$coverage_level_percent, 0.00) # 0.55 * (1 - 0.75) = 0.1375 → 0.15 → < 0.5 → 0
@@ -197,7 +197,7 @@ test_that("assumption 3: both coverage and acres respond", {
     baseline_premium_per_liability    = base_p,
     baseline_subsidy_per_premium      = base$subs,
     baseline_indemnity_per_acre       = base$indm_pa,
-    revenue_per_acre                  = base$rev_pa,
+    final_revenue_per_acre                  = base$rev_pa,
     assumption                        = 3
   )
   
@@ -210,7 +210,7 @@ test_that("assumption 3: both coverage and acres respond", {
   # Totals cross-check via adjust_indemnity_liability_per_acre
   adj <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = exp_cov,
-    revenue_per_acre            = base$rev_pa,
+    final_revenue_per_acre            = base$rev_pa,
     baseline_coverage_level     = base$cov,
     baseline_liability_per_acre = base$liab_pa,
     baseline_indemnity_per_acre = base$indm_pa
@@ -233,7 +233,7 @@ test_that("assumption must be length 1", {
       baseline_premium_per_liability    = 0.08,
       baseline_subsidy_per_premium      = 0.6,
       baseline_indemnity_per_acre       = 50,
-      revenue_per_acre                  = 120,
+      final_revenue_per_acre                  = 120,
       assumption                        = c(0,1)   # invalid
     ),
     "length\\(assumption\\) == 1"
