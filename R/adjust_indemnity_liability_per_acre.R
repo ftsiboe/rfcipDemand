@@ -45,7 +45,7 @@ adjust_indemnity_liability_per_acre <- function(
     else stop("All inputs must have length 1 or the same length.", call. = FALSE)
   }
   coverage_level_percent      <- recycle(coverage_level_percent)
-  final_revenue_per_acre            <- recycle(final_revenue_per_acre)
+  final_revenue_per_acre      <- recycle(final_revenue_per_acre)
   baseline_coverage_level     <- recycle(baseline_coverage_level)
   baseline_liability_per_acre <- recycle(baseline_liability_per_acre)
   baseline_indemnity_per_acre <- recycle(baseline_indemnity_per_acre)
