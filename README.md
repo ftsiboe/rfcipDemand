@@ -71,6 +71,12 @@ The two most important functions are:
 
 ## Example 1: Full sample estimation
 
+In this example we would estimate a classic demand system for crop
+insurance with the aim of estimating demand responsiveness. That how
+much demand changes with each percentage change in premium rate. We
+would do this for the entire sample with consideration for
+hectrogeneity.
+
 Model structure aligned to the approach in [Tsiboe & Turner
 (2023)](https://doi.org/10.1016/j.foodpol.2023.102505), updated with
 recent data.  
@@ -220,60 +226,55 @@ kable(final_tbl,
 | J-test                        |        0.000         |
 | Weak-instrument: F-statistics |       884.241        |
 
+``` r
+
+example1$Estimate <- round(example1$Estimate,3)
+rownames(example1) <- paste0(example1$demand,"_",example1$coef)
+```
+
 <sub>**Notes:** Crop insurance demand is modeled via a multi-equation
 structural model of crop insurance demand at the intensive and extensive
 margins measured by coverage level and insured acres. An insurance pool
-is defined as the unique combinations of crops (almonds, apples, barley,
-blueberries, cabbage, canola, corn, cotton, dry beans, dry peas, flax,
-forage production, fresh nectarines, grain sorghum, grapes, millet,
-oats, olives, onions, oranges, peaches, peanuts, pears, plums, potatoes,
-rice, rye, safflower, soybeans, sugar beets, sugarcane, sunflowers,
-sweet corn, tobacco, tomatoes, walnuts, and wheat), county, insurance
-unit (optional units \[OU\], basic units \[BU\], or enterprise units
-\[EU\]), insurance plan, irrigation practice (irrigated, non-irrigated,
-or unspecified), and organic practice (organic certified, organic
-transition, or unspecified). The data used was constructed by the
-authors using primary data from (1) Risk Management Agency’s summary of
-business files that contain insurance metrics aggregated by county,
-crop, crop type, production practice, insurance plan, coverage level,
-and insurance unit, actuarial data master, and price addendums, (2) Farm
-Service Agency’s crop acreage data, and (3) NASS Quick Stats. The
-preferred model is ††.  
+is defined as the unique combinations of crops, county, insurance unit,
+insurance plan, irrigation practice, and organic practice. The data used
+was constructed by the authors using primary data from (1) Risk
+Management Agency, (2) Farm Service Agency’s crop acreage data, and (3)
+NASS Quick Stats.
+
 Significance levels – *p\<0.1, **p\<0.05, ***p\<0.01. Standard errors in
 parentheses are clustered by insurance pool and year.</sub>
 
-The results from the preferred specification highlight distinct
-responses across the intensive and extensive margins of crop insurance
-demand. At the intensive margin (coverage level, ln θ_it), the
-producer-paid premium rate enters with the expected negative sign
-(-0.359), implying that a 1% increase in the premium rate is associated
-with a 0.36% decrease in chosen coverage levels. However, the effect is
-statistically insignificant, reflecting the limited responsiveness of
-coverage choices to cost signals. Other covariates, including county
-planted acres, crop price, and rental rates, are similarly imprecise and
-not distinguishable from zero.
+The results highlight distinct responses across the intensive and
+extensive margins of crop insurance demand. At the intensive margin
+(coverage level), the producer-paid premium rate enters with the
+expected negative sign (-0.036), implying that a 1% increase in the
+premium rate is associated with a -0.036% decrease in chosen coverage
+levels. However, the effect is statistically insignificant, reflecting
+the limited responsiveness of coverage choices to cost signals. Other
+covariates, including county planted acres, crop price, and rental
+rates, are similarly imprecise and not distinguishable from zero.
 
-At the extensive margin (insured acres, ln a_it), scale effects
-dominate. County planted acres exhibit a positive and statistically
-significant coefficient (0.024, p \< 0.05), meaning that a 1% increase
-in planting area raises insured acreage by about 0.024%. The premium
-rate again shows a negative effect (-0.476), suggesting a 1% increase in
-rates reduces insured acreage by nearly 0.48%, though the standard error
-is large and the estimate is not significant.
+At the extensive margin (insured acres), scale effects dominate. County
+planted acres exhibit a positive and statistically significant
+coefficient (0.311), meaning that a 1% increase in planting area raises
+insured acreage by about 0.311%. The premium rate again shows a negative
+effect (-0.167), suggesting a 1% increase in rates reduces insured
+acreage by nearly -0.167%, though the standard error is large and the
+estimate is not significant.
 
 For the total protection response, county planted acres remain a key
-driver (0.023, p \< 0.10), indicating that scale continues to push
-overall demand upward by roughly 0.023% for each 1% increase in planted
-acres. The premium rate reduces total protection (-0.664), implying that
-a 1% increase in paid premiums reduces total protection demand by about
-0.66%, though again, the estimate is not statistically precise.
+driver (0.308), indicating that scale continues to push overall demand
+upward by roughly 0.308% for each 1% increase in planted acres. The
+premium rate reduces total protection (-0.197), implying that a 1%
+increase in paid premiums reduces total protection demand by about
+-0.197%, though again, the estimate is not statistically precise.
 
 The covariance matrix provides additional insight. The positive
-cross-covariance (σ_θa = 0.014) indicates that unobserved factors
+cross-covariance (σ_θa = 0.046) indicates that unobserved factors
 increasing demand for coverage level also raise demand for insured
 acres, and vice versa. However, the relationship is asymmetric: the
-variance of insured acres (σ_aa = 1.349) dwarfs that of coverage level
-(σ_θθ = 0.006), suggesting that shocks to acreage drive most of the
+variance of insured acres (σ_aa = 3.862) dwarfs that of coverage level
+(σ_θθ = 3.862), suggesting that shocks to acreage drive most of the
 variation in joint demand.
 
 Overall, these estimates point to farm size (planted acres) as the most
@@ -283,6 +284,37 @@ subsidies mute price sensitivity. The positive covariance between
 margins further suggests complementarities in demand, but the dominant
 source of variation lies in the extensive margin, highlighting the
 central role of scale in shaping crop insurance participation.
+
+## Example 2: Sub sample estimation
+
+In this example we would consider example but under the case where one
+is interested in heterogeneity in demand response.
+
+For this example we will consider heterogeneity by commodity and state.
+
+The model structure and data are the same as example 1.
+
+**🧮 Estimate the model**
+
+``` r
+# 4) Specify the system
+
+model <- list(
+  name       = "demo_sys",
+  FE         = TRUE,
+  outcome    = c("net_reporting_level_amount","coverage_level_percent_aggregate"),
+  endogenous = "rate",
+  excluded   = "tauS0",
+  partial    = c("trend",names(data)[grepl("Crop_",names(data))],names(data)[grepl("year_",names(data))]),
+  disag      = NULL,
+  included   = c("county_acreage","price","rent")
+)
+
+# 5) Estimate demand system
+res <- fcip_demand_sys_estimate(model = model, data = data)
+
+write.csv(res,"data-raw/examples/example1.csv")
+```
 
 # 📚 Citation
 

@@ -60,16 +60,16 @@ A list with elements:
 \item{\code{coverage_type_code}}{Scenario coverage type (\code{"A"} or \code{"C"}).}
 \item{\code{coverage_level_percent}}{Scenario coverage level share.}
 \item{\code{insured_acres}}{Scenario insured acres.}
-\item{\code{liability_amount}}{Total liability = acres × adjusted liability per acre.}
-\item{\code{total_premium_amount}}{Total premium = liability × alt premium/liability.}
-\item{\code{subsidy_amount}}{Subsidy = total premium × subsidy share.}
-\item{\code{indemnity_amount}}{Total indemnity = acres × adjusted indemnity per acre.}
+\item{\code{liability_amount}}{Total liability = acres * adjusted liability per acre.}
+\item{\code{total_premium_amount}}{Total premium = liability * alt premium/liability.}
+\item{\code{subsidy_amount}}{Subsidy = total premium * subsidy share.}
+\item{\code{indemnity_amount}}{Total indemnity = acres * adjusted indemnity per acre.}
 \item{\code{price_change_pct}}{Percent price change used for elasticity adjustments.}
 }
 }
 \description{
-Simulates changes in Federal Crop Insurance Program (FCIP) outcomes—
-coverage level, insured acres, liability, premium, subsidy, and indemnity—
+Simulates changes in Federal Crop Insurance Program (FCIP) outcomes-
+coverage level, insured acres, liability, premium, subsidy, and indemnity-
 under an alternative premium-per-liability using elasticities of insured
 acres and/or coverage level.
 }
@@ -77,9 +77,9 @@ acres and/or coverage level.
 \subsection{Assumptions (set via \code{assumption})}{
 
 \itemize{
-\item \code{0}: Fixed demand — both coverage and acres remain at baseline.
-\item \code{1}: Acres respond to price (elasticity γ); coverage fixed.
-\item \code{2}: Coverage responds to price (elasticity θ); acres fixed.
+\item \code{0}: Fixed demand - both coverage and acres remain at baseline.
+\item \code{1}: Acres respond to price (elasticity gamma); coverage fixed.
+\item \code{2}: Coverage responds to price (elasticity tetha); acres fixed.
 \item \code{3}: Both acres and coverage respond.
 }
 }

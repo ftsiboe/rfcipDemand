@@ -1,10 +1,10 @@
 ---
 title: "rfcipDemand"
 output:
-  word_document: default
   github_document:
     toc: false
     toc_depth: 3
+  word_document: default
   html_document:
     toc: false
     toc_depth: '3'
@@ -215,7 +215,7 @@ The model structure and data are the same as example 1.
 
 **🧮 Estimate the model**
 
-```{r quick-start-estimate, eval=FALSE, warning=FALSE}
+```{r quick-start-estimate-4, eval=FALSE, warning=FALSE}
 # 4) Specify the system
 
 model <- list(

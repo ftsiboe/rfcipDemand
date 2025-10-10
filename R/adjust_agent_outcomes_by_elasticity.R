@@ -1,15 +1,15 @@
 #' Adjust FCIP outcomes by price elasticities
 #'
-#' Simulates changes in Federal Crop Insurance Program (FCIP) outcomes—
-#' coverage level, insured acres, liability, premium, subsidy, and indemnity—
+#' Simulates changes in Federal Crop Insurance Program (FCIP) outcomes-
+#' coverage level, insured acres, liability, premium, subsidy, and indemnity-
 #' under an alternative premium-per-liability using elasticities of insured
 #' acres and/or coverage level.
 #'
 #' ## Assumptions (set via `assumption`)
 #' \itemize{
-#'   \item \code{0}: Fixed demand — both coverage and acres remain at baseline.
-#'   \item \code{1}: Acres respond to price (elasticity γ); coverage fixed.
-#'   \item \code{2}: Coverage responds to price (elasticity θ); acres fixed.
+#'   \item \code{0}: Fixed demand - both coverage and acres remain at baseline.
+#'   \item \code{1}: Acres respond to price (elasticity gamma); coverage fixed.
+#'   \item \code{2}: Coverage responds to price (elasticity tetha); acres fixed.
 #'   \item \code{3}: Both acres and coverage respond.
 #' }
 #'
@@ -68,10 +68,10 @@
 #'   \item{\code{coverage_type_code}}{Scenario coverage type (\code{"A"} or \code{"C"}).}
 #'   \item{\code{coverage_level_percent}}{Scenario coverage level share.}
 #'   \item{\code{insured_acres}}{Scenario insured acres.}
-#'   \item{\code{liability_amount}}{Total liability = acres × adjusted liability per acre.}
-#'   \item{\code{total_premium_amount}}{Total premium = liability × alt premium/liability.}
-#'   \item{\code{subsidy_amount}}{Subsidy = total premium × subsidy share.}
-#'   \item{\code{indemnity_amount}}{Total indemnity = acres × adjusted indemnity per acre.}
+#'   \item{\code{liability_amount}}{Total liability = acres * adjusted liability per acre.}
+#'   \item{\code{total_premium_amount}}{Total premium = liability * alt premium/liability.}
+#'   \item{\code{subsidy_amount}}{Subsidy = total premium * subsidy share.}
+#'   \item{\code{indemnity_amount}}{Total indemnity = acres * adjusted indemnity per acre.}
 #'   \item{\code{price_change_pct}}{Percent price change used for elasticity adjustments.}
 #' }
 #'
@@ -216,10 +216,10 @@ adjust_agent_outcomes_by_elasticity <- function(
 #'
 #' Rules:
 #' \itemize{
-#'   \item Scenario = CAT, Baseline = Buy-up → factor = 1/0.55
-#'   \item Scenario = CAT, Baseline = CAT → factor = 1
-#'   \item Scenario = Buy-up, Baseline = CAT → factor = 0.55
-#'   \item All other transitions → factor = 1
+#'   \item Scenario = CAT, Baseline = Buy-up -> factor = 1/0.55
+#'   \item Scenario = CAT, Baseline = CAT -> factor = 1
+#'   \item Scenario = Buy-up, Baseline = CAT -> factor = 0.55
+#'   \item All other transitions -> factor = 1
 #' }
 #'
 #' @param curr Character scalar. Scenario coverage type code ("A" or "C").
@@ -241,7 +241,7 @@ get_price_election_factor <- function(curr, base) {
 #' Snaps a coverage level to the nearest 0.05 grid, truncates at 0.85,
 #' and enforces a minimum of 0.50. Values below 0.50 are set to 0.50.
 #'
-#' @param x Numeric scalar or vector. Coverage level(s) expressed as shares (0–1).
+#' @param x Numeric scalar or vector. Coverage level(s) expressed as shares (0-1).
 #'
 #' @return Numeric scalar or vector. Adjusted coverage level(s) rounded to the
 #'   0.05 grid, truncated to 0.85, and floored at 0.50.

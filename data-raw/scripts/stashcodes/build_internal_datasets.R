@@ -1,6 +1,28 @@
+
 rm(list=ls(all=TRUE));gc();library(rfcip);library(data.table);library(dplyr)
 
-dir_data_release <- "C:/GitHub/USFarmSafetyNetLab/data-raw/release"
+
+
+# for(i in c("fixed_effect_model_data_prep")){
+#   adm_price <- tempfile(fileext = ".rds")
+#   download.file(
+#     "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/adm_extracts/fcip_commodity_price.rds",
+#     adm_price, mode = "wb", quiet = TRUE)
+#   adm_price <- readRDS(adm_price)
+# }
+# 
+# [1] "./data/fcip_contiguous_county.rda"                              "./data/fcip_recodes_commodity_groupings.rda"                   
+# [3] "./data/fcip_recodes_insurance_plan.rda"                         "./data/fcip_recodes_practice.rda"                              
+# [5] "./data/fcip_recodes_type.rda"                                   "./data/fsa_crop_linker.rda"                                    
+# [7] "./data/nass_census_state_beginning_farmer_and_rancher_data.rda" "./data/nass_index_for_price_recived.rda"                       
+# [9] "./data/nass_marketing_year_avg_price.rda"                       "./data/nass_state_rental_rates.rda"                            
+# [11] "./data/nass_us_ag_price_index_monthly.rda" 
+# 
+# 
+# 
+# build_internal_datasets(dir_source = directory_internal_datasets, size_threshold = 5)
+
+dir_data_release <- "C:/Users/ftsib/Dropbox/GitHub/USFarmSafetyNetLab/data-raw/release"
 
 #   Maximum file size (in megabytes) allowed for inclusion.  Any dataset whose
 #   largest yearly file exceeds this threshold is skipped entirely.  Defaults to `1`.
