@@ -35,6 +35,13 @@
 #' @source Output from get_state_rental_rates() function
 #' @usage data(nass_state_rental_rates)
 "nass_state_rental_rates"
+#' @name nass_us_ag_price_index_monthly
+#' @title nass_us_ag_price_index_monthly
+#' @description A combined dataset for nass_us_ag_price_index_monthly
+#' @format A data frame with 2255 rows and 8 columns covering Inf--Inf.
+#' @source USDA NASS: https://www.nass.usda.gov/Charts_and_Maps/graphics/data
+#' @usage data(nass_us_ag_price_index_monthly)
+"nass_us_ag_price_index_monthly"
 #' @name fcip_contiguous_county
 #' @title fcip_contiguous_county
 #' @description A combined dataset for fcip_contiguous_county

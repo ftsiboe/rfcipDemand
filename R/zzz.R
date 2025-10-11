@@ -28,7 +28,7 @@
     nassSurvey_AREA_HARVESTED nassSurvey_AREA_PLANTED
     nass_index_for_price_recived nass_state_rental_rates coverage rd sp
     net_reporting_level_amount obs period_farmbill planted_acres pool
-    potential_liability_amount premium_per_liability price
+    potential_liability_amount premium_per_liability price rma_crop_code
     projected_price reporting_level_type standardized_liability_amount drawID gamma_elasticity rate rp_eligible tau0 theta trend
     state_cd state_code statisticcat_desc subsidy_amount subsidy_bins Estimate_lavaan FE constrained level name
     subsidy_per_premium subsidy_rate subsidy_rate_65 subsidy_rate_75 tau index_for_price_recived lhs op rent rhs
