@@ -24,7 +24,7 @@
 #' @name nass_marketing_year_avg_price
 #' @title nass_marketing_year_avg_price
 #' @description A combined dataset for nass_marketing_year_avg_price
-#' @format A data frame with 31139 rows and 7 columns covering 1866-2024.
+#' @format A data frame with 587 rows and 7 columns covering 1868-2022.
 #' @source USDA NASS Quick Stats
 #' @usage data(nass_marketing_year_avg_price)
 "nass_marketing_year_avg_price"
@@ -38,7 +38,7 @@
 #' @name nass_us_ag_price_index_monthly
 #' @title nass_us_ag_price_index_monthly
 #' @description A combined dataset for nass_us_ag_price_index_monthly
-#' @format A data frame with 2255 rows and 8 columns covering Inf--Inf.
+#' @format A data frame with 2799 rows and 8 columns covering Inf--Inf.
 #' @source USDA NASS: https://www.nass.usda.gov/Charts_and_Maps/graphics/data
 #' @usage data(nass_us_ag_price_index_monthly)
 "nass_us_ag_price_index_monthly"
@@ -66,14 +66,14 @@
 #' @name fcip_recodes_practice
 #' @title fcip_recodes_practice
 #' @description A combined dataset for fcip_recodes_practice
-#' @format A data frame with 28639 rows and 8 columns covering 1997-2025.
+#' @format A data frame with 28640 rows and 8 columns covering 1997-2025.
 #' @source USDA-RMA, Actuarial Data Master - A00510 supplemented data from legacy ADM files
 #' @usage data(fcip_recodes_practice)
 "fcip_recodes_practice"
 #' @name fcip_recodes_type
 #' @title fcip_recodes_type
 #' @description A combined dataset for fcip_recodes_type
-#' @format A data frame with 232709 rows and 7 columns covering 1999-2025.
+#' @format A data frame with 232730 rows and 7 columns covering 1999-2025.
 #' @source Generated internally, using harmonize_crop_type_codes()
 #' @usage data(fcip_recodes_type)
 "fcip_recodes_type"

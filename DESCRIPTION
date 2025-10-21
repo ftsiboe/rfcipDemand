@@ -21,9 +21,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Depends: R (>= 4.1.0)
-Imports: rfsa, data.table, systemfit,sandwich,doBy,car,plyr,usmap,stats,utils, tidyr, stringr
+Imports: rfsa, data.table, systemfit, sandwich, doBy, car, plyr, usmap, stats, utils, tidyr, stringr
 Remotes: github::UrbanInstitute/urbnmapr, github::dylan-turner25/rfsa, github::JanMarvin/nlsur
-Suggests: knitr, rmarkdown, tibble, dplyr, lavaan, testthat (>= 3.0.0)
+Suggests: knitr, rmarkdown, tibble, dplyr, purrr, readr, lavaan, testthat (>= 3.0.0)
 LazyData: true
 Cite-us: If you find it useful, please consider staring the repository and citing the following studies
   - Tsiboe, F., & Turner, D. (2023). "The crop insurance demand response to premium subsidies - 

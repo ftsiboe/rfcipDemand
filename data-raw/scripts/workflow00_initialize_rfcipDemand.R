@@ -10,19 +10,18 @@ unlink(c("NAMESPACE","./R/helper_data.R",
          list.files("./data", full.names = TRUE),
          list.files("./man", full.names = TRUE)))
 
-for(i in c("fixed_effect_model_data_prep")){
-  download.file(
-    paste0("https://raw.githubusercontent.com/ftsiboe/USFarmSafetyNetLab/heads/main/R/estimators/",i,".R"),
-    paste0("./R/",i,".R"), mode = "wb", quiet = TRUE)
+list_function <- c(
+  "https://raw.githubusercontent.com/ftsiboe/USFarmSafetyNetLab/heads/main/data-raw/scripts/library/estimators/fixed_effect_model_data_prep.R",
+  "https://raw.githubusercontent.com/ftsiboe/USFarmSafetyNetLab/heads/main/R/build_internal_datasets.R"
+)
+
+for(i in list_function){
+  download.file(i, paste0("./R/",basename(i)), mode = "wb", quiet = TRUE)
 }
 
-for(i in c("calculate_mode")){
-  download.file(
-    paste0("https://raw.githubusercontent.com/ftsiboe/USFarmSafetyNetLab/heads/main/R/",i,".R"),
-    paste0("./R/",i,".R"), mode = "wb", quiet = TRUE)
-}
+source("data-raw/scripts/run_internal_datasets_rfcipDemand.R")
 
-source("data-raw/scripts/stashcodes/build_internal_datasets.R")
+unlink(list.files("R",full.names = TRUE,pattern = "build_internal_datasets.R"))
 
 # Sanity pass through R/ sources: shows any non-ASCII characters per file
 for (i in list.files("R", full.names = TRUE)) {
@@ -42,3 +41,9 @@ devtools::build_manual(path = getwd())
 # Optional: run tests / full package check (uncomment when needed)
 # devtools::test()
 devtools::check()
+
+df <- fcip_demand_data_dispatcher(
+  study_years = 2001:2025,
+  identifiers = c("commodity_year", "state_code","county_code","commodity_code","type_code",
+                  "practice_code", "insurance_plan_code", "unit_structure_code"))
+length(unique(fcip_recodes_commodity_groupings$commodity_name))

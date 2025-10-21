@@ -1,13 +1,13 @@
 test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
 
   data <- fcip_demand_data_dispatcher(
-    study_years = 2022:2023,
+    study_years = 2020:2023,
     identifiers = c("commodity_year","state_code","county_code","commodity_code","type_code",
                     "practice_code","insurance_plan_code","unit_structure_code"))
 
   expect_true(nrow(data) > 0)
   
-  expect_true(all(unique(data$commodity_year) %in% 2022:2023))
+  expect_true(all(unique(data$commodity_year) %in% 2020:2023))
   
   expect_true(all(c("pool","commodity_year","net_reporting_level_amount",
                     "coverage_level_percent_aggregate","subsidy_per_premium",
@@ -23,8 +23,8 @@ test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
   
   data <- data[!data$singleton %in% 1,]
   data$rate <- data$premium_per_liability
-  data$commodity_year  <- as.numeric(as.character(data$commodity_year))
-  data$commodity_code  <- as.numeric(as.character(data$commodity_code))
+  data$commodity_year <- as.numeric(as.character(data$commodity_year))
+  data$commodity_code <- as.numeric(as.character(data$commodity_code))
   data$trend <- data$commodity_year - min(data$commodity_year,na.rm=TRUE)
   data$FCIP <- 1
   #data$theta <- data$coverage_level_percent_aggregate
@@ -46,5 +46,5 @@ test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
   res <- fcip_demand_sys_estimate(model=model,data=data, constrained_elasticities = TRUE)
   
   expect_true(nrow(res) > 0)
-  
+
 })

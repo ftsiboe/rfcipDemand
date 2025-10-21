@@ -43,7 +43,6 @@
 #' **Environment requirements** (for optional enrichment):
 #' - `fcip_recodes_commodity_groupings`, `fcip_recodes_practice`,
 #'   `fcip_recodes_insurance_plan`.
-#' - A function `calculate_mode()` used to compute the coverage mode.
 #'
 #' @return A `data.table` at the chosen identifier grain with coverage aggregates and the
 #'   columns listed under **What this stage produces**.
@@ -84,8 +83,14 @@ fcip_demand_data_prep_sob <- function(
   }] 
   
   # Group-level coverage stats
-  df[, coverage_level_percent_max := max(coverage_level_percent, na.rm = TRUE), by = identifiers]
-  df[, coverage_level_dominant := calculate_mode(coverage_level_percent, na.rm = TRUE), by = identifiers]
+  mode <- function(x, na.rm = TRUE) {
+    if (na.rm) x <- x[!is.na(x)]
+    if (length(x) == 0) return(NA)
+    ux <- unique(x)
+    ux[which.max(tabulate(match(x, ux)))]
+  }
+  df[, coverage_level_percent_max  := max(coverage_level_percent, na.rm = TRUE), by = identifiers]
+  df[, coverage_level_dominant     := mode(coverage_level_percent, na.rm = TRUE), by = identifiers]
   df[, coverage_level_percent_wavg := (net_reporting_level_amount/sum(net_reporting_level_amount, na.rm = TRUE))*coverage_level_percent, by = identifiers]
   
   # Liability-derived measures 
@@ -183,22 +188,30 @@ fcip_demand_data_controls <- function(df) {
   df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
   
   # (2) The missing expected price that persists is replaced with averages within groups
-  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
-     by = c("commodity_year","state_code","commodity_name","type_code","practice_code")]
-  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  tryCatch({ 
+    df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
+       by = c("commodity_year","state_code","commodity_name","type_code","practice_code")]
+    df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  }, error = function(e){NULL})
   
   # (3) The missing expected price that persists is replaced with averages within groups
-  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
-     by = c("commodity_year","state_code","commodity_name","type_code")]
-  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  tryCatch({ 
+    df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
+       by = c("commodity_year","state_code","commodity_name","type_code")]
+    df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  }, error = function(e){NULL})
   
   # (4) The missing expected price that persists is replaced with averages within groups
-  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
-     by = c("commodity_year","state_code","commodity_name")]
-  df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  tryCatch({ 
+    df[price %in% c(NA, 0, Inf, -Inf, NaN), price := mean(price, na.rm = TRUE),
+       by = c("commodity_year","state_code","commodity_name")]
+    df[price %in% c(NA, 0, Inf, -Inf, NaN), price := NA]
+  }, error = function(e){NULL})
   
   # (5) Normalize price to sample mean by commodity
-  df[, price := price/mean(price, na.rm = TRUE), by = c("commodity_code")]
+  tryCatch({ 
+    df[, price := price/mean(price, na.rm = TRUE), by = c("commodity_code")]
+  }, error = function(e){NULL})
   
   df <- df[, c("projected_price","harvest_price") := NULL]
   
@@ -258,18 +271,17 @@ fcip_demand_data_reconcile_acreage <- function(df){
   stopifnot(data.table::is.data.table(df))
   
   # Build FSA planted acres by county-year
-  crop_linker <- unique(as.data.frame(fsa_crop_linker)[c("crop_cd_fsa","crop","crop_yr")])
+  crop_linker <- unique(as.data.frame(fsa_crop_linker)[c("crop_cd_fsa","crop_rma","crop_yr")])
   names(crop_linker) <- c("crop_cd","commodity_name","crop_yr")
   crop_linker <- data.table::as.data.table(crop_linker)
   crop_linker <- crop_linker[!crop_cd %in% NA]
-  
-  if (!exists("fsaCropAcreageCC", inherits = TRUE)) {
-    utils::data("fsaCropAcreageCC", package = "rfsa", envir = environment())
-  }
-  fsa <- get("fsaCropAcreageCC", inherits = TRUE)
-  fsa <- data.table::as.data.table(fsa)
-  fsa <- fsa[!rma_crop_code %in% NA]
-  fsa <- fsa[, crop_cd:= rma_crop_code]
+
+  fsa <- tempfile(fileext = ".rds")
+  download.file(
+    "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/fsa_extracts/fsaCropAcreageData.rds",
+    fsa, mode = "wb", quiet = TRUE)
+  fsa <- data.table::as.data.table(readRDS(fsa))
+
   fsa <- fsa[crop_linker, on = c("crop_yr","crop_cd"), nomatch = 0,allow.cartesian=TRUE]
   fsa[,fips := stringr::str_pad(fips,pad="0",5)]
   fsa <- as.data.table(tidyr::separate(fsa,"fips",into=c("state_code","county_code"),sep=2))
@@ -278,6 +290,11 @@ fcip_demand_data_reconcile_acreage <- function(df){
   fsa <- fsa[, .(fsa_planted_acres = sum(planted_acres, na.rm = TRUE)),
              by = .(crop_yr, state_code, county_code, commodity_name)]
   data.table::setnames(fsa,old = c("crop_yr"),new = c("commodity_year"))
+  
+  # unique(fsa$commodity_name)
+  # unique(df$commodity_code)
+  
+  #table(fsa$commodity_name,fsa$commodity_year)
   
   df <- merge(df, fsa, by = c("commodity_year","state_code","county_code","commodity_name"), all.x = TRUE)
   rm(fsa,crop_linker); gc()

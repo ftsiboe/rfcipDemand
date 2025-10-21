@@ -5,7 +5,7 @@
 \alias{fcip_recodes_practice}
 \title{fcip_recodes_practice}
 \format{
-A data frame with 28639 rows and 8 columns covering 1997-2025.
+A data frame with 28640 rows and 8 columns covering 1997-2025.
 }
 \source{
 USDA-RMA, Actuarial Data Master - A00510 supplemented data from legacy ADM files

@@ -5,7 +5,7 @@
 \alias{nass_us_ag_price_index_monthly}
 \title{nass_us_ag_price_index_monthly}
 \format{
-A data frame with 2255 rows and 8 columns covering Inf--Inf.
+A data frame with 2799 rows and 8 columns covering Inf--Inf.
 }
 \source{
 USDA NASS: https://www.nass.usda.gov/Charts_and_Maps/graphics/data
