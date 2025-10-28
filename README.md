@@ -34,11 +34,6 @@ Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](c
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 <!-- badges: end -->
 
-<p align="center">
-
-<img src="man/figures/rfcipDemand_hex.png" width="180"/>
-</p>
-
 # 📖 Introduction
 
 `rfcipDemand` provides a reproducible pipeline for analyzing **U.S.
