@@ -1,5 +1,22 @@
-rfcipDemand
+fcipDemand — Tools to estimate Federal Crop Insurance Program (FCIP)
+demand
 ================
+
+- [📖 Introduction](#open_book-introduction)
+- [✨ Key Features](#sparkles-key-features)
+- [📦 Installation](#package-installation)
+- [🚀 Quick Start](#rocket-quick-start)
+- [🧮 Example 1: Full Sample
+  Estimation](#abacus-example-1-full-sample-estimation)
+- [🧩 Example 2: Subsample
+  Estimation](#jigsaw-example-2-subsample-estimation)
+- [📉 Example 3: Subsample Estimation with Non-Positive
+  Elasticities](#chart_with_downwards_trend-example-3-subsample-estimation-with-non-positive-elasticities)
+- [🧠 Example 4: Estimation with User-Added
+  Variables](#brain-example-4-estimation-with-user-added-variables)
+- [📚 Citation](#books-citation)
+- [🤝 Contributing](#handshake-contributing)
+- [📬 Contact](#mailbox_with_mail-contact)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -17,36 +34,45 @@ Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](c
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 <!-- badges: end -->
 
+<p align="center">
+
+<img src="man/figures/rfcipDemand_hex.png" width="180"/>
+</p>
+
 # 📖 Introduction
 
 `rfcipDemand` provides a reproducible pipeline for analyzing **U.S.
-Federal Crop Insurance Program (FCIP) demand**.
+Federal Crop Insurance Program (FCIP) demand**.  
+It enables flexible modeling of participation, coverage, and elasticity
+across counties, crops, and insurance plans.
 
-Its functionalities are grounded in the empirical strategies developed
-in:
+Its empirical foundations build on:
 
 - Tsiboe, F., & Turner, D. (2023). [**The crop insurance demand response
   to premium subsidies: Evidence from U.S.
-  Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food
-  Policy, 119(3).
-
+  Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505). *Food
+  Policy, 119(3)*  
 - Tsiboe, F., & Turner, D. (2023). [**Econometric identification of crop
-  insurance participation**](https://doi.org/10.1017/age.2023.13)
-  Agricultural and Resource Economics Review
+  insurance participation**](https://doi.org/10.1017/age.2023.13).
+  *Agricultural and Resource Economics Review*
 
-Specifically, the package helps you:
+------------------------------------------------------------------------
 
-- 🧩 Build county–crop–practice–plan–unit panels from **USDA RMA
-  SOBTPU** and related sources  
-- 🔗 Merge **price and instrument variables**  
-- 🌾 Reconcile **acreage** using FSA and NASS data  
-- 📊 Estimate **FCIP demand systems** with fixed effects and two-way
-  cluster-robust covariance  
-- ✅ Produce diagnostics, including robust first-stage strength
+# ✨ Key Features
 
-**Disclaimer:** This package uses USDA data but is not endorsed by or
-affiliated with USDA or the Federal Government.  
-See [LICENSE](LICENSE) for terms.
+- Builds harmonized FCIP panel datasets across crops, years, and
+  insurance plans.  
+- Estimates multi-equation demand systems with endogenous premium
+  rates.  
+- Supports heterogeneity and calibration to maintain economic
+  consistency.  
+- Provides diagnostics for instrument validity and elasticity bounds.  
+- Integrates easily with other ARPC and NIFA-supported research
+  pipelines.
+
+> **Disclaimer:** This package uses USDA data but is not endorsed by or
+> affiliated with USDA or the Federal Government.  
+> See [LICENSE](LICENSE) for terms.
 
 ------------------------------------------------------------------------
 
@@ -62,34 +88,33 @@ devtools::install_github("ftsiboe/rfcipDemand", force = TRUE, upgrade = "never")
 
 # 🚀 Quick Start
 
-The two most important functions are:
+The three core functions are:
 
 - `fcip_demand_data_dispatcher()` → assemble the modeling data  
-- `fcip_demand_sys_estimate()` → estimate demand equations
-- `adjust_agent_outcomes_by_elasticity()` → adjust demand via estimated
-  demand elasticities
+- `fcip_demand_sys_estimate()` → estimate demand equations  
+- `calibrate_fcip_demand_elasticities()` → estimate with non-positive
+  elasticities
 
-## Example 1: Full sample estimation
+------------------------------------------------------------------------
 
-In this example we would estimate a classic demand system for crop
-insurance with the aim of estimating demand responsiveness. That how
-much demand changes with each percentage change in premium rate. We
-would do this for the entire sample with consideration for
-hectrogeneity.
+# 🧮 Example 1: Full Sample Estimation
 
-Model structure aligned to the approach in [Tsiboe & Turner
-(2023)](https://doi.org/10.1016/j.foodpol.2023.102505), updated with
-recent data.  
-**NOTE:** Results may differ from the published articles due to RMA data
-revisions and pipeline improvements in this package.  
-If you need *exact* replication of a paper, please use that study’s
-dedicated replication package (link to be added).
+In this example, we estimate a baseline FCIP demand system to evaluate
+how demand changes with percentage changes in the premium rate.  
+This estimation uses the full sample, following the structure in [Tsiboe
+& Turner (2023)](https://doi.org/10.1016/j.foodpol.2023.102505) but with
+updated RMA data.
 
-**Data**
+<details>
+
+<summary>
+
+📦 Click to expand setup code
+</summary>
 
 ``` r
 # library(rfcipDemand)
-devtools::document()
+
 # 1) Identify fields for panel building
 FCIP_INSURANCE_POOL <- c("state_code","county_code","commodity_code","type_code","practice_code")
 
@@ -122,219 +147,171 @@ for(i in unique(data$commodity_year)){ data[,paste0("year_",i)] <- ifelse(data$c
 data <- data[names(data)[!names(data) %in% c(paste0("year_",max(data$commodity_year,na.rm=T)),"Crop_41")]]
 ```
 
-**🧮 Estimate the model**
+</details>
+
+**Estimate model**
 
 ``` r
-# 4) Specify the system
 
+# Specify the system
 model <- list(
   name       = "demo_sys",
   FE         = TRUE,
   outcome    = c("net_reporting_level_amount","coverage_level_percent_aggregate"),
   endogenous = "rate",
   excluded   = "tauS0",
-  partial    = c("trend",names(data)[grepl("Crop_",names(data))],names(data)[grepl("year_",names(data))]),
+  partial    = c("trend", names(data)[grepl("Crop_", names(data))],
+                 names(data)[grepl("year_", names(data))]),
   disag      = NULL,
   included   = c("county_acreage","price","rent")
 )
 
-# 5) Estimate demand system
+# Estimate demand system
 res <- fcip_demand_sys_estimate(model = model, data = data)
 
-write.csv(res,"data-raw/examples/example1.csv")
+# Save results
+write.csv(res, "data-raw/examples/example1.csv", row.names = FALSE)
 ```
 
-**📊 Discussion of Results**
+> **Discussion:**  
+> The premium rate enters with a negative sign as expected, indicating
+> that higher producer-paid premiums reduce insurance demand.  
+> County acreage remains the strongest driver of participation across
+> all margins. For more detailes on the resulst see [Example 1 —
+> Discussion of
+> Results](https://github.com/ftsiboe/rfcipDemand/tree/main/data-raw/examples/Example1_Discussion.md)
+> —
 
-The outputs (see Table 1 below) from `fcip_demand_sys_estimate()` are
-structured objects that typically include:
+# 🧩 Example 2: Subsample Estimation
 
-- **System coefficients**: Estimated elasticities of demand with respect
-  to premium rates, coverage levels, and control variables.  
-- **Robust inference**: Standard errors clustered by county and year,
-  consistent with best practices in applied demand modeling.  
-- **First-stage diagnostics**: Strength of excluded instruments (e.g.,
-  `tau`), ensuring valid identification of the endogenous premium
-  rate.  
-- **Equation-level summaries**: For multi-equation systems, results are
-  returned per outcome (e.g., insured acreage (`Gamma`) and coverage
-  level (`Theta1`)).
-
-**Table 1: Crop Insurance Demand System for US Federal Crop Insurance
-Pools (2001/24)**
-
-``` r
-devtools::document()
-#> ℹ Updating rfcipDemand documentation
-#> ℹ Loading rfcipDemand
-library(knitr)
-example1 <- readr::read_csv("data-raw/examples/example1.csv", show_col_types = FALSE)
-#> New names:
-#> • `` -> `...1`
-
-# Variable name mapping
-var_labels <- c(
-  "(Intercept)"            = "(Intercept)",
-  "tilda_rate"             = "Paid premium rate",
-  "tilda_county_acreage"   = "County planted acres",
-  "tilda_price"            = "Expected crop price",
-  "tilda_rent"             = "State rental rate for land",
-  "residCov_11"            = "σ_aa",
-  "residCov_22"            = "σ_θθ",
-  "residCov_12"            = "σ_θa",
-  "N"                      = "Number of observations",
-  "NFE"                    = "Number of insurance pools",
-  "JTest"                  = "J-test",
-  "FTest"                  = "Weak-instrument: F-statistics"
-)
-
-final_tbl <- format_fcip_demand_table(example1, var_labels)
-
-# Print table
-kable(final_tbl,
-      col.names = c("Variables","Estimates"),
-      format = "pipe",  # <- ensures compatibility with GitHub markdown
-      align = c("l","c"))
-```
-
-| Variables                     |      Estimates       |
-|:------------------------------|:--------------------:|
-| Coverage level                |                      |
-| (Intercept)                   |    0.000 (0.003)     |
-| Paid premium rate             | -0.036\*\*\* (0.014) |
-| County planted acres          |    -0.002 (0.002)    |
-| Expected crop price           |    -0.011 (0.019)    |
-| State rental rate for land    |    -0.000 (0.072)    |
-| Insured acres                 |                      |
-| (Intercept)                   |    0.000 (0.048)     |
-| Paid premium rate             |    -0.167 (0.115)    |
-| County planted acres          | 0.311\*\*\* (0.053)  |
-| Expected crop price           |    0.377 (0.340)     |
-| State rental rate for land    |    -0.053 (0.593)    |
-| Total protection response     |                      |
-| Paid premium rate             |   -0.197\* (0.117)   |
-| County planted acres          | 0.308\*\*\* (0.054)  |
-| Expected crop price           |    0.361 (0.350)     |
-| State rental rate for land    |    -0.054 (0.652)    |
-| Covariance matrix             |                      |
-| σ_aa                          |        3.862         |
-| σ_θθ                          |        0.015         |
-| σ_θa                          |        0.046         |
-| Additional statistics         |                      |
-| Number of observations        |     1013922.000      |
-| Number of insurance pools     |      151393.000      |
-| J-test                        |        0.000         |
-| Weak-instrument: F-statistics |       884.241        |
+This example explores **heterogeneity in demand response** across
+subgroups—specifically by commodity using the variable `CROP`.
 
 ``` r
 
-example1$Estimate <- round(example1$Estimate,3)
-rownames(example1) <- paste0(example1$demand,"_",example1$coef)
-```
-
-<sub>**Notes:** Crop insurance demand is modeled via a multi-equation
-structural model of crop insurance demand at the intensive and extensive
-margins measured by coverage level and insured acres. An insurance pool
-is defined as the unique combinations of crops, county, insurance unit,
-insurance plan, irrigation practice, and organic practice. The data used
-was constructed by the authors using primary data from (1) Risk
-Management Agency, (2) Farm Service Agency’s crop acreage data, and (3)
-NASS Quick Stats.
-
-Significance levels – *p\<0.1, **p\<0.05, ***p\<0.01. Standard errors in
-parentheses are clustered by insurance pool and year.</sub>
-
-The results highlight distinct responses across the intensive and
-extensive margins of crop insurance demand. At the intensive margin
-(coverage level), the producer-paid premium rate enters with the
-expected negative sign (-0.036), implying that a 1% increase in the
-premium rate is associated with a -0.036% decrease in chosen coverage
-levels. However, the effect is statistically insignificant, reflecting
-the limited responsiveness of coverage choices to cost signals. Other
-covariates, including county planted acres, crop price, and rental
-rates, are similarly imprecise and not distinguishable from zero.
-
-At the extensive margin (insured acres), scale effects dominate. County
-planted acres exhibit a positive and statistically significant
-coefficient (0.311), meaning that a 1% increase in planting area raises
-insured acreage by about 0.311%. The premium rate again shows a negative
-effect (-0.167), suggesting a 1% increase in rates reduces insured
-acreage by nearly -0.167%, though the standard error is large and the
-estimate is not significant.
-
-For the total protection response, county planted acres remain a key
-driver (0.308), indicating that scale continues to push overall demand
-upward by roughly 0.308% for each 1% increase in planted acres. The
-premium rate reduces total protection (-0.197), implying that a 1%
-increase in paid premiums reduces total protection demand by about
--0.197%, though again, the estimate is not statistically precise.
-
-The covariance matrix provides additional insight. The positive
-cross-covariance (σ_θa = 0.046) indicates that unobserved factors
-increasing demand for coverage level also raise demand for insured
-acres, and vice versa. However, the relationship is asymmetric: the
-variance of insured acres (σ_aa = 3.862) dwarfs that of coverage level
-(σ_θθ = 3.862), suggesting that shocks to acreage drive most of the
-variation in joint demand.
-
-Overall, these estimates point to farm size (planted acres) as the most
-consistent determinant of insurance demand, while the dampened and
-imprecisely estimated response to premium rates underscores how
-subsidies mute price sensitivity. The positive covariance between
-margins further suggests complementarities in demand, but the dominant
-source of variation lies in the extensive margin, highlighting the
-central role of scale in shaping crop insurance participation.
-
-## Example 2: Sub sample estimation
-
-In this example we would consider example but under the case where one
-is interested in heterogeneity in demand response.
-
-For this example we will consider heterogeneity by commodity and state.
-
-The model structure and data are the same as example 1.
-
-**🧮 Estimate the model**
-
-``` r
-# 4) Specify the system
-
+# Specify the system
 model <- list(
   name       = "demo_sys",
   FE         = TRUE,
   outcome    = c("net_reporting_level_amount","coverage_level_percent_aggregate"),
   endogenous = "rate",
   excluded   = "tauS0",
-  partial    = c("trend",names(data)[grepl("Crop_",names(data))],names(data)[grepl("year_",names(data))]),
-  disag      = NULL,
+  partial    = c("trend", names(data)[grepl("year_", names(data))]),
+  disag      = "CROP",
   included   = c("county_acreage","price","rent")
 )
 
-# 5) Estimate demand system
+# Estimate demand system
 res <- fcip_demand_sys_estimate(model = model, data = data)
 
-write.csv(res,"data-raw/examples/example1.csv")
+# Save results
+write.csv(res, "data-raw/examples/example2.csv", row.names = FALSE)
 ```
+
+> **Note:** This setup allows estimation of separate elasticities and
+> participation effects for each commodity group.
+
+------------------------------------------------------------------------
+
+# 📉 Example 3: Subsample Estimation with Non-Positive Elasticities
+
+This example estimates demand heterogeneity while constraining
+elasticities to be **non-positive**, ensuring consistency with the **law
+of demand**.
+
+``` r
+
+# Prep data
+df2 <- fcip_demand_data_dispatcher(
+  study_years = 2001:2024,
+  identifiers = c("commodity_year", FCIP_INSURANCE_POOL, 
+                  "insurance_plan_code", "unit_structure_code")
+)
+
+# Specify and Estimate demand system
+res <- calibrate_fcip_demand_elasticities(
+  calibration_year  = 2024,
+  estimation_window = 5,
+  data              = df2,
+  disaggregate      = "CROP"
+)
+
+# Save results
+write.csv(res, "data-raw/examples/example3.csv", row.names = FALSE)
+```
+
+> **Insight:**  
+> Capping elasticities between –2 and 0 ensures stable simulation
+> behavior and adherence to demand theory.
+
+------------------------------------------------------------------------
+
+# 🧠 Example 4: Estimation with User-Added Variables
+
+`fcip_demand_data_dispatcher()` generates a standard analysis-ready
+dataset.  
+Users can merge additional variables of interest (e.g., external climate
+or policy data) by matching on identifiers such as `state_code`,
+`county_code`, and `commodity_year`.
+
+If a new variable (`ramble`) is: - **Exogenous** → add under
+`included` - **Endogenous** → add under `endogenous` and specify
+instruments under `excluded`
+
+``` r
+
+# Prep data
+exampleX_data <- unique(data[c("state_code", "commodity_year", "county_code")])
+set.seed(123)
+exampleX_data$ramble <- runif(nrow(exampleX_data), min = 0, max = 1)
+
+data4 <- dplyr::inner_join(data, exampleX_data, by = c("state_code", "commodity_year", "county_code"))
+
+# Specify the system
+model <- list(
+  name       = "demo_sys",
+  FE         = TRUE,
+  outcome    = c("net_reporting_level_amount", "coverage_level_percent_aggregate"),
+  endogenous = "rate",
+  excluded   = "tauS0",
+  partial    = c("trend",
+                 names(data4)[grepl("Crop_", names(data4))],
+                 names(data4)[grepl("year_", names(data4))]),
+  disag      = NULL,
+  included   = c("county_acreage","price","rent","ramble")
+)
+
+# Estimate demand system
+res <- fcip_demand_sys_estimate(model = model, data = data4)
+
+# Save results
+write.csv(res, "data-raw/examples/example4.csv", row.names = FALSE)
+```
+
+> **Tip:** Adding stochastic variables like `ramble` helps test
+> robustness and explore model sensitivity under simulated shocks.
+
+------------------------------------------------------------------------
 
 # 📚 Citation
 
 If you use `rfcipDemand` in your research, please cite:
 
-- Tsiboe, F., & Turner, D. (2023). [**The crop insurance demand response
-  to premium subsidies: Evidence from U.S.
-  Agriculture**](https://doi.org/10.1016/j.foodpol.2023.102505) Food
-  Policy, 119(3).
+- Tsiboe, F., & Turner, D. (2023). *The crop insurance demand response
+  to premium subsidies: Evidence from U.S. Agriculture.*  
+  *Food Policy, 119(3).* <https://doi.org/10.1016/j.foodpol.2023.102505>
 
-- Tsiboe, F., & Turner, D. (2023). [**Econometric identification of crop
-  insurance participation**](https://doi.org/10.1017/age.2023.13)
-  Agricultural and Resource Economics Review
+- Tsiboe, F., & Turner, D. (2023). *Econometric identification of crop
+  insurance participation.*  
+  *Agricultural and Resource Economics Review.*
+  <https://doi.org/10.1017/age.2023.13>
 
 ------------------------------------------------------------------------
 
 # 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome. Please see the
-[Code of Conduct](code_of_conduct.md).
+Contributions, issues, and feature requests are welcome.  
+Please see the [Code of Conduct](code_of_conduct.md).
 
 ------------------------------------------------------------------------
 
@@ -342,4 +319,4 @@ Contributions, issues, and feature requests are welcome. Please see the
 
 Questions or collaboration ideas?  
 Email **Francis Tsiboe** at <ftsiboe@hotmail.com>.  
-Star the repo ⭐ if you find it useful!
+⭐ *Star this repository if you find it useful!*

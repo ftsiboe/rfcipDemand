@@ -11,8 +11,8 @@ Tools to construct county–crop–practice–plan–unit panels from the USDA R
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/you/rfcipDemand}
-  \item Report bugs at \url{https://github.com/you/rfcipDemand/issues}
+  \item \url{https://github.com/ftsiboe/rfcipDemand}
+  \item Report bugs at \url{https://github.com/ftsiboe/rfcipDemand/issues}
 }
 
 }

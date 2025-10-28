@@ -9,4 +9,4 @@ slurm-*.out
 data-raw/*
 !data-raw/*.R
 !data-raw/scripts/
-
+!data-raw/examples/

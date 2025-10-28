@@ -38,7 +38,7 @@ the estimator (e.g., \code{"commodity_code"} or \code{c("state","commodity_code"
 \description{
 Fits a 2-equation FCIP demand system over an estimation window ending in
 \code{calibration_year} and returns capped elasticities (-2, 0) by
-disaggregation level
+disaggregation level using \code{\link[=fcip_demand_sys_estimate]{fcip_demand_sys_estimate()}}
 }
 \details{
 Internally, the function (i) restricts \code{data} to the estimation years,

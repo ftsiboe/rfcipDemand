@@ -1,0 +1,89 @@
+---
+title: "Example 1 — Discussion of Results"
+output:
+  github_document:
+    toc: false
+    toc_depth: 2
+  html_document:
+    toc: false
+    toc_depth: 2
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+<!-- This file is meant to be referenced from the main README.
+     Knit it after running Example 1 so that `data-raw/examples/example1.csv` exists. -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.path = "man/figures/README-discuss-")
+```
+
+# 📊 Discussion of Results (Example 1)
+
+The outputs (see Table 1 below) from `fcip_demand_sys_estimate()` are structured objects that typically include:
+
+- **System coefficients**: Estimated elasticities of demand with respect to premium rates, coverage levels, and control variables.  
+- **Robust inference**: Standard errors clustered by county and year, consistent with best practices in applied demand modeling.  
+- **First-stage diagnostics**: Strength of excluded instruments (e.g., `tau`), ensuring valid identification of the endogenous premium rate.  
+- **Equation-level summaries**: For multi-equation systems, results are returned per outcome (e.g., insured acreage (`Gamma`) and coverage level (`Theta1`)). 
+
+**Table 1: Crop Insurance Demand System for US Federal Crop Insurance Pools (2001/24)**
+
+```{r quick-start-format-results, include=T, warning=FALSE}
+devtools::document()
+library(knitr)
+example1 <- readr::read_csv("example1.csv", show_col_types = FALSE)
+
+# Variable name mapping
+var_labels <- c(
+  "(Intercept)"            = "(Intercept)",
+  "tilda_rate"             = "Paid premium rate",
+  "tilda_county_acreage"   = "County planted acres",
+  "tilda_price"            = "Expected crop price",
+  "tilda_rent"             = "State rental rate for land",
+  "residCov_11"            = "σ_aa",
+  "residCov_22"            = "σ_θθ",
+  "residCov_12"            = "σ_θa",
+  "N"                      = "Number of observations",
+  "NFE"                    = "Number of insurance pools",
+  "JTest"                  = "J-test",
+  "FTest"                  = "Weak-instrument: F-statistics"
+)
+
+final_tbl <- format_fcip_demand_table(example1, var_labels)
+
+# Print table
+kable(final_tbl,
+      col.names = c("Variables","Estimates"),
+      format = "pipe",  # <- ensures compatibility with GitHub markdown
+      align = c("l","c"))
+
+example1$Estimate <- round(example1$Estimate,3)
+rownames(example1) <- paste0(example1$demand,"_",example1$coef)
+
+
+
+```
+
+<sub>**Notes:** Crop insurance demand is modeled via a multi-equation structural model of crop insurance demand at the intensive and extensive margins measured by coverage level and insured acres. An insurance pool is defined as the unique combinations of crops, county, insurance unit, insurance plan, irrigation practice, and organic practice. The data used was constructed by the authors using primary data from (1) Risk Management Agency, (2) Farm Service Agency’s crop acreage data, and (3) NASS Quick Stats.
+
+Significance levels – *p&lt;0.1, **p&lt;0.05, ***p&lt;0.01. Standard errors in parentheses are clustered by insurance pool and year.</sub>
+
+
+The results highlight distinct responses across the intensive and extensive margins of crop insurance demand. At the intensive margin (coverage level), the producer-paid premium rate enters with the expected negative sign (`r example1["theta_tilda_rate","Estimate"]`), implying that a 1% increase in the premium rate is associated with a `r example1["theta_tilda_rate","Estimate"]`% decrease in chosen coverage levels. However, the effect is statistically insignificant, reflecting the limited responsiveness of coverage choices to cost signals. Other covariates, including county planted acres, crop price, and rental rates, are similarly imprecise and not distinguishable from zero.
+
+At the extensive margin (insured acres), scale effects dominate. County planted acres exhibit a positive and statistically significant coefficient (`r example1["gamma_tilda_county_acreage","Estimate"]`), meaning that a 1% increase in planting area raises insured acreage by about `r example1["gamma_tilda_county_acreage","Estimate"]`%. The premium rate again shows a negative effect (`r example1["gamma_tilda_rate","Estimate"]`), suggesting a 1% increase in rates reduces insured acreage by nearly `r example1["gamma_tilda_rate","Estimate"]`%, though the standard error is large and the estimate is not significant.
+
+For the total protection response, county planted acres remain a key driver (`r example1["total_tilda_county_acreage","Estimate"]`), indicating that scale continues to push overall demand upward by roughly `r example1["total_tilda_county_acreage","Estimate"]`% for each 1% increase in planted acres. The premium rate reduces total protection (`r example1["total_tilda_rate","Estimate"]`), implying that a 1% increase in paid premiums reduces total protection demand by about `r example1["total_tilda_rate","Estimate"]`%, though again, the estimate is not statistically precise.
+
+The covariance matrix provides additional insight. The positive cross-covariance (σ_θa = `r example1["NA_residCov_12","Estimate"]`) indicates that unobserved factors increasing demand for coverage level also raise demand for insured acres, and vice versa. However, the relationship is asymmetric: the variance of insured acres (σ_aa = `r example1["NA_residCov_11","Estimate"]`) dwarfs that of coverage level (σ_θθ = `r example1["NA_residCov_11","Estimate"]`), suggesting that shocks to acreage drive most of the variation in joint demand.
+
+Overall, these estimates point to farm size (planted acres) as the most consistent determinant of insurance demand, while the dampened and imprecisely estimated response to premium rates underscores how subsidies mute price sensitivity. The positive covariance between margins further suggests complementarities in demand, but the dominant source of variation lies in the extensive margin, highlighting the central role of scale in shaping crop insurance participation.
+
+## Takeaways
+
+1. **Price sensitivity is negative but often small**, consistent with subsidy‑muted price signals in FCIP.  
+2. **Farm scale (planted acres) is a robust determinant** at both margins.  
+3. **Positive covariance** between margins suggests complementarities in insurance decisions.  
+4. For simulation exercises, consider **elasticity capping** (see Example 3) to enforce the law of demand and stabilize outcomes.

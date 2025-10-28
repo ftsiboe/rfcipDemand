@@ -2,7 +2,7 @@
 #'
 #' Fits a 2-equation FCIP demand system over an estimation window ending in
 #' `calibration_year` and returns capped elasticities (-2, 0) by
-#' disaggregation level
+#' disaggregation level using [fcip_demand_sys_estimate()]
 #'
 #' @param calibration_year Integer. Last year of the estimation window.
 #' @param estimation_window Integer (>= 1). Number of years ending at `calibration_year`.
@@ -40,7 +40,6 @@ calibrate_fcip_demand_elasticities <- function(
 
   # ensure data.table
   data <- data.table::as.data.table(data)
-  drawn_pools <- data.table::as.data.table(drawn_pools)
 
   if (!is.null(drawn_pools)) drawn_pools <- data.table::as.data.table(drawn_pools)
 
