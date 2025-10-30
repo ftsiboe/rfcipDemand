@@ -18,7 +18,8 @@ adjust_agent_outcomes_by_elasticity(
   final_revenue_per_acre,
   assumption = 0,
   premium_subsidy_schedule = NULL,
-  rate_differential_schedule = NULL
+  rate_differential_schedule = NULL,
+  rate_cup_and_cap = FALSE
 )
 }
 \arguments{
@@ -53,6 +54,8 @@ coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
 \item{rate_differential_schedule}{Optional numeric vector of length 8 corresponding to
 coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
 \code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1's.}
+
+\item{rate_cup_and_cap}{logical(1) If TRUE, enforces a rate change to be no more than (+*-) 20\%. Defaults to FALSE.}
 }
 \value{
 A list with elements:

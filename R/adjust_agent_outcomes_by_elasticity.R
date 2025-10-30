@@ -117,6 +117,8 @@ adjust_agent_outcomes_by_elasticity <- function(
   
   # clamp each r01..r05 to [0.80*r00, 1.20*r00], then cap > 1 to 0.999
   if(rate_cup_and_cap){
+    alternate_premium_per_liability <- round(alternate_premium_per_liability, 4)
+    baseline_premium_per_liability  <- round(baseline_premium_per_liability, 4)
     rate_change <- pmin(pmax(alternate_premium_per_liability, baseline_premium_per_liability * 0.80), baseline_premium_per_liability * 1.20)
     alternate_premium_per_liability <- ifelse(rate_change > 1, 0.999, rate_change)
   }
