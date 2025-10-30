@@ -62,7 +62,6 @@
 #' @param rate_differential_schedule Optional numeric vector of length 8 corresponding to
 #'   coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
 #'   \code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1's.
-#' @param rate_cup_and_cap logical(1) If TRUE, enforces a rate change to be no more than (+*-) 20%. Defaults to FALSE.
 #' 
 #' @return A list with elements:
 #' \describe{
@@ -98,8 +97,7 @@ adjust_agent_outcomes_by_elasticity <- function(
     final_revenue_per_acre,
     assumption = 0,
     premium_subsidy_schedule = NULL,
-    rate_differential_schedule  = NULL,
-    rate_cup_and_cap = FALSE
+    rate_differential_schedule  = NULL
 ){
   
   # Default schedules
@@ -114,14 +112,6 @@ adjust_agent_outcomes_by_elasticity <- function(
   stopifnot(is.finite(baseline_coverage_level), baseline_coverage_level > 0, baseline_coverage_level <= 1)
   stopifnot(length(assumption) == 1L, assumption %in% c(0L,1L,2L,3L))
   stopifnot(baseline_coverage_level %in% seq(0.50, 0.85, 0.05))
-  
-  # clamp each r01..r05 to [0.80*r00, 1.20*r00], then cap > 1 to 0.999
-  if(rate_cup_and_cap){
-    alternate_premium_per_liability <- round(alternate_premium_per_liability, 4)
-    baseline_premium_per_liability  <- round(baseline_premium_per_liability, 4)
-    rate_change <- pmin(pmax(alternate_premium_per_liability, baseline_premium_per_liability * 0.80), baseline_premium_per_liability * 1.20)
-    alternate_premium_per_liability <- ifelse(rate_change > 1, 0.999, rate_change)
-  }
   
   # Percent change in price used by elasticities
   price_change_pct <- 100 * (alternate_premium_per_liability/baseline_premium_per_liability - 1)
