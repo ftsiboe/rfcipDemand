@@ -54,6 +54,8 @@
 #' @param baseline_premium_per_liability Numeric. Baseline premium per dollar of liability.
 #' @param baseline_subsidy_per_premium Numeric in (0,1). Subsidy share of total premium.
 #' @param baseline_indemnity_per_acre Numeric. Baseline indemnity per acre.
+#' @param baseline_subsidy_percent Numeric. Baseline subsidy percent.
+#' @param baseline_rate_differential Numeric. Baseline rate differential factor.
 #' @param final_revenue_per_acre Numeric. Revenue per acre (used for indemnity adjustment).
 #' @param assumption Integer (0,1,2,3). Scenario selector (see above). Default \code{0}.
 #' @param premium_subsidy_schedule Optional numeric vector of length 8 corresponding to
@@ -94,6 +96,8 @@ adjust_agent_outcomes_by_elasticity <- function(
     baseline_premium_per_liability,
     baseline_subsidy_per_premium,
     baseline_indemnity_per_acre,
+    baseline_subsidy_percent,
+    baseline_rate_differential,
     final_revenue_per_acre,
     assumption = 0,
     premium_subsidy_schedule = NULL,
@@ -160,14 +164,12 @@ adjust_agent_outcomes_by_elasticity <- function(
       rd = rate_differential_schedule
     )
     
-    sp_base <- schedule[coverage == baseline_coverage_level, sp]
-    sp_scn  <- schedule[coverage == coverage_level_percent, sp]
-    rd_base <- schedule[coverage == baseline_coverage_level, rd]
-    rd_scn  <- schedule[coverage == coverage_level_percent, rd]
+    alternate_subsidy_percent   <- schedule[coverage == coverage_level_percent, sp]
+    alternate_rate_differential <- schedule[coverage == coverage_level_percent, rd]
     
-    if(length(sp_base) && length(sp_scn) && length(rd_base) && length(rd_scn)){
-      adjust_premium_subsidy   <- sp_scn / sp_base
-      adjust_rate_differential <- rd_scn / rd_base
+    if(length(baseline_subsidy_percent) && length(alternate_subsidy_percent) && length(baseline_rate_differential) && length(alternate_rate_differential)){
+      adjust_premium_subsidy   <- alternate_subsidy_percent / baseline_subsidy_percent
+      adjust_rate_differential <- alternate_rate_differential / baseline_rate_differential
       
       alternate_premium_per_liability <- alternate_premium_per_liability * adjust_rate_differential
       baseline_subsidy_per_premium    <- baseline_subsidy_per_premium    * adjust_premium_subsidy
