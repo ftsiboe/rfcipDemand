@@ -15,6 +15,8 @@ adjust_agent_outcomes_by_elasticity(
   baseline_premium_per_liability,
   baseline_subsidy_per_premium,
   baseline_indemnity_per_acre,
+  baseline_subsidy_percent,
+  baseline_rate_differential,
   final_revenue_per_acre,
   assumption = 0,
   premium_subsidy_schedule = NULL,
@@ -41,6 +43,10 @@ adjust_agent_outcomes_by_elasticity(
 \item{baseline_subsidy_per_premium}{Numeric in (0,1). Subsidy share of total premium.}
 
 \item{baseline_indemnity_per_acre}{Numeric. Baseline indemnity per acre.}
+
+\item{baseline_subsidy_percent}{Numeric. Baseline subsidy percent.}
+
+\item{baseline_rate_differential}{Numeric. Baseline rate differential factor.}
 
 \item{final_revenue_per_acre}{Numeric. Revenue per acre (used for indemnity adjustment).}
 

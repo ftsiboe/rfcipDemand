@@ -11,7 +11,9 @@ test_that("returns named list with expected elements", {
     baseline_subsidy_per_premium      = 0.60,
     baseline_indemnity_per_acre       = 50,
     final_revenue_per_acre            = 120,
-    assumption                        = 0
+    assumption                        = 0,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   expect_type(res, "list")
   expect_setequal(
@@ -35,7 +37,9 @@ test_that("price_change_pct is computed correctly", {
     baseline_subsidy_per_premium      = 0.60,
     baseline_indemnity_per_acre       = 50,
     final_revenue_per_acre            = 120,
-    assumption                        = 0
+    assumption                        = 0,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   expect_equal(res$price_change_pct, 25)  # 100*((0.10/0.08) - 1)
 })
@@ -57,7 +61,9 @@ test_that("assumption 0: coverage and acres fixed; totals consistent", {
     baseline_subsidy_per_premium      = base$subs_share,
     baseline_indemnity_per_acre       = base$indm_pa,
     final_revenue_per_acre            = base$rev_pa,
-    assumption                        = 0
+    assumption                        = 0,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   
   expect_equal(res$coverage_level_percent, base$cov)
@@ -94,7 +100,9 @@ test_that("assumption 1: only acres respond to price", {
     baseline_subsidy_per_premium      = base$subs,
     baseline_indemnity_per_acre       = base$indm_pa,
     final_revenue_per_acre            = base$rev_pa,
-    assumption                        = 1
+    assumption                        = 1,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   
   exp_acres <- base$acres * (1 + (gamma * pc)/100)  # 100*(1 - 0.1) = 90
@@ -133,7 +141,9 @@ test_that("assumption 2: only coverage responds with rounding and caps", {
     baseline_subsidy_per_premium      = base$subs,
     baseline_indemnity_per_acre       = base$indm_pa,
     final_revenue_per_acre            = base$rev_pa,
-    assumption                        = 2
+    assumption                        = 2,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   
   expect_equal(res$coverage_level_percent, exp_cov, tolerance = 1e-12)
@@ -167,7 +177,9 @@ test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
     baseline_subsidy_per_premium      = 0.50,
     baseline_indemnity_per_acre       = 0,
     final_revenue_per_acre            = 0,
-    assumption                        = 2
+    assumption                        = 2,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   expect_equal(res_cap$coverage_level_percent, 0.85) # 0.7 * 1.25 = 0.875 → round 0.90 → cap 0.85
   
@@ -184,7 +196,9 @@ test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
     baseline_subsidy_per_premium      = 0.50,
     baseline_indemnity_per_acre       = 0,
     final_revenue_per_acre            = 0,
-    assumption                        = 2
+    assumption                        = 2,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   expect_equal(res_floor$coverage_level_percent, 0.00) # 0.55 * (1 - 0.75) = 0.1375 → 0.15 → < 0.5 → 0
 })
@@ -206,7 +220,9 @@ test_that("assumption 3: both coverage and acres respond", {
     baseline_subsidy_per_premium      = base$subs,
     baseline_indemnity_per_acre       = base$indm_pa,
     final_revenue_per_acre            = base$rev_pa,
-    assumption                        = 3
+    assumption                        = 3,
+    baseline_subsidy_percent = 1,
+    baseline_rate_differential = 1
   )
   
   # Expected coverage (rounded) and acres
