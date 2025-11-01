@@ -115,7 +115,9 @@ adjust_agent_outcomes_by_elasticity <- function(
   stopifnot(is.finite(baseline_premium_per_liability), baseline_premium_per_liability > 0)
   stopifnot(is.finite(baseline_coverage_level), baseline_coverage_level > 0, baseline_coverage_level <= 1)
   stopifnot(length(assumption) == 1L, assumption %in% c(0L,1L,2L,3L))
-  stopifnot(baseline_coverage_level %in% seq(0.50, 0.85, 0.05))
+  if(assumption > 1){
+    stopifnot(baseline_coverage_level %in% seq(0.50, 0.85, 0.05))
+  }
   
   # Percent change in price used by elasticities
   price_change_pct <- 100 * (alternate_premium_per_liability/baseline_premium_per_liability - 1)
