@@ -7,41 +7,48 @@
 #' @source Internal innovation
 #' @usage data(fsa_crop_linker)
 "fsa_crop_linker"
-#' @name nass_census_state_beginning_farmer_and_rancher_data
-#' @title nass_census_state_beginning_farmer_and_rancher_data
-#' @description A combined dataset for nass_census_state_beginning_farmer_and_rancher_data
+#' @name agCensusAcres
+#' @title agCensusAcres
+#' @description A combined dataset for agCensusAcres
+#' @format A data frame with 15369 rows and 15 columns covering Inf--Inf.
+#' @source USDA NASS Quick Stats
+#' @usage data(agCensusAcres)
+"agCensusAcres"
+#' @name agCensusBFR
+#' @title agCensusBFR
+#' @description A combined dataset for agCensusBFR
 #' @format A data frame with 255 rows and 16 columns covering Inf--Inf.
 #' @source USDA NASS Quick Stats
-#' @usage data(nass_census_state_beginning_farmer_and_rancher_data)
-"nass_census_state_beginning_farmer_and_rancher_data"
-#' @name nass_index_for_price_recived
-#' @title nass_index_for_price_recived
-#' @description A combined dataset for nass_index_for_price_recived
-#' @format A data frame with 35 rows and 3 columns covering 1990-2024.
-#' @source USDA NASS Quick Stats
-#' @usage data(nass_index_for_price_recived)
-"nass_index_for_price_recived"
-#' @name nass_marketing_year_avg_price
-#' @title nass_marketing_year_avg_price
-#' @description A combined dataset for nass_marketing_year_avg_price
-#' @format A data frame with 587 rows and 7 columns covering 1868-2022.
-#' @source USDA NASS Quick Stats
-#' @usage data(nass_marketing_year_avg_price)
-"nass_marketing_year_avg_price"
-#' @name nass_state_rental_rates
-#' @title nass_state_rental_rates
-#' @description A combined dataset for nass_state_rental_rates
-#' @format A data frame with 1792 rows and 5 columns covering 1994-2025.
-#' @source Output from get_state_rental_rates() function
-#' @usage data(nass_state_rental_rates)
-"nass_state_rental_rates"
-#' @name nass_us_ag_price_index_monthly
-#' @title nass_us_ag_price_index_monthly
-#' @description A combined dataset for nass_us_ag_price_index_monthly
+#' @usage data(agCensusBFR)
+"agCensusBFR"
+#' @name nassAgPriceMonthlyIndex
+#' @title nassAgPriceMonthlyIndex
+#' @description A combined dataset for nassAgPriceMonthlyIndex
 #' @format A data frame with 2799 rows and 8 columns covering Inf--Inf.
 #' @source USDA NASS: https://www.nass.usda.gov/Charts_and_Maps/graphics/data
-#' @usage data(nass_us_ag_price_index_monthly)
-"nass_us_ag_price_index_monthly"
+#' @usage data(nassAgPriceMonthlyIndex)
+"nassAgPriceMonthlyIndex"
+#' @name nassSurveyMYAprice
+#' @title nassSurveyMYAprice
+#' @description A combined dataset for nassSurveyMYAprice
+#' @format A data frame with 31139 rows and 7 columns covering 1866-2024.
+#' @source USDA NASS Quick Stats
+#' @usage data(nassSurveyMYAprice)
+"nassSurveyMYAprice"
+#' @name nassSurveyPriceRecivedIndex
+#' @title nassSurveyPriceRecivedIndex
+#' @description A combined dataset for nassSurveyPriceRecivedIndex
+#' @format A data frame with 35 rows and 3 columns covering 1990-2024.
+#' @source USDA NASS Quick Stats
+#' @usage data(nassSurveyPriceRecivedIndex)
+"nassSurveyPriceRecivedIndex"
+#' @name nassSurveyRentalRates
+#' @title nassSurveyRentalRates
+#' @description A combined dataset for nassSurveyRentalRates
+#' @format A data frame with 1792 rows and 5 columns covering 1994-2025.
+#' @source Output from get_state_rental_rates() function
+#' @usage data(nassSurveyRentalRates)
+"nassSurveyRentalRates"
 #' @name fcip_contiguous_county
 #' @title fcip_contiguous_county
 #' @description A combined dataset for fcip_contiguous_county

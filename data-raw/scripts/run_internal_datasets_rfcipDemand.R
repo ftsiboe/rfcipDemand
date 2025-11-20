@@ -1,9 +1,9 @@
 
 rm(list=ls(all=TRUE));gc();library(rfcip);library(data.table);library(dplyr)
 
-dir_data_release <- "C:/Users/ftsib/Dropbox/GitHub/USFarmSafetyNetLab/data-raw/release"
+source("R/build_internal_datasets.R")
 
-devtools::document()
+dir_data_release <- file.path(gsub("rfcipDemand","USFarmSafetyNetLab",getwd()),"data-raw/release")
 
 build_internal_datasets(
   source_files = c(

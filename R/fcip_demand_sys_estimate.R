@@ -437,7 +437,7 @@ fcip_demand_sys_effect <- function(fit, vcMat, fields, data) {
 #' Produces diagnostics **without** re-running GMM:
 #' - **FTest**: joint relevance of excluded instruments in each first stage,
 #'   using the same two-way (pool by crop year) cluster-robust covariance via
-#'   [fcip_demand_sys_vcov()] with \code{kind = "lm"}. Reports the **minimum** F
+#'   `fcip_demand_sys_vcov()` with \code{kind = "lm"}. Reports the **minimum** F
 #'   across endogenous regressors.
 #' - **JTest** (optional): an *approximate* over-identification test computed as
 #'   the sum of per-equation Sargan statistics

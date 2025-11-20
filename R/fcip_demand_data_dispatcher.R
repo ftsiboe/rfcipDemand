@@ -154,9 +154,9 @@ fcip_demand_data_prep_sob <- function(
 #' @section Data sources:
 #' - ADM price release: `adm_extracts/fcip_commodity_price.rds`
 #' - Instrument release: `reps/fcip_demand_instruments.rds` (uses `tau_adm`, fallback `tau_sob`)
-#' - Assumes in-memory tables: `nass_state_rental_rates`, `nass_index_for_price_recived`
+#' - Assumes in-memory tables: `nassSurveyRentalRates`, `nassSurveyPriceRecivedIndex`
 #'
-#' @param df A `data.table` produced by [fcip_demand_data_prep_sob()].
+#' @param df A `data.table` produced by `fcip_demand_data_prep_sob()`.
 #'
 #' @return The same `data.table` with added columns:
 #'   `price`, `tau`, `subsidy_rate_65`, `subsidy_rate_75`, `rent`, `index_for_price_recived`.
@@ -229,12 +229,12 @@ fcip_demand_data_controls <- function(df) {
   rm(fcip_instruments);gc()
   
   # Per-acre cost of crop production was approximated with state-level rental rates retrieved from NASS Quick Stats.
-  df <- df[nass_state_rental_rates[, lapply(.SD, mean), by = intersect(names(df), names(nass_state_rental_rates)), .SDcols = "rent"],
-           on = intersect(names(df), names(nass_state_rental_rates)), nomatch = 0]
+  df <- df[nassSurveyRentalRates[, lapply(.SD, mean), by = intersect(names(df), names(nassSurveyRentalRates)), .SDcols = "rent"],
+           on = intersect(names(df), names(nassSurveyRentalRates)), nomatch = 0]
   
   # NASS index for price received
-  df <- df[nass_index_for_price_recived[, lapply(.SD, mean), by = intersect(names(df), names(nass_index_for_price_recived)), .SDcols = "index_for_price_recived"],
-           on = intersect(names(df), names(nass_index_for_price_recived)), nomatch = 0]
+  df <- df[nassSurveyPriceRecivedIndex[, lapply(.SD, mean), by = intersect(names(df), names(nassSurveyPriceRecivedIndex)), .SDcols = "index_for_price_recived"],
+           on = intersect(names(df), names(nassSurveyPriceRecivedIndex)), nomatch = 0]
   
   # Convert to real terms
   df[, price := price/index_for_price_recived]
@@ -262,11 +262,17 @@ fcip_demand_data_controls <- function(df) {
 #'   `nassSurvey_AREA_*` or `fsa_planted_acres` intermediates.
 #' @family Estimation Data
 #' @import data.table rfsa
-#' @importFrom utils download.file data
+#' @importFrom utils data
 #' @importFrom tidyr spread
 #' @keywords internal
 #' @noRd
 fcip_demand_data_reconcile_acreage <- function(df){
+  
+  temporary_dir <- tools::R_user_dir("rfcipDemand", which = "cache")
+
+  if (!dir.exists(temporary_dir)) {
+    dir.create(temporary_dir, recursive = TRUE)
+  }
   
   stopifnot(data.table::is.data.table(df))
   
@@ -276,11 +282,14 @@ fcip_demand_data_reconcile_acreage <- function(df){
   crop_linker <- data.table::as.data.table(crop_linker)
   crop_linker <- crop_linker[!crop_cd %in% NA]
 
-  fsa <- tempfile(fileext = ".rds")
-  download.file(
-    "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/fsa_extracts/fsaCropAcreageData.rds",
-    fsa, mode = "wb", quiet = TRUE)
-  fsa <- data.table::as.data.table(readRDS(fsa))
+  piggyback::pb_download(
+    file = "fsaCropAcreageData.rds",
+    dest = temporary_dir,
+    repo = "ftsiboe/USFarmSafetyNetLab",
+    tag  = "fsa_extracts",
+    overwrite = TRUE)
+  fsa <- readRDS(file.path(temporary_dir,"fsaCropAcreageData.rds"))
+  data.table::setDT(fsa)
 
   fsa <- fsa[crop_linker, on = c("crop_yr","crop_cd"), nomatch = 0,allow.cartesian=TRUE]
   fsa[,fips := stringr::str_pad(fips,pad="0",5)]
@@ -300,12 +309,16 @@ fcip_demand_data_reconcile_acreage <- function(df){
   rm(fsa,crop_linker); gc()
   
   # NASS county series (planted/bearing/harvested)
-  nass <- tempfile(fileext = ".rds")
-  utils::download.file(
-    "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/nass_extracts/nass_production_data.rds", 
-    nass, mode = "wb", quiet = TRUE)
-  nass <- readRDS(nass)
+  
+  piggyback::pb_download(
+    file = "nassSurveyCropProductionData.rds",
+    dest = temporary_dir,
+    repo = "ftsiboe/USFarmSafetyNetLab",
+    tag  = "nass_extracts",
+    overwrite = TRUE)
+  nass <- readRDS(file.path(temporary_dir,"nassSurveyCropProductionData.rds"))
   data.table::setDT(nass)
+
   nass <- nass[agg_level_desc %in% "COUNTY" &
                  statisticcat_desc %in% c("nassSurvey_AREA_HARVESTED","nassSurvey_AREA_PLANTED","nassSurvey_AREA_BEARING"),
                .(value = sum(value, na.rm = TRUE)),
@@ -353,7 +366,7 @@ fcip_demand_data_reconcile_acreage <- function(df){
 #' - **Binning**: `subsidy_bins` in 0.02 steps from 0.40 to 0.80 (inclusive, with clamp).
 #' - **Labels**: `period_farmbill` factor (pre-1980 ... 2018) and `period_combo` ("Before"/"After" 2012).
 #'
-#' @param df A `data.table` from [fcip_demand_data_reconcile_acreage()].
+#' @param df A `data.table` from fcip_demand_data_reconcile_acreage().
 #'
 #' @return Final `data.table` ready for estimation.
 #' @family Estimation Data

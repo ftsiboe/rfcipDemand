@@ -31,7 +31,7 @@ Produces diagnostics \strong{without} re-running GMM:
 \itemize{
 \item \strong{FTest}: joint relevance of excluded instruments in each first stage,
 using the same two-way (pool by crop year) cluster-robust covariance via
-\code{\link[=fcip_demand_sys_vcov]{fcip_demand_sys_vcov()}} with \code{kind = "lm"}. Reports the \strong{minimum} F
+\code{fcip_demand_sys_vcov()} with \code{kind = "lm"}. Reports the \strong{minimum} F
 across endogenous regressors.
 \item \strong{JTest} (optional): an \emph{approximate} over-identification test computed as
 the sum of per-equation Sargan statistics

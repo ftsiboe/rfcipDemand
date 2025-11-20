@@ -2,7 +2,7 @@
 #'
 #' Fits a 2-equation FCIP demand system over an estimation window ending in
 #' `calibration_year` and returns capped elasticities (-2, 0) by
-#' disaggregation level using [fcip_demand_sys_estimate()]
+#' disaggregation level using `fcip_demand_sys_estimate()`
 #'
 #' @param calibration_year Integer. Last year of the estimation window.
 #' @param estimation_window Integer (>= 1). Number of years ending at `calibration_year`.
