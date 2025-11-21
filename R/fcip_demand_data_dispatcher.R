@@ -58,14 +58,18 @@ fcip_demand_data_prep_sob <- function(
   
   stopifnot(length(study_years) > 0)
   
-  # Download SOBTPU release 
-  df <- tempfile(fileext = ".rds")
-  download.file(
-    "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/sob/sobtpu_all.rds",
-    df, mode = "wb", quiet = TRUE)
-  df <- readRDS(df)
-  data.table::setDT(df)
+  temporary_dir <- tempdir()
   
+  # Download SOBTPU release 
+  piggyback::pb_download(
+    file = "sobtpu_all.rds",
+    dest = temporary_dir,
+    repo = "ftsiboe/USFarmSafetyNetLab",
+    tag  = "sob",
+    overwrite = TRUE)
+  df <- readRDS(file.path(temporary_dir,"sobtpu_all.rds"))
+  data.table::setDT(df)
+
   # Base filters 
   df <- df[commodity_year %in% study_years]
   df <- df[coverage_type_code %in% "A"]
@@ -169,14 +173,19 @@ fcip_demand_data_prep_sob <- function(
 #' @noRd
 fcip_demand_data_controls <- function(df) {
   
-  stopifnot(data.table::is.data.table(df))
+  temporary_dir <- tempdir()
+  
+  df <- data.table::as.data.table(df)
   
   # ADM commodity price
-  adm_price <- tempfile(fileext = ".rds")
-  download.file(
-    "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/adm_extracts/fcip_commodity_price.rds",
-    adm_price, mode = "wb", quiet = TRUE)
-  adm_price <- readRDS(adm_price)
+  piggyback::pb_download(
+    file = "fcip_commodity_price.rds",
+    dest = temporary_dir,
+    repo = "ftsiboe/USFarmSafetyNetLab",
+    tag  = "sob",
+    overwrite = TRUE)
+  adm_price <- readRDS(file.path(temporary_dir,"fcip_commodity_price.rds"))
+  data.table::setDT(adm_price)
   adm_price <- adm_price[, lapply(.SD, mean), by = intersect(names(df),names(adm_price)), .SDcols = c("projected_price","harvest_price")]
   df <- merge(df,adm_price,by = intersect(names(df),names(adm_price)),all.x = TRUE)
   rm(adm_price);gc()
@@ -216,11 +225,14 @@ fcip_demand_data_controls <- function(df) {
   df <- df[, c("projected_price","harvest_price") := NULL]
   
   # Instruments (tau and benchmark subsidy rates)
-  fcip_instruments <- tempfile(fileext = ".rds")
-  download.file(
-    "https://github.com/ftsiboe/USFarmSafetyNetLab/releases/download/reps/fcip_demand_instruments.rds",
-    fcip_instruments, mode = "wb", quiet = TRUE)
-  fcip_instruments <- readRDS(fcip_instruments)
+  piggyback::pb_download(
+    file = "fcip_commodity_price.rds",
+    dest = temporary_dir,
+    repo = "ftsiboe/USFarmSafetyNetLab",
+    tag  = "reps",
+    overwrite = TRUE)
+  fcip_instruments <- readRDS(file.path(temporary_dir,"fcip_demand_instruments.rds"))
+  data.table::setDT(fcip_instruments)
   fcip_instruments[,tau := tau_adm]
   fcip_instruments[tau %in% c(NA,Inf,-Inf,NaN,0),tau := tau_sob]
   
@@ -268,13 +280,8 @@ fcip_demand_data_controls <- function(df) {
 #' @noRd
 fcip_demand_data_reconcile_acreage <- function(df){
   
-  temporary_dir <- tools::R_user_dir("rfcipDemand", which = "cache")
-
-  if (!dir.exists(temporary_dir)) {
-    dir.create(temporary_dir, recursive = TRUE)
-  }
-  
-  stopifnot(data.table::is.data.table(df))
+  temporary_dir <- tempdir()
+  df <- data.table::as.data.table(df)
   
   # Build FSA planted acres by county-year
   crop_linker <- unique(as.data.frame(fsa_crop_linker)[c("crop_cd_fsa","crop_rma","crop_yr")])
@@ -377,7 +384,7 @@ fcip_demand_data_reconcile_acreage <- function(df){
 #' @noRd
 fcip_demand_data_finalize <- function(df){
   
-  stopifnot(data.table::is.data.table(df))
+  df <- data.table::as.data.table(df)
   
   # Required log filters 
   df <- df[!log(coverage_level_percent_aggregate)  %in% c(0, NA, Inf, -Inf, NaN)]
