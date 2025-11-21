@@ -182,7 +182,7 @@ fcip_demand_data_controls <- function(df) {
     file = "fcip_commodity_price.rds",
     dest = temporary_dir,
     repo = "ftsiboe/USFarmSafetyNetLab",
-    tag  = "sob",
+    tag  = "adm_extracts",
     overwrite = TRUE)
   adm_price <- readRDS(file.path(temporary_dir,"fcip_commodity_price.rds"))
   data.table::setDT(adm_price)
@@ -226,7 +226,7 @@ fcip_demand_data_controls <- function(df) {
   
   # Instruments (tau and benchmark subsidy rates)
   piggyback::pb_download(
-    file = "fcip_commodity_price.rds",
+    file = "fcip_demand_instruments.rds",
     dest = temporary_dir,
     repo = "ftsiboe/USFarmSafetyNetLab",
     tag  = "reps",
