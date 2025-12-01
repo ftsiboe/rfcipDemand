@@ -10,13 +10,13 @@ unlink(c("NAMESPACE","./R/helper_data.R",
          list.files("./data", full.names = TRUE),
          list.files("./man", full.names = TRUE)))
 
-list_function <- c(
-  "https://raw.githubusercontent.com/ftsiboe/USFarmSafetyNetLab/heads/main/data-raw/scripts/library/estimators/fixed_effect_model_data_prep.R",
-  "https://raw.githubusercontent.com/ftsiboe/USFarmSafetyNetLab/heads/main/R/build_internal_datasets.R"
-)
-
-for(i in list_function){
-  download.file(i, paste0("./R/",basename(i)), mode = "wb", quiet = TRUE)
+if(toupper(as.character(Sys.info()[["sysname"]])) %in% "WINDOWS"){
+  source( file.path(dirname(dirname(getwd())),"codeLibrary.R"))
+  list_function <- c(
+    file.path(codeLibrary,"estimators/fixed_effect_model_data_prep.R"),
+    file.path(codeLibrary,"miscellaneous/build_internal_datasets.R")
+  )
+  file.copy(from= list_function, to = "R/", overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
 }
 
 source("data-raw/scripts/run_internal_datasets_rfcipDemand.R")

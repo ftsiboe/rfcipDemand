@@ -5,7 +5,7 @@
 \alias{fcip_recodes_commodity_groupings}
 \title{fcip_recodes_commodity_groupings}
 \format{
-A data frame with 3572 rows and 10 columns covering 1997-2025.
+A data frame with 3668 rows and 10 columns covering 1997-2026.
 }
 \source{
 USDA-RMA, Actuarial Data Master - A00400 and A00420 supplemented data from legacy ADM files

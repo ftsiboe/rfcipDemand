@@ -5,7 +5,7 @@
 \alias{premium_subsidy_schedule}
 \title{premium_subsidy_schedule}
 \format{
-A data frame with 7522 rows and 7 columns covering 2001-2025.
+A data frame with 7883 rows and 7 columns covering 2001-2026.
 }
 \source{
 USDA-RMA, Actuarial Data Master supplemented data from legacy ADM files

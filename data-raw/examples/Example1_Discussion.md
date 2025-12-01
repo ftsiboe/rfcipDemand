@@ -71,7 +71,7 @@ kable(final_tbl,
 | State rental rate for land    |   -0.059 (0.587)    |
 | Total protection response     |                     |
 | Paid premium rate             |  -0.195\* (0.116)   |
-| County planted acres          | 0.304\*\*\* (0.053) |
+| County planted acres          | 0.305\*\*\* (0.053) |
 | Expected crop price           |    0.331 (0.354)    |
 | State rental rate for land    |   -0.060 (0.644)    |
 | Covariance matrix             |                     |
@@ -79,10 +79,10 @@ kable(final_tbl,
 | σ_θθ                          |        0.015        |
 | σ_θa                          |        0.047        |
 | Additional statistics         |                     |
-| Number of observations        |     1036051.000     |
+| Number of observations        |     1036053.000     |
 | Number of insurance pools     |     155710.000      |
 | J-test                        |        0.000        |
-| Weak-instrument: F-statistics |       840.252       |
+| Weak-instrument: F-statistics |       840.314       |
 
 ``` r
 
@@ -121,8 +121,8 @@ acreage by nearly -0.166%, though the standard error is large and the
 estimate is not significant.
 
 For the total protection response, county planted acres remain a key
-driver (0.304), indicating that scale continues to push overall demand
-upward by roughly 0.304% for each 1% increase in planted acres. The
+driver (0.305), indicating that scale continues to push overall demand
+upward by roughly 0.305% for each 1% increase in planted acres. The
 premium rate reduces total protection (-0.195), implying that a 1%
 increase in paid premiums reduces total protection demand by about
 -0.195%, though again, the estimate is not statistically precise.
