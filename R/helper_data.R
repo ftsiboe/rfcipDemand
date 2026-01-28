@@ -31,7 +31,7 @@
 #' @name nassSurveyMYAprice
 #' @title nassSurveyMYAprice
 #' @description A combined dataset for nassSurveyMYAprice
-#' @format A data frame with 31139 rows and 7 columns covering 1866-2024.
+#' @format A data frame with 33078 rows and 7 columns covering 1866-2024.
 #' @source USDA NASS Quick Stats
 #' @usage data(nassSurveyMYAprice)
 "nassSurveyMYAprice"
@@ -59,35 +59,42 @@
 #' @name fcip_recodes_commodity_groupings
 #' @title fcip_recodes_commodity_groupings
 #' @description A combined dataset for fcip_recodes_commodity_groupings
-#' @format A data frame with 3668 rows and 10 columns covering 1997-2026.
+#' @format A data frame with 3617 rows and 10 columns covering 1997-2026.
 #' @source USDA-RMA, Actuarial Data Master - A00400 and A00420 supplemented data from legacy ADM files
 #' @usage data(fcip_recodes_commodity_groupings)
 "fcip_recodes_commodity_groupings"
 #' @name fcip_recodes_insurance_plan
 #' @title fcip_recodes_insurance_plan
 #' @description A combined dataset for fcip_recodes_insurance_plan
-#' @format A data frame with 808 rows and 10 columns covering 1989-2026.
+#' @format A data frame with 802 rows and 10 columns covering 1989-2026.
 #' @source USDA-RMA, Actuarial Data Master - A00460 supplemented data from legacy ADM files
 #' @usage data(fcip_recodes_insurance_plan)
 "fcip_recodes_insurance_plan"
 #' @name fcip_recodes_practice
 #' @title fcip_recodes_practice
 #' @description A combined dataset for fcip_recodes_practice
-#' @format A data frame with 29562 rows and 8 columns covering 1997-2026.
+#' @format A data frame with 29848 rows and 8 columns covering 1997-2026.
 #' @source USDA-RMA, Actuarial Data Master - A00510 supplemented data from legacy ADM files
 #' @usage data(fcip_recodes_practice)
 "fcip_recodes_practice"
 #' @name fcip_recodes_type
 #' @title fcip_recodes_type
 #' @description A combined dataset for fcip_recodes_type
-#' @format A data frame with 232729 rows and 7 columns covering 1999-2025.
+#' @format A data frame with 234220 rows and 7 columns covering 1999-2026.
 #' @source Generated internally, using harmonize_crop_type_codes()
 #' @usage data(fcip_recodes_type)
 "fcip_recodes_type"
 #' @name premium_subsidy_schedule
 #' @title premium_subsidy_schedule
 #' @description A combined dataset for premium_subsidy_schedule
-#' @format A data frame with 7883 rows and 7 columns covering 2001-2026.
+#' @format A data frame with 7951 rows and 7 columns covering 2001-2026.
 #' @source USDA-RMA, Actuarial Data Master supplemented data from legacy ADM files
 #' @usage data(premium_subsidy_schedule)
 "premium_subsidy_schedule"
+#' @name prevented_planting_adm
+#' @title prevented_planting_adm
+#' @description A combined dataset for prevented_planting_adm
+#' @format A data frame with 252605 rows and 10 columns covering 2011-2026.
+#' @source USDA-RMA, Actuarial Data Master supplemented data from legacy ADM files
+#' @usage data(prevented_planting_adm)
+"prevented_planting_adm"
