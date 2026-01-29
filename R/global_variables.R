@@ -28,3 +28,42 @@ global_variables <-  strsplit(
       ",
   "\\s+"
 )
+
+
+#' Insurance pool identifier fields
+#'
+#' A character vector of column names that together define a unique insurance
+#' pool in the Federal Crop Insurance Program (FCIP).
+#'
+#' @details
+#' Insurance pools represent the most granular level of rate making within FCIP.
+#' Each pool is uniquely identified by the combination of:
+#' \itemize{
+#'   \item \strong{state_code}: State FIPS code
+#'   \item \strong{county_code}: County FIPS code
+#'   \item \strong{commodity_code}: Crop commodity code
+#'   \item \strong{type_code}: Crop type (e.g., grain vs. silage)
+#'   \item \strong{practice_code}: Production practice (e.g., irrigated, organic)
+#' }
+#'
+#' @format A \code{character} vector of field names.
+#' @return A \code{character} vector specifying the columns used to define
+#'   each FCIP insurance pool.
+#' @examples
+#' \dontrun{
+#' # Default insurance pool fields
+#' FCIP_INSURANCE_POOL
+#'
+#' # Override to a subset of the original fields
+#' rFarmPolicySim:::FCIP_INSURANCE_POOL <- c(
+#'   "state_code", "county_code", "commodity_code"
+#' )
+#'}
+#' @export
+FCIP_INSURANCE_POOL <- c(
+  "state_code",
+  "county_code",
+  "commodity_code",
+  "type_code",
+  "practice_code"
+)

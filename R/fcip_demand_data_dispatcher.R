@@ -386,15 +386,25 @@ fcip_demand_data_finalize <- function(df){
   
   df <- data.table::as.data.table(df)
   
+  # df <- readRDS("C:/Users/ftsib/Dropbox (Personal)/GitHub/my_packages/USFarmSafetyNetLab/data-raw/release/reps/fcip_demand_instruments.rds")
+  # 
+  # summaryBy(tau_sob + tau_adm + tau_final+subsidy_rate_65 +
+  #             subsidy_rate_75 ~ commodity_year,data=df, FUN = max, na.rm=TRUE)
+  # 
+  
+  # summaryBy(coverage_level_percent_aggregate+net_reporting_level_amount+
+  #             subsidy_per_premium + premium_per_liability + tau + subsidy_rate_65 + 
+  #             subsidy_rate_75 + county_acreage ~ commodity_year,data=df, FUN = max, na.rm=TRUE)
+  
   # Required log filters 
-  df <- df[!log(coverage_level_percent_aggregate)  %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(net_reporting_level_amount)        %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(subsidy_per_premium)               %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(premium_per_liability)             %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(tau)                               %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(subsidy_rate_65)                   %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(subsidy_rate_75)                   %in% c(0, NA, Inf, -Inf, NaN)]
-  df <- df[!log(county_acreage)                    %in% c(0, NA, Inf, -Inf, NaN)]
+  df <- df[!log(coverage_level_percent_aggregate)  %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(net_reporting_level_amount)        %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(subsidy_per_premium)               %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(premium_per_liability)             %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(subsidy_rate_65)                   %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(subsidy_rate_75)                   %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(county_acreage)                    %in% c(NA, Inf, -Inf, NaN)]
+  df <- df[!log(tau)                               %in% c(NA, Inf, -Inf, NaN)]
   
   # Crop support thresholds 
   available_years <- length(unique(df$commodity_year))

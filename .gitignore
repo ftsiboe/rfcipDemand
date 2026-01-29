@@ -10,3 +10,5 @@ data-raw/*
 !data-raw/*.R
 !data-raw/scripts/
 !data-raw/examples/
+!data-raw/replications/
+data-raw/replications/fcip_demand_response
