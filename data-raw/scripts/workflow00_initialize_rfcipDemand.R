@@ -42,8 +42,22 @@ devtools::build_manual(path = getwd())
 # devtools::test()
 devtools::check()
 
-df <- fcip_demand_data_dispatcher(
-  study_years = 2001:2025,
+data <- fcip_demand_data_dispatcher(
+  study_years = 2001:as.numeric(format(Sys.Date(),"%Y")),
   identifiers = c("commodity_year", "state_code","county_code","commodity_code","type_code",
                   "practice_code", "insurance_plan_code", "unit_structure_code"))
 length(unique(fcip_recodes_commodity_groupings$commodity_name))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

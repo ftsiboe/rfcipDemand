@@ -7,6 +7,7 @@ dir_data_release <- file.path(gsub("rfcipDemand","USFarmSafetyNetLab",getwd()),"
 
 build_internal_datasets(
   source_files = c(
+    list.files("data-raw/internal_data" ,full.names = T,pattern = ".rds$"),
     list.files(paste0(dir_data_release,"/fsa") ,full.names = T,pattern = ".rds$"),
     #list.files(paste0(dir_data_release,"/ice") ,full.names = T,pattern = ".rds$"),
     list.files(paste0(dir_data_release,"/nass"),full.names = T,pattern = ".rds$"),

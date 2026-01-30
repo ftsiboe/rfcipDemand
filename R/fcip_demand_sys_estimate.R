@@ -680,8 +680,9 @@ fcip_demand_elasticities_lavaan <- function(
     tilda_gamma ~ 1
     tilda_theta ~ 1
   '
-  
-  ineq <- "b1 < 0\nb2 < 0\nb1 + b2 + b1*b2 < 0"
+  ineq <- paste0("b1 < ",elasticity_limits$gamma[1],
+                 "\nb2 < ",elasticity_limits$theta[2],
+                 "\nb1 + b2 + b1*b2 < ",elasticity_limits$total[3])
   
   fit <- lavaan::sem(
     model         = model,
