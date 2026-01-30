@@ -5,7 +5,7 @@
 \alias{fsa_crop_linker}
 \title{Simulator Helper Datasets}
 \format{
-A data frame with 8778 rows and 8 columns covering Inf--Inf.
+A data frame with 4389 rows and 8 columns covering Inf--Inf.
 }
 \source{
 Internal innovation

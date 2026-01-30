@@ -228,8 +228,8 @@ fcip_demand_data_controls <- function(df) {
   piggyback::pb_download(
     file = "fcip_demand_instruments.rds",
     dest = temporary_dir,
-    repo = "ftsiboe/USFarmSafetyNetLab",
-    tag  = "reps",
+    repo = "ftsiboe/rfcipDemand",
+    tag  = "instruments",
     overwrite = TRUE)
   fcip_instruments <- readRDS(file.path(temporary_dir,"fcip_demand_instruments.rds"))
   data.table::setDT(fcip_instruments)

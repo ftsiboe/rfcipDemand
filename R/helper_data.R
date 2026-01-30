@@ -3,7 +3,7 @@
 #' @name fsa_crop_linker
 #' @title fsa_crop_linker
 #' @description A combined dataset for fsa_crop_linker
-#' @format A data frame with 8778 rows and 8 columns covering Inf--Inf.
+#' @format A data frame with 4389 rows and 8 columns covering Inf--Inf.
 #' @source Internal innovation
 #' @usage data(fsa_crop_linker)
 "fsa_crop_linker"
