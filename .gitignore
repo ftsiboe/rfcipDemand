@@ -4,7 +4,6 @@
 .RData
 .Ruserdata
 rfcipDemand.Rproj
-job_*.sbatch
 slurm-*.out
 data-raw/*
 !data-raw/*.R
