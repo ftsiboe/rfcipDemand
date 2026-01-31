@@ -44,14 +44,14 @@ model <- list(
 # Estimate demand system
 res <- fcip_demand_sys_estimate(model = model, data = data)
 
-elasticity_limits <- res[coef %in% "tilda_rate"]
+fcip_elasticity_limits <- res[coef %in% "tilda_rate"]
 
-elasticity_limits <- data.table(
-  gamma = elasticity_limits[demand %in% "gamma"][["Estimate"]]*0.5,
-  theta = elasticity_limits[demand %in% "theta"][["Estimate"]]*0.5,
-  total = elasticity_limits[demand %in% "total"][["Estimate"]]*0.5)
+fcip_elasticity_limits <- data.table(
+  gamma = fcip_elasticity_limits[demand %in% "gamma"][["Estimate"]]*0.5,
+  theta = fcip_elasticity_limits[demand %in% "theta"][["Estimate"]]*0.5,
+  total = fcip_elasticity_limits[demand %in% "total"][["Estimate"]]*0.5)
 
-elasticity_limits[, data_source:= "Elasticity limits determined as 50% of the magnitude of the program level elasticities"]
+fcip_elasticity_limits[, data_source:= "Elasticity limits determined as 50% of the magnitude of the program level elasticities"]
 
-saveRDS(elasticity_limits,file="data-raw/internal_data/elasticity_limits.rds")
+saveRDS(fcip_elasticity_limits,file="data-raw/internal_data/fcip_elasticity_limits.rds")
 

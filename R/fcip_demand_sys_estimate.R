@@ -641,14 +641,15 @@ fcip_demand_sys_run <- function(data, fields) {
 #' @param data data.frame with cols: instr_rate, tilda_rate, tilda_gamma, tilda_theta
 #' @param estimator "ML" or "MLR" (default "MLR" = robust SE/tests)
 #' @param missing   "fiml" or "listwise" (default "fiml")
+#' @param control a list of control parameters. see \code{\link{rfcipDemand_controls}}.
 #' @return A data.table of parameter estimates and logical convergence flag
 #' @import data.table
 #' @export
 fcip_demand_elasticities_lavaan <- function(
     data,
     estimator = c("ML", "MLR"),
-    missing   = c("fiml", "listwise")
-){
+    missing   = c("fiml", "listwise"),
+    control = rfcipDemand_controls()){
   # required columns
   need <- c("instr_rate", "tilda_rate", "tilda_gamma", "tilda_theta")
   miss <- setdiff(need, names(data))
@@ -680,9 +681,9 @@ fcip_demand_elasticities_lavaan <- function(
     tilda_gamma ~ 1
     tilda_theta ~ 1
   '
-  ineq <- paste0("b1 < ",elasticity_limits$gamma[1],
-                 "\nb2 < ",elasticity_limits$theta[2],
-                 "\nb1 + b2 + b1*b2 < ",elasticity_limits$total[3])
+  ineq <- paste0("b1 < ",control$elasticity_limits$gamma[1],
+                 "\nb2 < ",control$elasticity_limits$theta[2],
+                 "\nb1 + b2 + b1*b2 < ",control$elasticity_limits$total[3])
   
   fit <- lavaan::sem(
     model         = model,
@@ -757,7 +758,7 @@ fcip_demand_elasticities_lavaan <- function(
 #'   elasticities via a constrained SEM (lavaan) and, where applicable, replace
 #'   positive elasticity estimates with constrained ones. See **Constrained
 #'   elasticities (optional)**.
-#'   
+#' @param control a list of control parameters. see \code{\link{rfcipDemand_controls}}.
 #' @details
 #' **Inputs and preprocessing**
 #' - `model$outcome` must be a character vector of length 2 giving the two
@@ -799,7 +800,10 @@ fcip_demand_elasticities_lavaan <- function(
 #' @importFrom doBy summaryBy
 #' @export
 fcip_demand_sys_estimate <- function(
-    model, data, constrained_elasticities = FALSE){
+    model, 
+    data, 
+    constrained_elasticities = FALSE,
+    control = rfcipDemand_controls()){
   
   stopifnot(all(c("outcome","endogenous","included","disag","FE") %in% names(model)))
   
@@ -858,7 +862,7 @@ fcip_demand_sys_estimate <- function(
           # i <- "1"
           pd <- fcip_demand_sys_prep(data = data[data[[disag]] %in% i, , drop = FALSE], fields = fields)
           pt <- fcip_demand_sys_partial(data = pd$data, fields = fields, partial_override = pd$partial)$data
-          pe <- fcip_demand_elasticities_lavaan(data = pt,estimator = "MLR", missing   = "listwise")
+          pe <- fcip_demand_elasticities_lavaan(data = pt,estimator = "MLR", missing   = "listwise", control = control)
           pe[,endogenous := fields$endogenous]
           pe[,FE := fields$FE]
           pe[,name := fields$name]

@@ -1,12 +1,12 @@
 #' @title Simulator Helper Datasets
 
-#' @name elasticity_limits
-#' @title elasticity_limits
-#' @description A combined dataset for elasticity_limits
+#' @name fcip_elasticity_limits
+#' @title fcip_elasticity_limits
+#' @description A combined dataset for fcip_elasticity_limits
 #' @format A data frame with 1 rows and 4 columns covering Inf--Inf.
 #' @source Elasticity limits determined as 50% of the magnitude of the program level elasticities
-#' @usage data(elasticity_limits)
-"elasticity_limits"
+#' @usage data(fcip_elasticity_limits)
+"fcip_elasticity_limits"
 #' @name fsa_crop_linker
 #' @title fsa_crop_linker
 #' @description A combined dataset for fsa_crop_linker

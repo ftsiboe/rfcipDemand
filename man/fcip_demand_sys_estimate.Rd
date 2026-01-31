@@ -4,7 +4,12 @@
 \alias{fcip_demand_sys_estimate}
 \title{System estimator (modular wrapper; preserves original outputs)}
 \usage{
-fcip_demand_sys_estimate(model, data, constrained_elasticities = FALSE)
+fcip_demand_sys_estimate(
+  model,
+  data,
+  constrained_elasticities = FALSE,
+  control = rfcipDemand_controls()
+)
 }
 \arguments{
 \item{model}{List specifying the system; required elements are:
@@ -30,6 +35,8 @@ Optional elements:
 elasticities via a constrained SEM (lavaan) and, where applicable, replace
 positive elasticity estimates with constrained ones. See \strong{Constrained
 elasticities (optional)}.}
+
+\item{control}{a list of control parameters. see \code{\link{rfcipDemand_controls}}.}
 }
 \value{
 A \code{data.table} aggregating results across all disaggregation levels.

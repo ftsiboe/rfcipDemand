@@ -25,7 +25,7 @@ global_variables <-  strsplit(
     state_cd state_code statisticcat_desc subsidy_amount subsidy_bins Estimate_lavaan FE constrained level name
     subsidy_per_premium subsidy_rate subsidy_rate_65 subsidy_rate_75 tau index_for_price_recived lhs op rent rhs
     tau_adm tau_c tau_sob total_premium_amount triger_level value Estimate 
-    elasticity_limits Estimates Pvalue StdError demand nassSurveyPriceRecivedIndex nassSurveyRentalRates
+    fcip_elasticity_limits Estimates Pvalue StdError demand nassSurveyPriceRecivedIndex nassSurveyRentalRates
       ",
   "\\s+"
 )

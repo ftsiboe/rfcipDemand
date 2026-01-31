@@ -7,7 +7,8 @@
 fcip_demand_elasticities_lavaan(
   data,
   estimator = c("ML", "MLR"),
-  missing = c("fiml", "listwise")
+  missing = c("fiml", "listwise"),
+  control = rfcipDemand_controls()
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ fcip_demand_elasticities_lavaan(
 \item{estimator}{"ML" or "MLR" (default "MLR" = robust SE/tests)}
 
 \item{missing}{"fiml" or "listwise" (default "fiml")}
+
+\item{control}{a list of control parameters. see \code{\link{rfcipDemand_controls}}.}
 }
 \value{
 A data.table of parameter estimates and logical convergence flag
