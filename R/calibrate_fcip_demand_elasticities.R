@@ -17,7 +17,8 @@
 #'   join on intersecting columns.
 #' @param disaggregate Optional character vector of grouping variables passed to
 #'   the estimator (e.g., `"commodity_code"` or `c("state","commodity_code")`).
-#'
+#' @param control a list of control parameters. see \code{\link{rfcipDemand_controls}}.
+#' 
 #' @return `data.table` with columns:
 #'   `disag`, `level`, `gamma_elasticity`, `theta_elasticity`.
 #'
@@ -36,7 +37,8 @@ calibrate_fcip_demand_elasticities <- function(
     estimation_window,
     data,
     drawn_pools = NULL,
-    disaggregate = NULL){
+    disaggregate = NULL,
+    control = rfcipDemand_controls()){
 
   # ensure data.table
   data <- data.table::as.data.table(data)
@@ -109,7 +111,8 @@ calibrate_fcip_demand_elasticities <- function(
       partial = c("county_acreage","rent","price","trend",
                   names(data)[grepl("^year_", names(data))])
     ),
-    data = data, constrained_elasticities = TRUE
+    data = data, constrained_elasticities = TRUE,
+    control = control
   )
 
   elast[Estimate > 0 , Estimate := 0]

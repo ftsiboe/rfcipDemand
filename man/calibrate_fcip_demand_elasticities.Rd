@@ -9,7 +9,8 @@ calibrate_fcip_demand_elasticities(
   estimation_window,
   data,
   drawn_pools = NULL,
-  disaggregate = NULL
+  disaggregate = NULL,
+  control = rfcipDemand_controls()
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ join on intersecting columns.}
 
 \item{disaggregate}{Optional character vector of grouping variables passed to
 the estimator (e.g., \code{"commodity_code"} or \code{c("state","commodity_code")}).}
+
+\item{control}{a list of control parameters. see \code{\link{rfcipDemand_controls}}.}
 }
 \value{
 \code{data.table} with columns:
