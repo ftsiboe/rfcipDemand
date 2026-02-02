@@ -5,7 +5,7 @@
 \alias{nassSurveyMYAprice}
 \title{nassSurveyMYAprice}
 \format{
-A data frame with 33078 rows and 7 columns covering 1866-2024.
+A data frame with 33080 rows and 7 columns covering 1866-2024.
 }
 \source{
 USDA NASS Quick Stats

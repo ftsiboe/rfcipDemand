@@ -5,7 +5,7 @@
 \alias{nassSurveyPriceRecivedIndex}
 \title{nassSurveyPriceRecivedIndex}
 \format{
-A data frame with 35 rows and 3 columns covering 1990-2024.
+A data frame with 36 rows and 3 columns covering 1990-2025.
 }
 \source{
 USDA NASS Quick Stats

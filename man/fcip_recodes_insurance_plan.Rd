@@ -5,7 +5,7 @@
 \alias{fcip_recodes_insurance_plan}
 \title{fcip_recodes_insurance_plan}
 \format{
-A data frame with 802 rows and 10 columns covering 1989-2026.
+A data frame with 815 rows and 10 columns covering 1989-2026.
 }
 \source{
 USDA-RMA, Actuarial Data Master - A00460 supplemented data from legacy ADM files

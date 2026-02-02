@@ -5,7 +5,7 @@
 \alias{fcip_recodes_type}
 \title{fcip_recodes_type}
 \format{
-A data frame with 234220 rows and 7 columns covering 1999-2026.
+A data frame with 234500 rows and 7 columns covering 1999-2026.
 }
 \source{
 Generated internally, using harmonize_crop_type_codes()
