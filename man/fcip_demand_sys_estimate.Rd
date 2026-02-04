@@ -64,8 +64,7 @@ outcome column names in \code{data}. Internally these are mapped to
 \code{"full_sample"} key is created.
 \item The disaggregation key is coerced to \code{character}.
 \item For each level of \code{model$disag}, the function keeps only levels that have
-\strong{at least 30 observations per \code{commodity_year}} (computed via
-\code{doBy::summaryBy}). Levels failing this threshold are dropped.
+\strong{at least 30 observations per \code{commodity_year}}. Levels failing this threshold are dropped.
 }
 
 \strong{Per-level estimation}

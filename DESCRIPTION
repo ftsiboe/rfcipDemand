@@ -21,7 +21,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Depends: R (>= 4.1.0)
-Imports: rfsa, data.table, systemfit, sandwich, doBy, car, plyr, usmap, stats, utils, tidyr, stringr
+Imports: rfsa, data.table, systemfit, sandwich, car, plyr, usmap, stats, utils, tidyr, stringr
 Remotes: github::UrbanInstitute/urbnmapr, github::dylan-turner25/rfsa, github::JanMarvin/nlsur
 Suggests: knitr, rmarkdown, tibble, dplyr, purrr, readr, lavaan, piggyback, testthat (>= 3.0.0)
 LazyData: true

@@ -768,8 +768,7 @@ fcip_demand_elasticities_lavaan <- function(
 #'   `"full_sample"` key is created.
 #' - The disaggregation key is coerced to `character`.
 #' - For each level of `model$disag`, the function keeps only levels that have
-#'   **at least 30 observations per `commodity_year`** (computed via
-#'   `doBy::summaryBy`). Levels failing this threshold are dropped.
+#'   **at least 30 observations per `commodity_year`**. Levels failing this threshold are dropped.
 #'
 #' **Per-level estimation**
 #' For each retained level, the function calls internal helpers
@@ -797,7 +796,6 @@ fcip_demand_elasticities_lavaan <- function(
 #' @return A `data.table` aggregating results across all disaggregation levels.
 #'   The column set depends on `constrained` (see **Returned shape**).
 #' @import data.table
-#' @importFrom doBy summaryBy
 #' @export
 fcip_demand_sys_estimate <- function(
     model, 
@@ -833,11 +831,8 @@ fcip_demand_sys_estimate <- function(
   data[[disag]] <- as.character(data[[disag]])
   
   # Build levels with >= 30 obs per commodity_year
-  disagMap <- doBy::summaryBy(list("commodity_year", disag), data = data, FUN = length)
-  stopifnot("commodity_year.length" %in% names(disagMap))
-  disagMap <- disagMap[disagMap[["commodity_year.length"]] >= 30, , drop = FALSE]
-  
-  data   <- data[data[[disag]] %in% disagMap[[disag]], , drop = FALSE]
+  disagMap <- data[,.N,by = c("commodity_year", disag)][N >= 30]
+  data     <- data[data[[disag]] %in% disagMap[[disag]], , drop = FALSE]
 
   fields <- list(outcome=outcome, endogenous=endogenous, included=included,
                  excluded=excluded, partial=partial, FE=model$FE,
