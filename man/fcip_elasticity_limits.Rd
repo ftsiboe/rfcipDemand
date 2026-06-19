@@ -3,9 +3,9 @@
 \docType{data}
 \name{fcip_elasticity_limits}
 \alias{fcip_elasticity_limits}
-\title{Simulator Helper Datasets}
+\title{rfcipDemand Helper Datasets}
 \format{
-A data frame with 1 rows and 4 columns covering Inf--Inf.
+A data frame with 1 rows and 4 columns covering NA-NA.
 }
 \source{
 Elasticity limits determined as 50\% of the magnitude of the program level elasticities

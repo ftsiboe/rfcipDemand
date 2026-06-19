@@ -259,15 +259,10 @@ fcip_demand_data_controls <- function(df) {
 #' Reconcile county acreage from FSA and NASS
 #'
 #' @description
-#' Builds county-year planted acres from FSA (`fsaCropAcreageCC` joined via `fsa_crop_linker`)
+#' Builds county-year planted acres from FSA (`fsa_acreage_data_full`)
 #' and merges NASS county series (planted, bearing, harvested). Sets `county_acreage`
 #' choosing the first non-missing in the order: FSA planted - NASS planted - NASS bearing - NASS harvested. Intermediate columns are dropped.
-#'
-#' @section Data sources:
-#' - Package data: `fsaCropAcreageCC` (loaded via `data(fsaCropAcreageCC)`)
-#' - Linker: `fsa_crop_linker` (columns: `crop_cd_fsa`, `crop`, `crop_yr`)
-#' - Release download: `nass_extracts/nass_production_data.rds`
-#'
+#' 
 #' @param df A `data.table` from `fcip_demand_data_controls()'.
 #'
 #' @return The same `data.table` with a single `county_acreage` column and without
@@ -282,38 +277,21 @@ fcip_demand_data_reconcile_acreage <- function(df){
   
   temporary_dir <- tempdir()
   df <- data.table::as.data.table(df)
-  
-  # Build FSA planted acres by county-year
-  crop_linker <- unique(as.data.frame(fsa_crop_linker)[c("crop_cd_fsa","crop_rma","crop_yr")])
-  names(crop_linker) <- c("crop_cd","commodity_name","crop_yr")
-  crop_linker <- data.table::as.data.table(crop_linker)
-  crop_linker <- crop_linker[!crop_cd %in% NA]
 
   piggyback::pb_download(
-    file = "fsaCropAcreageData.rds",
+    file = "fsa_acreage_data_full.rds",
     dest = temporary_dir,
     repo = "ftsiboe/USFarmSafetyNetLab",
     tag  = "fsa_extracts",
     overwrite = TRUE)
-  fsa <- readRDS(file.path(temporary_dir,"fsaCropAcreageData.rds"))
+  fsa <- readRDS(file.path(temporary_dir,"fsa_acreage_data_full.rds"))
   data.table::setDT(fsa)
 
-  fsa <- fsa[crop_linker, on = c("crop_yr","crop_cd"), nomatch = 0,allow.cartesian=TRUE]
-  fsa[,fips := stringr::str_pad(fips,pad="0",5)]
-  fsa <- as.data.table(tidyr::separate(fsa,"fips",into=c("state_code","county_code"),sep=2))
-  fsa[,state_code := as.numeric(as.character(state_code))]
-  fsa[,county_code := as.numeric(as.character(county_code))]
   fsa <- fsa[, .(fsa_planted_acres = sum(planted_acres, na.rm = TRUE)),
-             by = .(crop_yr, state_code, county_code, commodity_name)]
-  data.table::setnames(fsa,old = c("crop_yr"),new = c("commodity_year"))
-  
-  # unique(fsa$commodity_name)
-  # unique(df$commodity_code)
-  
-  #table(fsa$commodity_name,fsa$commodity_year)
-  
+             by = c("commodity_year","commodity_code","state_code","county_code")]
+
   df <- merge(df, fsa, by = c("commodity_year","state_code","county_code","commodity_name"), all.x = TRUE)
-  rm(fsa,crop_linker); gc()
+  rm(fsa); gc()
   
   # NASS county series (planted/bearing/harvested)
   
