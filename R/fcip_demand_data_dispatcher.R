@@ -290,7 +290,7 @@ fcip_demand_data_reconcile_acreage <- function(df){
   fsa <- fsa[, .(fsa_planted_acres = sum(planted_acres, na.rm = TRUE)),
              by = c("commodity_year","commodity_code","state_code","county_code")]
 
-  df <- merge(df, fsa, by = c("commodity_year","state_code","county_code","commodity_name"), all.x = TRUE)
+  df <- merge(df, fsa, by = c("commodity_year","state_code","county_code","commodity_code"), all.x = TRUE)
   rm(fsa); gc()
   
   # NASS county series (planted/bearing/harvested)

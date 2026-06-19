@@ -59,30 +59,30 @@ kable(final_tbl,
 |:------------------------------|:-------------------:|
 | Coverage level                |                     |
 | (Intercept)                   |   -0.000 (0.003)    |
-| Paid premium rate             | -0.035\*\* (0.014)  |
+| Paid premium rate             | -0.030\*\* (0.012)  |
 | County planted acres          |   -0.002 (0.002)    |
-| Expected crop price           |   -0.011 (0.019)    |
-| State rental rate for land    |   -0.001 (0.072)    |
+| Expected crop price           |   -0.012 (0.021)    |
+| State rental rate for land    |   -0.001 (0.071)    |
 | Insured acres                 |                     |
-| (Intercept)                   |   -0.000 (0.050)    |
-| Paid premium rate             |   -0.166 (0.114)    |
-| County planted acres          | 0.307\*\*\* (0.052) |
-| Expected crop price           |    0.346 (0.340)    |
-| State rental rate for land    |   -0.059 (0.587)    |
+| (Intercept)                   |    0.000 (0.047)    |
+| Paid premium rate             |   -0.145 (0.104)    |
+| County planted acres          | 0.366\*\*\* (0.042) |
+| Expected crop price           |    0.350 (0.380)    |
+| State rental rate for land    |   -0.039 (0.620)    |
 | Total protection response     |                     |
-| Paid premium rate             |  -0.195\* (0.116)   |
-| County planted acres          | 0.305\*\*\* (0.053) |
-| Expected crop price           |    0.331 (0.354)    |
-| State rental rate for land    |   -0.060 (0.644)    |
+| Paid premium rate             |   -0.171 (0.106)    |
+| County planted acres          | 0.364\*\*\* (0.043) |
+| Expected crop price           |    0.334 (0.395)    |
+| State rental rate for land    |   -0.040 (0.676)    |
 | Covariance matrix             |                     |
-| σ_aa                          |        3.858        |
+| σ_aa                          |        3.946        |
 | σ_θθ                          |        0.015        |
 | σ_θa                          |        0.047        |
 | Additional statistics         |                     |
-| Number of observations        |     1036053.000     |
-| Number of insurance pools     |     155710.000      |
+| Number of observations        |     1198590.000     |
+| Number of insurance pools     |     171466.000      |
 | J-test                        |        0.000        |
-| Weak-instrument: F-statistics |       840.314       |
+| Weak-instrument: F-statistics |       318.628       |
 
 ``` r
 
@@ -105,8 +105,8 @@ parentheses are clustered by insurance pool and year.</sub>
 The results highlight distinct responses across the intensive and
 extensive margins of crop insurance demand. At the intensive margin
 (coverage level), the producer-paid premium rate enters with the
-expected negative sign (-0.035), implying that a 1% increase in the
-premium rate is associated with a -0.035% decrease in chosen coverage
+expected negative sign (-0.03), implying that a 1% increase in the
+premium rate is associated with a -0.03% decrease in chosen coverage
 levels. However, the effect is statistically insignificant, reflecting
 the limited responsiveness of coverage choices to cost signals. Other
 covariates, including county planted acres, crop price, and rental
@@ -114,25 +114,25 @@ rates, are similarly imprecise and not distinguishable from zero.
 
 At the extensive margin (insured acres), scale effects dominate. County
 planted acres exhibit a positive and statistically significant
-coefficient (0.307), meaning that a 1% increase in planting area raises
-insured acreage by about 0.307%. The premium rate again shows a negative
-effect (-0.166), suggesting a 1% increase in rates reduces insured
-acreage by nearly -0.166%, though the standard error is large and the
+coefficient (0.366), meaning that a 1% increase in planting area raises
+insured acreage by about 0.366%. The premium rate again shows a negative
+effect (-0.145), suggesting a 1% increase in rates reduces insured
+acreage by nearly -0.145%, though the standard error is large and the
 estimate is not significant.
 
 For the total protection response, county planted acres remain a key
-driver (0.305), indicating that scale continues to push overall demand
-upward by roughly 0.305% for each 1% increase in planted acres. The
-premium rate reduces total protection (-0.195), implying that a 1%
+driver (0.364), indicating that scale continues to push overall demand
+upward by roughly 0.364% for each 1% increase in planted acres. The
+premium rate reduces total protection (-0.171), implying that a 1%
 increase in paid premiums reduces total protection demand by about
--0.195%, though again, the estimate is not statistically precise.
+-0.171%, though again, the estimate is not statistically precise.
 
 The covariance matrix provides additional insight. The positive
 cross-covariance (σ_θa = 0.047) indicates that unobserved factors
 increasing demand for coverage level also raise demand for insured
 acres, and vice versa. However, the relationship is asymmetric: the
-variance of insured acres (σ_aa = 3.858) dwarfs that of coverage level
-(σ_θθ = 3.858), suggesting that shocks to acreage drive most of the
+variance of insured acres (σ_aa = 3.946) dwarfs that of coverage level
+(σ_θθ = 3.946), suggesting that shocks to acreage drive most of the
 variation in joint demand.
 
 Overall, these estimates point to farm size (planted acres) as the most
