@@ -38,3 +38,7 @@ job_lcr_estimations.sbatch
 ^rfcipDemand_.*\.pdf$
 ^man/figures/
 
+^LICENSE$
+^CLA.md$
+^CONTRIBUTING.md$
+

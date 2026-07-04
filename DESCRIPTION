@@ -2,9 +2,11 @@ Package: rfcipDemand
 Type: Package
 Title: Estimate Federal Crop Insurance Program Demand Models
 Version: 0.0.0.9000
-Author: Francis Tsiboe [aut, cre] (<https://orcid.org/0000-0001-5984-1072>)
+Author: Francis Tsiboe [aut, cre] (<https://orcid.org/0000-0001-5984-1072>),
+    TERRA ANALYTICS LLC [cph, fnd]
 Maintainer: Francis Tsiboe <ftsiboe@hotmail.com>
 Creator: Francis Tsiboe
+Copyright: TERRA ANALYTICS LLC (Kansas, USA)
 Description: Tools to construct county–crop–practice–plan–unit panels from the
     USDA RMA Summary of Business (SOBTPU) and related sources, and to estimate
     FCIP demand systems with two-way cluster-robust covariance. The pipeline
@@ -13,7 +15,7 @@ Description: Tools to construct county–crop–practice–plan–unit panels fr
     and produces diagnostics including robust first-stage F-tests. Methods align
     with the empirical design in "The crop insurance demand response to premium
     subsidies Evidence from U.S. Agriculture" (Food Policy, 2023, 119(3)).
-License: GPL-3 + file LICENSE
+License: GPL-3
 URL: https://github.com/ftsiboe/rfcipDemand
 BugReports: https://github.com/ftsiboe/rfcipDemand/issues
 Encoding: UTF-8
