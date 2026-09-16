@@ -5,7 +5,6 @@ Version: 0.0.0.9000
 Author: Francis Tsiboe [aut, cre] (<https://orcid.org/0000-0001-5984-1072>),
     TERRA ANALYTICS LLC [cph, fnd]
 Maintainer: Francis Tsiboe <ftsiboe@hotmail.com>
-Creator: Francis Tsiboe
 Copyright: TERRA ANALYTICS LLC (Kansas, USA)
 Description: Tools to construct county–crop–practice–plan–unit panels from the
     USDA RMA Summary of Business (SOBTPU) and related sources, and to estimate
@@ -27,8 +26,3 @@ Imports: rfsa, data.table, systemfit, sandwich, car, plyr, usmap, stats, utils, 
 Remotes: github::UrbanInstitute/urbnmapr, github::dylan-turner25/rfsa, github::JanMarvin/nlsur
 Suggests: knitr, rmarkdown, tibble, dplyr, purrr, readr, lavaan, piggyback, testthat (>= 3.0.0)
 LazyData: true
-Cite-us: If you find it useful, please consider staring the repository and citing the following studies
-  - Tsiboe, F., & Turner, D. (2023). "The crop insurance demand response to premium subsidies - 
-    Evidence from U.S. Agriculture". Food Policy, 119(3). doi.org/10.1016/j.foodpol.2023.102505
-  - Tsiboe, F., & Turner, D. (2023). Econometric identification of crop insurance participation. 
-    Agricultural and Resource Economics Review. 52(3) 476-497. doi.org/10.1017/age.2023.13

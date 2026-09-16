@@ -1,0 +1,32 @@
+citHeader(
+  "To cite rfcipDemand in publications, please cite the package. It is developed and ",
+  "maintained by TERRA ANALYTICS LLC; citation is how that work stays visible."
+)
+
+bibentry(
+  bibtype = "Manual",
+  title   = "rfcipDemand: Estimate Federal Crop Insurance Program Demand Models",
+  author  = person("Francis", "Tsiboe",
+                   comment = c(ORCID = "0000-0001-5984-1072")),
+  year    = "2026",
+  note    = "R package version 0.0.0.9000. Copyright TERRA ANALYTICS LLC (Kansas, USA)",
+  url     = "https://github.com/ftsiboe/rfcipDemand"
+)
+
+bibentry(
+  bibtype = "Article",
+  title   = paste("The crop insurance demand response to premium subsidies:",
+                  "Evidence from U.S. Agriculture"),
+  author  = c(person("F.", "Tsiboe"), person("D.", "Turner")),
+  journal = "Food Policy", volume = "119", number = "3", year = "2023",
+  doi     = "10.1016/j.foodpol.2023.102505"
+)
+
+bibentry(
+  bibtype = "Article",
+  title   = "Econometric identification of crop insurance participation",
+  author  = c(person("F.", "Tsiboe"), person("D.", "Turner")),
+  journal = "Agricultural and Resource Economics Review",
+  volume  = "52", number = "3", pages = "476--497", year = "2023",
+  doi     = "10.1017/age.2023.13"
+)

@@ -283,3 +283,16 @@ Please see the [Code of Conduct](code_of_conduct.md).
 Questions or collaboration ideas?  
 Email **Francis Tsiboe** at [ftsiboe@hotmail.com](mailto:ftsiboe@hotmail.com).  
 ⭐ *Star this repository if you find it useful!*
+
+------------------------------------------------------------------------
+
+**🤝 Contributing & license** Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). All contributions require agreement to the project's [Contributor License Agreement](CLA.md): you keep ownership of your work, and the project keeps the flexibility to offer the package under additional license terms in the future. The package is released under [GPL-3](LICENSE). Copyright © 2025–2026 TERRA ANALYTICS LLC (Kansas, USA).
+
+------------------------------------------------------------------------
+
+**💼 Commercial use** GPL-3 is a copyleft license: if you distribute a product that
+incorporates this package, that product must be released under GPL-3 as well.
+If that does not fit your situation, or you need this work built, extended, or
+maintained to your schedule rather than to a research calendar, TERRA ANALYTICS
+LLC licenses it separately and takes on contract work. Write to Francis Tsiboe
+(<ftsiboe@hotmail.com>).
