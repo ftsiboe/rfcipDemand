@@ -41,5 +41,8 @@ cases via \code{data.table::fcase()}.
 \item \code{production_to_count = pmax(baseline_liability_per_acre - baseline_indemnity_per_acre, 0)}
 \item \code{adj_Liability_per_acre = (baseline_liability_per_acre / baseline_coverage_level) * coverage_level_percent}
 \item Indemnity cases (I1-I5) selected with \code{data.table::fcase()}.
+\item Adjusted indemnity is floored at 0 in the two cases that can go
+negative (coverage falls with a baseline loss; coverage rises with
+no baseline loss).
 }
 }
