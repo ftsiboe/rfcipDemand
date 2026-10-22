@@ -15,10 +15,10 @@ test_that("returns named list with correct lengths", {
 test_that("covers the five mutually exclusive indemnity cases", {
   # Vectorized inputs covering cases:
   # 1) baseline > alt, baseline indemnity == 0   -> adj indm = 0
-  # 2) baseline > alt, baseline indemnity >  0   -> adj indm = base indm - (base liab - adj liab)
+  # 2) baseline > alt, baseline indemnity >  0   -> adj indm = max(0, base indm - (base liab - adj liab))
   # 3) baseline == alt                           -> adj indm = base indm
   # 4) baseline < alt, baseline indemnity >  0   -> adj indm = adj liab - production_to_count
-  # 5) baseline < alt, baseline indemnity == 0   -> adj indm = adj liab - final_revenue_per_acre
+  # 5) baseline < alt, baseline indemnity == 0   -> adj indm = max(0, adj liab - final_revenue_per_acre)
   baseline_cov <- c(0.80, 0.80, 0.75, 0.70, 0.70)
   alt_cov      <- c(0.70, 0.70, 0.75, 0.80, 0.80)
   base_liab    <- rep(100, 5)
@@ -44,17 +44,54 @@ test_that("covers the five mutually exclusive indemnity cases", {
   exp_adj_indm <- c(
     # 1
     0,
-    # 2
-    base_indm[2] - (base_liab[2] - exp_adj_liab[2]),
+    # 2 (10 - 12.5 = -2.5 before the zero floor was added)
+    max(0, base_indm[2] - (base_liab[2] - exp_adj_liab[2])),
     # 3
     base_indm[3],
     # 4
     exp_adj_liab[4] - ptc[4],
     # 5
-    exp_adj_liab[5] - revenue_pa[5]
+    max(0, exp_adj_liab[5] - revenue_pa[5])
   )
   
   expect_equal(res$adj_Indemnity_per_acre, exp_adj_indm, tolerance = 1e-10)
+})
+
+test_that("adjusted indemnity is floored at zero", {
+  # Coverage falls 0.75 -> 0.70; liability drop (6.67) exceeds baseline indemnity (5)
+  res <- adjust_indemnity_liability_per_acre(
+    coverage_level_percent      = 0.70,
+    final_revenue_per_acre      = 0,
+    baseline_coverage_level     = 0.75,
+    baseline_liability_per_acre = 100,
+    baseline_indemnity_per_acre = 5
+  )
+  expect_equal(res$adj_Liability_per_acre, 100 / 0.75 * 0.70, tolerance = 1e-10)
+  expect_equal(res$adj_Indemnity_per_acre, 0)
+
+  # Coverage rises 0.70 -> 0.75; no baseline loss and revenue (700) exceeds new guarantee (428.57)
+  res <- adjust_indemnity_liability_per_acre(
+    coverage_level_percent      = 0.75,
+    final_revenue_per_acre      = 700,
+    baseline_coverage_level     = 0.70,
+    baseline_liability_per_acre = 400,
+    baseline_indemnity_per_acre = 0
+  )
+  expect_equal(res$adj_Liability_per_acre, 400 / 0.70 * 0.75, tolerance = 1e-10)
+  expect_equal(res$adj_Indemnity_per_acre, 0)
+})
+
+test_that("coverage falls with a remaining loss: indemnity unchanged by the floor", {
+  # 20 - (100 - 93.33) = 13.33
+  res <- adjust_indemnity_liability_per_acre(
+    coverage_level_percent      = 0.70,
+    final_revenue_per_acre      = 0,
+    baseline_coverage_level     = 0.75,
+    baseline_liability_per_acre = 100,
+    baseline_indemnity_per_acre = 20
+  )
+  expect_equal(res$adj_Indemnity_per_acre, 20 - (100 - 100 / 0.75 * 0.70), tolerance = 1e-10)
+  expect_gt(res$adj_Indemnity_per_acre, 0)
 })
 
 test_that("recycles scalars to vector length", {

@@ -16,6 +16,9 @@
 #'   \item \code{production_to_count = pmax(baseline_liability_per_acre - baseline_indemnity_per_acre, 0)}
 #'   \item \code{adj_Liability_per_acre = (baseline_liability_per_acre / baseline_coverage_level) * coverage_level_percent}
 #'   \item Indemnity cases (I1-I5) selected with \code{data.table::fcase()}.
+#'   \item Adjusted indemnity is floored at 0 in the two cases that can go
+#'         negative (coverage falls with a baseline loss; coverage rises with
+#'         no baseline loss).
 #' }
 #'
 #' @return A list with:
@@ -70,8 +73,9 @@ adjust_indemnity_liability_per_acre <- function(
     0,
 
     # Higher baseline coverage; baseline had indemnity = reduce by liability change
+    # (floored at 0: the liability drop can exceed the baseline indemnity)
     baseline_coverage_level >  coverage_level_percent & baseline_indemnity_per_acre >  0,
-    baseline_indemnity_per_acre - (baseline_liability_per_acre - adj_Liability_per_acre),
+    pmax(baseline_indemnity_per_acre - (baseline_liability_per_acre - adj_Liability_per_acre), 0),
 
     # Same coverage level : keep baseline indemnity
     baseline_coverage_level == coverage_level_percent,
@@ -82,8 +86,9 @@ adjust_indemnity_liability_per_acre <- function(
     adj_Liability_per_acre - production_to_count,
 
     # Lower baseline coverage; baseline had no indemnity = alt liability - revenue
+    # (floored at 0: revenue usually exceeds the new guarantee)
     baseline_coverage_level <  coverage_level_percent & baseline_indemnity_per_acre == 0,
-    adj_Liability_per_acre - final_revenue_per_acre,
+    pmax(adj_Liability_per_acre - final_revenue_per_acre, 0),
 
     # Fallback for any unmatched/NA cases
     default = NA_real_
