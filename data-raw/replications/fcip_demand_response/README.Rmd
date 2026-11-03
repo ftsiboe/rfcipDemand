@@ -1,0 +1,43 @@
+---
+title: "Crop insurance demand response"
+
+output:
+  github_document:
+    toc: false
+    toc_depth: 3
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include=FALSE}
+library(knitr)
+library(dplyr)
+library(devtools)
+load_all()
+```
+
+The folder provides data and replication codes for [The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture](https://doi.org/10.1016/j.foodpol.2023.102505)
+
+**Abstract:** Premium subsidies are a common policy tool to promote crop insurance participation in many countries. However, the relationship between subsidies and demand is not entirely obvious given the variation in the use of subsidies and crop insurance participation within the international crop insurance landscape. Focusing on the U.S. Federal Crop Insurance Program (FCIP) demand is modeled as a system of equations representing decisions at the intensive [coverage level] and extensive [net insured acres] margins. The model makes use of an identification strategy that leverages exogenous variation in government-set pricing policy to address potential sources of endogeneity. Applying the model to over one million insurance pool level FCIP observations spanning two decades (2001–2022) suggest an inelastic response at both extensive and intensive margins to changes in producer-paid premium rates with the response to premium rates becoming increasingly more elastic as subsidies decrease. These estimated elasticities are on the low end compared to previous literature, however, significant heterogeneity across commodity, production practices, policy type, and location are observed suggesting subsets of producers are likely to respond to changes in the cost of insurance in different ways.
+
+**Highlights:**
+
+ - Crop insurance at intensive [coverage level] and extensive [insured acres] margins modeled.
+ - Identification strategy leverages exogenous variation in government-set pricing policy.
+ - Demand response to changes in paid premium rate is inelastic at both margins.
+ - Demand response becomes increasingly more elastic as subsidies decrease.
+ - Significant observed heterogeneity in demand response across subsets of producers.
+
+
+The findings and conclusions in associated publications and their associated replication files and data provided in this repository are those of the author(s) and should not be construed to represent any official USDA or U.S. Government determination or policy. 
+
+For additional details, please contact Francis Tsiboe at ftsiboe@hotmail.com
+
+**📚 Citation:**
+If you find this repository useful, please star this project and cite our papers.
+
+Tsiboe, F., & Turner, D. (2023). [The crop insurance demand response to premium subsidies: Evidence from U.S. Agriculture](https://doi.org/10.1016/j.foodpol.2023.102505). Food Policy, 119, 102505.
+
+See the [LICENSE](../LICENSE) file in the repository's root for details.
+
+*Maintained by [ftsiboe](https://github.com/ftsiboe)*

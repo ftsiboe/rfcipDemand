@@ -5,7 +5,24 @@
 .Ruserdata
 rfcipDemand.Rproj
 slurm-*.out
+
+# Build outputs
+rfcipDemand_*.pdf
+rfcipDemand_*.tar.gz
+*.Rcheck/
+
+# data-raw: ignore everything except scripts, examples and the instrument
+# generator with its release files
 data-raw/*
-!data-raw/*.R
 !data-raw/scripts/
 !data-raw/examples/
+!data-raw/replications/
+data-raw/replications/**
+!data-raw/replications/**/
+!data-raw/replications/**/generate_fcip_instruments.R
+!data-raw/replications/crop_insurance_instruments/create_release.R
+!data-raw/replications/crop_insurance_instruments/README.Rmd
+!data-raw/replications/crop_insurance_instruments/README.md
+!data-raw/replications/crop_insurance_instruments/job_generate_fcip_instruments.sbatch
+!data-raw/replications/**/README.Rmd
+
