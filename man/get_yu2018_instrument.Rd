@@ -32,7 +32,7 @@ national subsidy-rate instruments at specified coverage levels,
 following Yu et al. (2018).
 }
 \seealso{
-Other FCIP instruments: 
-\code{\link{estimate_fcip_instruments}()}
+Other FCIP instruments:
+\code{\link[=estimate_fcip_instruments]{estimate_fcip_instruments()}}
 }
 \concept{FCIP instruments}

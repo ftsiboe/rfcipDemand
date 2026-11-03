@@ -22,7 +22,7 @@ piggyback::pb_new_release( repo = "ftsiboe/rfcipDemand", tag  = "instruments")
 
 # Upload. overwrite = TRUE ensures reruns replace existing assets.
 list_assets <- list.files("./data-raw/replications/crop_insurance_instruments", full.names = TRUE, recursive = TRUE)
-list_assets <- list_assets[! grepl("README|job_generate",list_assets)]
+list_assets <- list_assets[! grepl("README|job_generate|create_release",list_assets)]
 
 piggyback::pb_upload(list_assets,repo = "ftsiboe/rfcipDemand", tag  = "instruments",overwrite = TRUE)
 

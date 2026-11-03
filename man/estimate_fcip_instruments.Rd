@@ -58,7 +58,7 @@ add \code{commodity_year}, and return the result.
 }
 }
 \seealso{
-Other FCIP instruments: 
-\code{\link{get_yu2018_instrument}()}
+Other FCIP instruments:
+\code{\link[=get_yu2018_instrument]{get_yu2018_instrument()}}
 }
 \concept{FCIP instruments}
