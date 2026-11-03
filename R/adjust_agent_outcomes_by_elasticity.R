@@ -14,35 +14,46 @@
 #' }
 #'
 #' ## Price response
-#' Price response is applied using the percent change in price:
-#' \deqn{\%\Delta p = 100 \times \left(\frac{\text{alt}}{\text{base}} - 1\right),}
-#' and for any baseline quantity \eqn{q} with elasticity \eqn{e_q}:
+#' The elasticities are estimated with respect to the farmer-paid premium rate,
+#' so the price signal is the percent change in the farmer-paid rate,
+#' premium per liability times one minus the subsidy share:
+#' \deqn{\%\Delta p = 100 \times \left(\frac{r_{alt}(1 - s_{alt})}{r_{base}(1 - s_{base})} - 1\right),}
+#' where \eqn{s_{alt}} is \code{alternate_subsidy_per_premium} (defaults to the
+#' baseline share, in which case this equals the percent change in the total
+#' rate). For any baseline quantity \eqn{q} with elasticity \eqn{e_q}:
 #' \deqn{q_{\text{new}} = q_{\text{base}} \left[1 + \left(e_q \times \frac{\%\Delta p}{100}\right)\right].}
+#' If the baseline farmer-paid rate is zero (fully subsidized), there is no
+#' price signal and \code{price_change_pct} is \code{0}.
 #'
 #' ## Coverage adjustment
-#' Coverage is rounded to the nearest 0.05 grid and truncated to the range
-#' \eqn{(0, 0.85)}. Values less than 0.50 are set to \code{0} (i.e., no
-#' coverage). Coverage type code is set to \code{"A"} for buy-up coverage and
-#' \code{"C"} for CAT coverage. For CAT policies, scenario coverage levels at
-#' 0.50/0.55 are adjusted to reflect CAT rules.
+#' Buy-up coverage is rounded to the nearest 0.05 grid and capped at 0.85.
+#' A buy-up policy whose coverage falls below 0.50 moves to CAT: coverage type
+#' \code{"C"}, coverage level 0.50 at 55\% of the price, with the premium fully
+#' subsidized.
+#'
+#' **CAT policies never leave CAT.** Because CAT premium is fully subsidized,
+#' a baseline CAT policy does not respond to the price change: its coverage and
+#' insured acres stay at baseline under every assumption.
 #'
 #' Per-acre liability and indemnity are updated using
-#' \code{\link{adjust_indemnity_liability_per_acre}}.
+#' \code{\link{adjust_indemnity_liability_per_acre}}. Moves between CAT and buy-up
+#' rescale liability by the price election: CAT liability is 50\% coverage at
+#' 55\% of the price, so buy-up to CAT multiplies by 0.55.
 #'
 #' ## Optional schedules
 #' Coverage-specific scaling is possible via:
 #' \itemize{
 #'   \item \code{premium_subsidy_schedule}: length-8 numeric for coverage levels
-#'         \code{0.50, 0.55, ..., 0.85}. Multiplies the
-#'         \code{baseline_subsidy_per_premium} at the scenario coverage.
+#'         \code{0.50, 0.55, ..., 0.85}. Multiplies the subsidy share at the
+#'         scenario coverage, relative to \code{baseline_subsidy_percent}.
 #'   \item \code{rate_differential_schedule}: length-8 numeric for the same grid.
 #'         Multiplies the \code{alternate_premium_per_liability} at the scenario coverage.
 #' }
 #'
 #' ## Missing or zero inputs
-#' If either \code{insured_acres} or \code{coverage_level_percent} is \code{NA}
-#' or \code{0} after adjustment, both are reset to \code{0} and all dollar
-#' outcomes are set to \code{0}.
+#' If \code{insured_acres} is \code{NA} or \code{0}, or the coverage level is
+#' \code{NA}, after adjustment, coverage and acres are reset to \code{0} and all
+#' dollar outcomes are set to \code{0}.
 #'
 #' @param alternate_premium_per_liability Numeric. Alternative premium per dollar of liability.
 #' @param insured_acres_elasticity Numeric. Elasticity of insured acres w.r.t. price (percent basis).
@@ -52,7 +63,7 @@
 #' @param baseline_insured_acres Numeric. Baseline insured acres.
 #' @param baseline_liability_per_acre Numeric. Baseline liability per acre.
 #' @param baseline_premium_per_liability Numeric. Baseline premium per dollar of liability.
-#' @param baseline_subsidy_per_premium Numeric in (0,1). Subsidy share of total premium.
+#' @param baseline_subsidy_per_premium Numeric in \[0,1\]. Subsidy share of total premium.
 #' @param baseline_indemnity_per_acre Numeric. Baseline indemnity per acre.
 #' @param baseline_subsidy_percent Numeric. Baseline subsidy percent.
 #' @param baseline_rate_differential Numeric. Baseline rate differential factor.
@@ -60,11 +71,14 @@
 #' @param assumption Integer (0,1,2,3). Scenario selector (see above). Default \code{0}.
 #' @param premium_subsidy_schedule Optional numeric vector of length 8 corresponding to
 #'   coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
-#'   \code{baseline_subsidy_per_premium} at the scenario coverage. Defaults to 1's.
+#'   the subsidy share at the scenario coverage. Defaults to 1's.
 #' @param rate_differential_schedule Optional numeric vector of length 8 corresponding to
 #'   coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
 #'   \code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1's.
-#' 
+#' @param alternate_subsidy_per_premium Optional numeric in \[0,1\]. Subsidy share of
+#'   total premium in the scenario, at the baseline coverage level. Defaults to
+#'   \code{baseline_subsidy_per_premium} (no subsidy change).
+#'
 #' @return A list with elements:
 #' \describe{
 #'   \item{\code{coverage_type_code}}{Scenario coverage type (\code{"A"} or \code{"C"}).}
@@ -74,12 +88,12 @@
 #'   \item{\code{total_premium_amount}}{Total premium = liability * alt premium/liability.}
 #'   \item{\code{subsidy_amount}}{Subsidy = total premium * subsidy share.}
 #'   \item{\code{indemnity_amount}}{Total indemnity = acres * adjusted indemnity per acre.}
-#'   \item{\code{price_change_pct}}{Percent price change used for elasticity adjustments.}
+#'   \item{\code{price_change_pct}}{Percent change in the farmer-paid rate used for elasticity adjustments.}
 #' }
 #'
 #' @details
 #' Elasticities are applied multiplicatively to baseline quantities. Coverage
-#' levels are snapped to the 0.05 grid and truncated. When schedules are
+#' levels are snapped to the 0.05 grid and capped. When schedules are
 #' supplied, subsidy shares and premium rates are rescaled relative to the
 #' baseline coverage before applying to the scenario coverage.
 #'
@@ -101,49 +115,68 @@ adjust_agent_outcomes_by_elasticity <- function(
     final_revenue_per_acre,
     assumption = 0,
     premium_subsidy_schedule = NULL,
-    rate_differential_schedule  = NULL
+    rate_differential_schedule  = NULL,
+    alternate_subsidy_per_premium = NULL
 ){
-  
+
   # Default schedules
   if(is.null(premium_subsidy_schedule)) premium_subsidy_schedule <- rep(1, 8L)
   if(is.null(rate_differential_schedule)) rate_differential_schedule <- rep(1, 8L)
-  
+  if(is.null(alternate_subsidy_per_premium)) alternate_subsidy_per_premium <- baseline_subsidy_per_premium
+
   # Validations
   stopifnot(is.numeric(premium_subsidy_schedule), length(premium_subsidy_schedule) == 8)
   stopifnot(is.numeric(rate_differential_schedule), length(rate_differential_schedule) == 8)
   stopifnot(is.finite(alternate_premium_per_liability), alternate_premium_per_liability >= 0)
   stopifnot(is.finite(baseline_premium_per_liability), baseline_premium_per_liability > 0)
   stopifnot(is.finite(baseline_coverage_level), baseline_coverage_level > 0, baseline_coverage_level <= 1)
+  stopifnot(is.finite(alternate_subsidy_per_premium),
+            alternate_subsidy_per_premium >= 0, alternate_subsidy_per_premium <= 1)
   stopifnot(length(assumption) == 1L, assumption %in% c(0L,1L,2L,3L))
   if(assumption > 1){
-    stopifnot(baseline_coverage_level %in% seq(0.50, 0.85, 0.05))
+    stopifnot(round(baseline_coverage_level, 2) %in% round(seq(0.50, 0.85, 0.05), 2))
   }
-  
-  # Percent change in price used by elasticities
-  price_change_pct <- 100 * (alternate_premium_per_liability/baseline_premium_per_liability - 1)
+
+  # Percent change in the farmer-paid rate used by elasticities
+  baseline_farmer_rate  <- baseline_premium_per_liability  * (1 - baseline_subsidy_per_premium)
+  alternate_farmer_rate <- alternate_premium_per_liability * (1 - alternate_subsidy_per_premium)
+  price_change_pct <- if (isTRUE(baseline_farmer_rate > 0)) {
+    100 * (alternate_farmer_rate / baseline_farmer_rate - 1)
+  } else {
+    0
+  }
 
   # Defaults (will be overwritten per assumption)
-  coverage_type_code <- baseline_coverage_type
+  coverage_type_code     <- baseline_coverage_type
   coverage_level_percent <- baseline_coverage_level
-  insured_acres <- baseline_insured_acres
+  insured_acres          <- baseline_insured_acres
+  subsidy_per_premium    <- alternate_subsidy_per_premium
+
+  # CAT never leaves CAT: premium is fully subsidized, so no price response
+  responds <- !identical(as.character(baseline_coverage_type), "C")
 
   # Acres move with price
-  if(assumption %in% c(1L, 3L)){
+  if(responds && assumption %in% c(1L, 3L)){
     insured_acres <- baseline_insured_acres*(1 + ((insured_acres_elasticity * price_change_pct)/100))
     insured_acres <- pmax(insured_acres, 0)
   }
 
-  # Coverage level moves with price
-  if(assumption %in% c(2L, 3L)){
+  # Coverage level moves with price; buy-up below 0.50 moves to CAT
+  if(responds && assumption %in% c(2L, 3L)){
     coverage_level_percent <- baseline_coverage_level*(1 + (coverage_level_elasticity * price_change_pct)/100)
     coverage_level_percent <- normalize_coverage(coverage_level_percent)
-    coverage_type_code     <- if(coverage_level_percent == 0) "" else if (coverage_level_percent < 0.50) "C" else "A"
-    coverage_level_percent <- if(coverage_level_percent >0 & coverage_level_percent < 0.50) 0.50 else coverage_level_percent
+    if (!is.na(coverage_level_percent)) {
+      if (coverage_level_percent < 0.50) {
+        coverage_type_code     <- "C"
+        coverage_level_percent <- 0.50
+      } else {
+        coverage_type_code     <- "A"
+      }
+    }
   }
-  
-  # Reset both variables to zero if either insured_acres or coverage_level_percent is missing (NA)
-  if (is.na(insured_acres) || insured_acres == 0 ||
-      is.na(coverage_level_percent) || coverage_level_percent == 0) {
+
+  # Reset to zero if acres are missing/zero or coverage is missing
+  if (is.na(insured_acres) || insured_acres == 0 || is.na(coverage_level_percent)) {
     return(list(
       coverage_type_code     = "",
       coverage_level_percent = 0,
@@ -155,32 +188,36 @@ adjust_agent_outcomes_by_elasticity <- function(
       price_change_pct       = price_change_pct
     ))
   }
-  
+
   # Adjust rates/subsidy for the new coverage level
-  if (!is.na(coverage_level_percent) &&
-      !isTRUE(all.equal(coverage_level_percent, baseline_coverage_level))) {
+  if (!isTRUE(all.equal(coverage_level_percent, baseline_coverage_level))) {
 
     schedule <- data.table::data.table(
-      coverage = seq(0.50, 0.85, 0.05),
+      coverage = round(seq(0.50, 0.85, 0.05), 2),
       sp = premium_subsidy_schedule,
       rd = rate_differential_schedule
     )
-    
-    alternate_subsidy_percent   <- schedule[coverage == coverage_level_percent, sp]
-    alternate_rate_differential <- schedule[coverage == coverage_level_percent, rd]
-    
+
+    alternate_subsidy_percent   <- schedule[coverage == round(coverage_level_percent, 2), sp]
+    alternate_rate_differential <- schedule[coverage == round(coverage_level_percent, 2), rd]
+
     if(length(baseline_subsidy_percent) && length(alternate_subsidy_percent) && length(baseline_rate_differential) && length(alternate_rate_differential)){
       adjust_premium_subsidy   <- alternate_subsidy_percent / baseline_subsidy_percent
       adjust_rate_differential <- alternate_rate_differential / baseline_rate_differential
-      
+
       alternate_premium_per_liability <- alternate_premium_per_liability * adjust_rate_differential
-      baseline_subsidy_per_premium    <- baseline_subsidy_per_premium    * adjust_premium_subsidy
+      subsidy_per_premium             <- subsidy_per_premium * adjust_premium_subsidy
     }
   }
 
+  # A move to CAT is fully subsidized
+  if (identical(coverage_type_code, "C") && !identical(as.character(baseline_coverage_type), "C")) {
+    subsidy_per_premium <- 1
+  }
+
   # Reconcile CAT vs. buy-up coverage transitions
-  price_election_factor <- get_price_election_factor( coverage_type_code, baseline_coverage_type)
-  
+  price_election_factor <- get_price_election_factor(coverage_type_code, baseline_coverage_type)
+
   # Adjust per-acre liability and indemnity
   adjust_res <- adjust_indemnity_liability_per_acre(
     coverage_level_percent      = coverage_level_percent*price_election_factor,
@@ -196,7 +233,7 @@ adjust_agent_outcomes_by_elasticity <- function(
   # Totals
   liability_amount       <- adj_Liability_per_acre * insured_acres
   total_premium_amount   <- alternate_premium_per_liability * liability_amount
-  subsidy_amount         <- baseline_subsidy_per_premium*total_premium_amount
+  subsidy_amount         <- subsidy_per_premium * total_premium_amount
   indemnity_amount       <- adj_Indemnity_per_acre * insured_acres
 
   list(
@@ -215,14 +252,14 @@ adjust_agent_outcomes_by_elasticity <- function(
 #' Internal helper: Reconcile CAT vs. buy-up coverage transitions
 #'
 #' Computes the price election factor adjustment when moving between CAT ("C")
-#' and buy-up ("A") coverage types. Used to scale per-acre liability and indemnity
-#' without mutating the coverage share itself.
+#' and buy-up ("A") coverage types. CAT liability is 50\% coverage at 55\% of the
+#' price, so it is scaled to and from buy-up by 0.55. Used to scale per-acre
+#' liability and indemnity without mutating the coverage share itself.
 #'
 #' Rules:
 #' \itemize{
-#'   \item Scenario = CAT, Baseline = Buy-up -> factor = 1/0.55
-#'   \item Scenario = CAT, Baseline = CAT -> factor = 1
-#'   \item Scenario = Buy-up, Baseline = CAT -> factor = 0.55
+#'   \item Scenario = CAT, Baseline = Buy-up -> factor = 0.55
+#'   \item Scenario = Buy-up, Baseline = CAT -> factor = 1/0.55
 #'   \item All other transitions -> factor = 1
 #' }
 #'
@@ -234,26 +271,23 @@ adjust_agent_outcomes_by_elasticity <- function(
 #' @keywords internal
 #' @noRd
 get_price_election_factor <- function(curr, base) {
-  if (curr == "C" && base == "A") return(1/0.55)
-  if (curr == "C" && base == "C") return(1)
-  if (curr == "A" && base == "C") return(0.55)
+  if (curr == "C" && base == "A") return(0.55)
+  if (curr == "A" && base == "C") return(1/0.55)
   1
 }
 
 #' Internal helper: Normalize coverage levels
 #'
-#' Snaps a coverage level to the nearest 0.05 grid, truncates at 0.85,
-#' and enforces a minimum of 0.50. Values below 0.50 are set to 0.50.
+#' Snaps a coverage level to the nearest 0.05 grid and caps it at 0.85.
+#' Values below 0.50 are returned as they are; the caller moves them to CAT.
 #'
 #' @param x Numeric scalar or vector. Coverage level(s) expressed as shares (0-1).
 #'
-#' @return Numeric scalar or vector. Adjusted coverage level(s) rounded to the
-#'   0.05 grid, truncated to 0.85, and floored at 0.50.
+#' @return Numeric scalar or vector, rounded to the 0.05 grid and capped at 0.85.
 #'
 #' @keywords internal
 #' @noRd
 normalize_coverage <- function(x) {
   x <- round(x / 0.05) * 0.05
-  x <- pmin(x, 0.85)
-  ifelse(x < 0.50, 0, x)
+  round(pmin(x, 0.85), 2)
 }

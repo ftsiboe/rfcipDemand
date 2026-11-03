@@ -66,3 +66,36 @@ test_that("generate_fcip_instruments works", {
   expect_true(all(c("tau_sob","tau_adm","tau_final","subsidy_rate_65","subsidy_rate_75")
                   %in% names(instruments)))
 })
+
+test_that("counties without usable history are filled from their neighbours", {
+  cc <- data.table::as.data.table(fcip_contiguous_county)
+  before <- data.table::copy(cc)
+
+  # A real county and its contiguous counties
+  target <- cc[1, .(state_code, county_code)]
+  nbrs <- unique(cc[state_code == target$state_code & county_code == target$county_code &
+                      !(contiguous_state_code == state_code & contiguous_county_code == county_code),
+                    .(state_code = contiguous_state_code, county_code = contiguous_county_code)])
+  expect_gt(nrow(nbrs), 0)
+
+  set.seed(42)
+  counties <- rbind(target, nbrs)
+  statplan <- data.table::rbindlist(lapply(1990:2009, function(y) {
+    data.table::data.table(commodity_year = y, counties, commodity_code = 41,
+                           insured_area = 1000,
+                           lcr = c(0, stats::runif(nrow(nbrs), 0.02, 0.20)))
+  }))
+
+  res <- estimate_fcip_instruments(year = 2011, statplan = statplan)
+
+  # The target has no valid own rate (all-zero LCR) but is now present
+  own <- res[state_code == target$state_code & county_code == target$county_code]
+  expect_equal(nrow(own), 1L)
+
+  # ... and equals the mean of its neighbours' rates
+  nb <- res[nbrs, on = .(state_code, county_code), nomatch = 0]
+  expect_equal(own$tau_sob, mean(nb$tau_sob), tolerance = 1e-8)
+
+  # The package dataset is not modified by reference
+  expect_identical(data.table::as.data.table(fcip_contiguous_county), before)
+})

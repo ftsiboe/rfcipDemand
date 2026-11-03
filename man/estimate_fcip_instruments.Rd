@@ -45,12 +45,14 @@ following:
 Errors return \code{NULL} so processing continues.
 \item \strong{Contiguous-county smoothing}:
 \itemize{
-\item Build a lookup table of contiguous counties (using \code{contiguous_county}).
-\item For each contiguous group, compute the mean \code{tau} to get \code{tau_c}.
+\item Pair each county with its contiguous counties (\code{fcip_contiguous_county}).
+\item For each county and crop, average the valid \code{tau} of its neighbours
+to get \code{tau_c}.
 }
-\item \strong{Merge & fill}: Left-join the raw \code{adm} and \code{contiguous_adm};
-replace any zero/NA/Inf \code{tau} with the group mean \code{tau_c} into
-\code{tau_sob}.
+\item \strong{Merge & fill}: Full-join \code{tau} and \code{tau_c}; \code{tau_sob} is the
+county's own \code{tau} when valid, otherwise the neighbour mean \code{tau_c}.
+Counties with no usable history of their own are therefore filled from
+their neighbours.
 \item \strong{Cleanup}: Drop helper columns (\code{tau}, \code{tau_c}), remove invalid rows,
 add \code{commodity_year}, and return the result.
 }

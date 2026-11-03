@@ -31,12 +31,14 @@
 #' 2. **Unloaded-rate calculation**: For each county in \code{task_list}, call  
 #'    `estimate_fcip_unloaded_rate()` on the same 2-21 year window to get \code{tau}.  
 #'    Errors return \code{NULL} so processing continues.  
-#' 3. **Contiguous-county smoothing**:  
-#'    - Build a lookup table of contiguous counties (using \code{contiguous_county}).  
-#'    - For each contiguous group, compute the mean \code{tau} to get \code{tau_c}.  
-#' 4. **Merge & fill**: Left-join the raw \code{adm} and \code{contiguous_adm};  
-#'    replace any zero/NA/Inf \code{tau} with the group mean \code{tau_c} into  
-#'    \code{tau_sob}.  
+#' 3. **Contiguous-county smoothing**:
+#'    - Pair each county with its contiguous counties (\code{fcip_contiguous_county}).
+#'    - For each county and crop, average the valid \code{tau} of its neighbours
+#'      to get \code{tau_c}.
+#' 4. **Merge & fill**: Full-join \code{tau} and \code{tau_c}; \code{tau_sob} is the
+#'    county's own \code{tau} when valid, otherwise the neighbour mean \code{tau_c}.
+#'    Counties with no usable history of their own are therefore filled from
+#'    their neighbours.
 #' 5. **Cleanup**: Drop helper columns (\code{tau}, \code{tau_c}), remove invalid rows,  
 #'    add \code{commodity_year}, and return the result.
 #' @family FCIP instruments
@@ -54,44 +56,43 @@ estimate_fcip_instruments <- function(year, statplan) {
         tryCatch({
           estimate_fcip_unloaded_rate(
             statplan = statplan[commodity_year %in% (year-2):(year-21)],
-            year   = year,
             state  = task_list$state_code[i],
             county = task_list$county_code[i])
         }, error = function(e){return(NULL)})
       }), fill = TRUE)
   setDT(adm)
   
-  # 3. Prepare contiguous county mapping for smoothing
-  contiguous_county <- fcip_contiguous_county
-  setDT(contiguous_county)
-  contiguous_county[, state_code := contiguous_state_code]
-  contiguous_county[, county_code := contiguous_county_code]
-  contiguous_adm <- unique(contiguous_county, by = c("state_code", "county_code"))
-  
-  # 4. For each contiguous group, compute the mean tau => tau_c
-  contiguous_adm <- data.table::rbindlist(
-    lapply(
-      1:nrow(contiguous_adm),
-      function(ss){
-        tryCatch({
-          # ss <- 1
-          data <- contiguous_adm[ss][contiguous_county, on = .(state_code, county_code), nomatch = 0][
-            adm, on = .(state_code, county_code), nomatch = 0]
-          
-          data <- data[, .(tau_c = mean(tau, na.rm = TRUE)),by = .(state_code, county_code, commodity_code)]
-          
-          return(data)
-        }, error = function(e){return(NULL)})
-      }), fill = TRUE)
-  
-  # 5. Merge raw rates with contiguous-county smoothed rates
-  adm <- adm[contiguous_adm, on = intersect(names(adm), names(contiguous_adm)), nomatch = 0]
-  
-  # 6. Replace any invalid/zero tau with the smoothed tau_c
-  adm[, tau_sob := fifelse(tau %in% c(NA, Inf, -Inf, NaN) | tau == 0, tau_c, tau)]
-  
+  if (!nrow(adm)) {
+    adm <- data.table::data.table(state_code = numeric(), county_code = numeric(),
+                                  commodity_code = numeric(), tau = numeric())
+  }
+
+  # 3. Contiguous county pairs: origin county -> neighbouring county.
+  #    Work on a copy so the package dataset is never modified by reference.
+  contiguous_county <- unique(data.table::as.data.table(data.table::copy(fcip_contiguous_county))[
+    , .(state_code, county_code, contiguous_state_code, contiguous_county_code)])
+  contiguous_county <- contiguous_county[
+    !(state_code == contiguous_state_code & county_code == contiguous_county_code)]
+
+  # 4. For each origin county and crop, the mean valid tau of its neighbours => tau_c
+  neighbour_tau <- data.table::copy(adm[is.finite(tau) & tau != 0,
+                                        .(contiguous_state_code = state_code,
+                                          contiguous_county_code = county_code,
+                                          commodity_code, tau)])
+  contiguous_adm <- merge(contiguous_county, neighbour_tau,
+                          by = c("contiguous_state_code", "contiguous_county_code"),
+                          allow.cartesian = TRUE)
+  contiguous_adm <- contiguous_adm[, .(tau_c = mean(tau)),
+                                   by = .(state_code, county_code, commodity_code)]
+
+  # 5. Merge raw rates with neighbour means; keep counties that only have a neighbour mean
+  adm <- merge(adm, contiguous_adm, by = c("state_code", "county_code", "commodity_code"), all = TRUE)
+
+  # 6. Replace any missing/invalid/zero tau with the neighbour mean tau_c
+  adm[, tau_sob := fifelse(!is.finite(tau) | tau == 0, tau_c, tau)]
+
   # 7. Drop helper columns and invalid rows
-  rm(contiguous_adm);gc()
+  rm(contiguous_adm, neighbour_tau);gc()
   adm <- adm[, setdiff(names(adm), c("tau_c", "tau")), with = FALSE]
   adm <- adm[!tau_sob %in% c(NA, Inf, -Inf, NaN,0)]
   
@@ -115,9 +116,6 @@ estimate_fcip_instruments <- function(year, statplan) {
 #'     \item{lcr}{Loss Cost Rate for each county.}
 #'     \item{commodity_code}{Crop identifier.}
 #'   }
-#' @param year Integer. Crop year for which rates are being estimated
-#'   (currently not used but reserved for future subsetting).
-#' @param crop Optional vector of commodity codes to filter by crop.
 #' @param state Optional vector of state codes to restrict the analysis.
 #' @param county Optional vector of county codes to restrict the analysis.
 #'
@@ -152,8 +150,6 @@ estimate_fcip_instruments <- function(year, statplan) {
 #' @noRd
 estimate_fcip_unloaded_rate <- function(
     statplan,
-    year   = 2011,
-    crop   = NULL,
     state  = NULL,
     county = NULL) {
   # Documentation link:

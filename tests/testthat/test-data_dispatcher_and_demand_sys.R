@@ -1,4 +1,7 @@
 test_that("fcip_demand_data_dispatcher and fcip_demand_sys_estimate works", {
+  skip_on_cran()
+  skip_if_offline()
+
 
   data <- fcip_demand_data_dispatcher(
     study_years = 2020:2023,

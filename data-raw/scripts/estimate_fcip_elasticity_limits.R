@@ -53,5 +53,6 @@ fcip_elasticity_limits <- data.table(
 
 fcip_elasticity_limits[, data_source:= "Elasticity limits determined as 50% of the magnitude of the program level elasticities"]
 
-saveRDS(fcip_elasticity_limits,file="data-raw/internal_data/fcip_elasticity_limits.rds")
+# Written straight to data/; documented in R/data.R
+usethis::use_data(fcip_elasticity_limits, overwrite = TRUE, compress = "xz")
 

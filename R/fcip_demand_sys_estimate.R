@@ -41,16 +41,17 @@ fcip_demand_sys_prep <- function(data, fields) {
       dd <- dd[!dd[[yy]] %in% c(Inf, -Inf, NA, NaN), , drop = FALSE]
     }
     
-    # Demean if FE (expects user-supplied helper `fixed_effect_model_data_prep`)
+    # Demean if FE: outcomes are demeaned together with the regressors, so the
+    # residuals (and hence the clustered covariance) exclude the pool effects
     NFE <- 0L
     if (isTRUE(FE)) {
       dm <- fixed_effect_model_data_prep(
         data   = dd,
-        varlist= unique(c(endogenous, included, excluded, partial)),
+        varlist= unique(c(outcome, endogenous, included, excluded, partial)),
         panel  = "pool",
         time   = "commodity_year",
         wvar   = NULL,
-        output = outcome
+        output = NULL
       )
       NFE <- dm$NFE
       dd  <- as.data.table(dm$data)
@@ -580,13 +581,13 @@ fcip_demand_sys_tests <- function(g, h, data, fit, NFE, approx_j = FALSE){
 #'
 #' @description
 #' Runs the full pipeline: prep -> partial/tilda creation ->
-#' systemfit -> two-way clustered VCOV -> delta-method totals -> optional restricted
+#' systemfit -> two-way clustered VCOV -> delta-method totals ->
 #' step -> diagnostics; then returns a tidy coefficient table with metadata.
 #'
 #' @param data Estimation dataset 
 #' @param fields Named list carrying model fields (see \code{fcip_demand_estimation()}),
 #'   including \code{disag}, \code{FE}, \code{outcome}, \code{endogenous}, \code{included},
-#'   optional \code{excluded}, \code{partial}, \code{restrict}, and \code{name}.
+#'   optional \code{excluded}, \code{partial}, and \code{name}.
 #'
 #' @return A \code{data.frame} with columns \code{demand}, \code{coef},
 #'   \code{Estimate}, \code{StdError}, \code{Zvalue}, \code{Pvalue} and
@@ -619,7 +620,6 @@ fcip_demand_sys_run <- function(data, fields) {
   tst <- fcip_demand_sys_tests(g = g, h = h, data = dd, fit = fit, NFE = NFE, approx_j = TRUE)
   
   res <- rbind(tab, tot, tst)
-  # res <- rbind(res, fcip_demand_sys_restricted(fields$restrict, tab, fit, dd, fields$outcome, tE, tX, tI))
   rownames(res) <- NULL
   res$model      <- fields$name
   res$endogenous <- paste(fields$endogenous, collapse = ",")
@@ -681,9 +681,17 @@ fcip_demand_elasticities_lavaan <- function(
     tilda_gamma ~ 1
     tilda_theta ~ 1
   '
-  ineq <- paste0("b1 < ",control$elasticity_limits$gamma[1],
-                 "\nb2 < ",control$elasticity_limits$theta[2],
-                 "\nb1 + b2 + b1*b2 < ",control$elasticity_limits$total[3])
+  limits <- control$elasticity_limits
+  limit_value <- function(nm) {
+    v <- limits[[nm]]
+    if (is.null(v) || length(v) != 1L || !is.numeric(v) || !is.finite(v)) {
+      stop("`control$elasticity_limits$", nm, "` must be a single finite number.", call. = FALSE)
+    }
+    v
+  }
+  ineq <- paste0("b1 < ", limit_value("gamma"),
+                 "\nb2 < ", limit_value("theta"),
+                 "\nb1 + b2 + b1*b2 < ", limit_value("total"))
   
   fit <- lavaan::sem(
     model         = model,
@@ -748,7 +756,6 @@ fcip_demand_elasticities_lavaan <- function(
 #'   Optional elements:
 #'   - `excluded` (character or `NULL`): excluded instruments.
 #'   - `partial`  (character or `NULL`): variables to partial out (tilda).
-#'   - `restrict` (logical): pass-through to internal restricted estimation.
 #'   - `name`     (character(1)): label carried to the output.
 #' @param data `data.frame`/`data.table` containing all referenced columns in
 #'   `model` plus `pool` and `commodity_year`. Columns in `model$outcome`,
@@ -768,7 +775,8 @@ fcip_demand_elasticities_lavaan <- function(
 #'   `"full_sample"` key is created.
 #' - The disaggregation key is coerced to `character`.
 #' - For each level of `model$disag`, the function keeps only levels that have
-#'   **at least 30 observations per `commodity_year`**. Levels failing this threshold are dropped.
+#'   **at least 30 observations in at least one `commodity_year`**. Levels
+#'   failing this threshold are dropped; retained levels keep all their years.
 #'
 #' **Per-level estimation**
 #' For each retained level, the function calls internal helpers
@@ -815,7 +823,6 @@ fcip_demand_sys_estimate <- function(
   included   <- model$included
   excluded   <- model$excluded %||% NULL
   partial    <- model$partial  %||% NULL
-  restrict   <- isTRUE(model$restrict)
   if(is.null(model$disag)){
     data$full_sample <- 1
     model$disag      <- "full_sample"
@@ -830,13 +837,13 @@ fcip_demand_sys_estimate <- function(
   # Ensure disaggregation key is character
   data[[disag]] <- as.character(data[[disag]])
   
-  # Build levels with >= 30 obs per commodity_year
+  # Keep levels with >= 30 obs in at least one commodity_year
   disagMap <- data[,.N,by = c("commodity_year", disag)][N >= 30]
   data     <- data[data[[disag]] %in% disagMap[[disag]], , drop = FALSE]
 
   fields <- list(outcome=outcome, endogenous=endogenous, included=included,
                  excluded=excluded, partial=partial, FE=model$FE,
-                 restrict=restrict, disag=disag, name=model$name %||% NA_character_)
+                 disag=disag, name=model$name %||% NA_character_)
   
   res <- data.table::rbindlist(
     lapply(unique(data[[disag]]), function(i) {

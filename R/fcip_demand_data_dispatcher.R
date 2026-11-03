@@ -48,7 +48,6 @@
 #'   columns listed under **What this stage produces**.
 #' @family Estimation Data
 #' @import data.table
-#' @importFrom utils download.file
 #' @keywords internal
 #' @noRd
 fcip_demand_data_prep_sob <- function(
@@ -168,7 +167,6 @@ fcip_demand_data_prep_sob <- function(
 #' @note Column name `index_for_price_recived` follows the source spelling.
 #' @family Estimation Data
 #' @import data.table
-#' @importFrom utils download.file
 #' @keywords internal
 #' @noRd
 fcip_demand_data_controls <- function(df) {
@@ -268,8 +266,7 @@ fcip_demand_data_controls <- function(df) {
 #' @return The same `data.table` with a single `county_acreage` column and without
 #'   `nassSurvey_AREA_*` or `fsa_planted_acres` intermediates.
 #' @family Estimation Data
-#' @import data.table rfsa
-#' @importFrom utils data
+#' @import data.table
 #' @importFrom tidyr spread
 #' @keywords internal
 #' @noRd
@@ -464,6 +461,10 @@ fcip_demand_data_dispatcher <- function(
     study_years = 2001:(as.numeric(format(Sys.Date(), "%Y")) - 1),
     identifiers = c("commodity_year",FCIP_INSURANCE_POOL,"insurance_plan_code","unit_structure_code")
 ) {
+  # Large release files: allow long downloads for this call only
+  op <- options(timeout = max(3600, getOption("timeout")))
+  on.exit(options(op), add = TRUE)
+
   df <- fcip_demand_data_prep_sob(study_years = study_years, identifiers = identifiers)
   df <- fcip_demand_data_controls(df)
   df <- fcip_demand_data_reconcile_acreage(df)

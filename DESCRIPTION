@@ -1,7 +1,7 @@
 Package: rfcipDemand
 Type: Package
 Title: Estimate Federal Crop Insurance Program Demand Models
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Author: Francis Tsiboe [aut, cre] (<https://orcid.org/0000-0001-5984-1072>),
     TERRA ANALYTICS LLC [cph, fnd]
 Maintainer: Francis Tsiboe <ftsiboe@hotmail.com>
@@ -22,7 +22,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Depends: R (>= 4.1.0)
-Imports: rfsa, data.table, systemfit, sandwich, car, plyr, usmap, stats, utils, tidyr, stringr
-Remotes: github::UrbanInstitute/urbnmapr, github::dylan-turner25/rfsa, github::JanMarvin/nlsur
-Suggests: knitr, rmarkdown, tibble, dplyr, purrr, readr, lavaan, piggyback, testthat (>= 3.0.0)
+Imports: data.table, systemfit, sandwich, car, plyr, usmap, stats, utils, tidyr, stringr, piggyback, dplyr, tibble, lavaan
+Suggests: knitr, rmarkdown, purrr, readr, testthat (>= 3.0.0)
 LazyData: true

@@ -22,15 +22,10 @@ rfcipDemand.Rproj
 ^LICENSE\.md$
 ^codemeta\.json$
 data-raw
-replications
-README.docx
-README.log
 README.md
 README.Rmd
-README.tex
 ^SECURITY\.md$
 code_of_conduct.md
-job_lcr_estimations.sbatch
 \.out$
 ^.*\.pdf$
 ^rfcipDemand_.*\.pdf$

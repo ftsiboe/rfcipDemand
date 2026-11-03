@@ -163,7 +163,7 @@ test_that("assumption 2: only coverage responds with rounding and caps", {
   expect_equal(res$subsidy_amount, base$subs * res$total_premium_amount, tolerance = 1e-10)
 })
 
-test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
+test_that("assumption 2: coverage capped to 0.85 and moved to CAT if < 0.5", {
   # Cap to 0.85
   res_cap <- adjust_agent_outcomes_by_elasticity(
     alternate_premium_per_liability   = 0.04,  # -50% vs 0.08
@@ -183,7 +183,7 @@ test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
   )
   expect_equal(res_cap$coverage_level_percent, 0.85) # 0.7 * 1.25 = 0.875 → round 0.90 → cap 0.85
   
-  # Floor to 0 if < 0.5 after rounding
+  # Below 0.5 after rounding -> moves to CAT
   res_floor <- adjust_agent_outcomes_by_elasticity(
     alternate_premium_per_liability   = 0.20,  # +150% vs 0.08
     insured_acres_elasticity          = 0,
@@ -200,7 +200,82 @@ test_that("assumption 2: coverage capped to 0.85 and floored to 0 if < 0.5", {
     baseline_subsidy_percent = 1,
     baseline_rate_differential = 1
   )
-  expect_equal(res_floor$coverage_level_percent, 0.00) # 0.55 * (1 - 0.75) = 0.1375 → 0.15 → < 0.5 → 0
+  # 0.55 * (1 - 0.75) = 0.1375 -> 0.15 -> < 0.5 -> CAT at 0.50
+  expect_equal(res_floor$coverage_type_code, "C")
+  expect_equal(res_floor$coverage_level_percent, 0.50)
+  expect_equal(res_floor$insured_acres, 1)
+  # CAT liability = baseline / 0.55 * (0.50 * 0.55) = 0.50
+  expect_equal(res_floor$liability_amount, 1 / 0.55 * 0.50 * 0.55, tolerance = 1e-10)
+  # CAT premium is fully subsidized
+  expect_equal(res_floor$subsidy_amount, res_floor$total_premium_amount, tolerance = 1e-10)
+})
+
+cat_args <- function(...) {
+  utils::modifyList(list(
+    alternate_premium_per_liability   = 0.20,
+    insured_acres_elasticity          = -0.4,
+    coverage_level_elasticity         = -0.5,
+    baseline_coverage_type            = "C",
+    baseline_coverage_level           = 0.50,
+    baseline_insured_acres            = 100,
+    baseline_liability_per_acre       = 50,
+    baseline_premium_per_liability    = 0.08,
+    baseline_subsidy_per_premium      = 1,
+    baseline_indemnity_per_acre       = 5,
+    final_revenue_per_acre            = 40,
+    assumption                        = 3,
+    baseline_subsidy_percent          = 1,
+    baseline_rate_differential        = 1
+  ), list(...))
+}
+
+test_that("CAT never leaves CAT: no price response under any assumption", {
+  for (a in 0:3) {
+    res <- do.call(adjust_agent_outcomes_by_elasticity, cat_args(assumption = a))
+    expect_equal(res$coverage_type_code, "C")
+    expect_equal(res$coverage_level_percent, 0.50)
+    expect_equal(res$insured_acres, 100)
+    expect_equal(res$liability_amount, 50 * 100, tolerance = 1e-10)
+    expect_equal(res$indemnity_amount, 5 * 100, tolerance = 1e-10)
+    expect_equal(res$price_change_pct, 0)  # fully subsidized: no price signal
+  }
+})
+
+test_that("price election factor scales liability in the right direction", {
+  expect_equal(get_price_election_factor("C", "A"), 0.55)
+  expect_equal(get_price_election_factor("A", "C"), 1 / 0.55)
+  expect_equal(get_price_election_factor("A", "A"), 1)
+  expect_equal(get_price_election_factor("C", "C"), 1)
+})
+
+test_that("price signal is the change in the farmer-paid rate", {
+  base <- list(
+    alternate_premium_per_liability   = 0.08,
+    insured_acres_elasticity          = -0.4,
+    coverage_level_elasticity         = 0,
+    baseline_coverage_type            = "A",
+    baseline_coverage_level           = 0.70,
+    baseline_insured_acres            = 100,
+    baseline_liability_per_acre       = 200,
+    baseline_premium_per_liability    = 0.08,
+    baseline_subsidy_per_premium      = 0.60,
+    baseline_indemnity_per_acre       = 0,
+    final_revenue_per_acre            = 300,
+    assumption                        = 1,
+    baseline_subsidy_percent          = 1,
+    baseline_rate_differential        = 1
+  )
+  # Same rate, subsidy cut from 60% to 50%: farmer rate 0.032 -> 0.040, +25%
+  res <- do.call(adjust_agent_outcomes_by_elasticity,
+                 utils::modifyList(base, list(alternate_subsidy_per_premium = 0.50)))
+  expect_equal(res$price_change_pct, 25, tolerance = 1e-10)
+  expect_equal(res$insured_acres, 100 * (1 - 0.4 * 0.25), tolerance = 1e-10)
+  expect_equal(res$subsidy_amount, 0.50 * res$total_premium_amount, tolerance = 1e-10)
+
+  # Default (no subsidy change) equals the change in the total rate
+  res0 <- do.call(adjust_agent_outcomes_by_elasticity,
+                  utils::modifyList(base, list(alternate_premium_per_liability = 0.10)))
+  expect_equal(res0$price_change_pct, 25, tolerance = 1e-10)
 })
 
 test_that("assumption 3: both coverage and acres respond", {

@@ -11,7 +11,7 @@ fcip_demand_sys_run(data, fields)
 
 \item{fields}{Named list carrying model fields (see \code{fcip_demand_estimation()}),
 including \code{disag}, \code{FE}, \code{outcome}, \code{endogenous}, \code{included},
-optional \code{excluded}, \code{partial}, \code{restrict}, and \code{name}.}
+optional \code{excluded}, \code{partial}, and \code{name}.}
 }
 \value{
 A \code{data.frame} with columns \code{demand}, \code{coef},
@@ -21,6 +21,6 @@ meta-columns \code{model}, \code{endogenous}, \code{FE}, \code{name},
 }
 \description{
 Runs the full pipeline: prep -> partial/tilda creation ->
-systemfit -> two-way clustered VCOV -> delta-method totals -> optional restricted
+systemfit -> two-way clustered VCOV -> delta-method totals ->
 step -> diagnostics; then returns a tidy coefficient table with metadata.
 }

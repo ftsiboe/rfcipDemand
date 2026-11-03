@@ -10,13 +10,15 @@
 # leaves the package as it was.
 #
 # Run from the package root:
-#   source("data-raw/datasets.R")
+#   source("data-raw/scripts/datasets.R")
+#
+# fcip_elasticity_limits is not built here: data-raw/scripts/estimate_fcip_elasticity_limits.R
+# writes data/fcip_elasticity_limits.rda directly.
 
 source(file.path(dirname(getwd()), "fcipResources", "data-raw", "scripts", "environment_setup.R"))
 
 # ---- Source folders ----------------------------------------------------------
 roots <- c(
-  internal = "data-raw/internal_data",
   fsa      = file.path(dirname(dirname(wd$adm)), "usda_fsa", "fsa_acreage", "processed"),
   nass     = file.path(dirname(dirname(wd$adm)), "usda_nass", "quick_stats_database", "processed"),
   adm      = file.path(wd$adm, "processed", "adm_extracts")
@@ -28,8 +30,6 @@ roots <- c(
 # root: which folder in `roots` holds the yearly .rds files
 # keys: columns that must be present (and, with `unique_keys`, unique)
 datasets <- list(
-  fcip_elasticity_limits = list(
-    root = "internal", keys = c("gamma", "theta", "total"), unique_keys = FALSE),
   fcip_contiguous_county = list(
     root = "adm", keys = c("state_code", "county_code", "contiguous_state_code", "contiguous_county_code"),
     unique_keys = FALSE),
@@ -93,8 +93,10 @@ for (name in names(built)) {
   do.call(usethis::use_data, list(as.name(name), overwrite = TRUE, compress = "xz"))
 }
 
-# Datasets in data/ that are no longer in the manifest
-stale <- setdiff(tools::file_path_sans_ext(list.files("data", pattern = "\\.rda$")), names(datasets))
+# Warn about files in data/ that neither this manifest nor another script builds
+built_elsewhere <- c("fcip_elasticity_limits")
+stale <- setdiff(tools::file_path_sans_ext(list.files("data", pattern = "\\.rda$")),
+                 c(names(datasets), built_elsewhere))
 if (length(stale)) warning("data/ has files not in the manifest: ", paste(stale, collapse = ", "))
 
 rm(list = c(names(built), "built"))

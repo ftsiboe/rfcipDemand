@@ -22,7 +22,6 @@ fcip_demand_sys_estimate(
 Optional elements:
 \item \code{excluded} (character or \code{NULL}): excluded instruments.
 \item \code{partial}  (character or \code{NULL}): variables to partial out (tilda).
-\item \code{restrict} (logical): pass-through to internal restricted estimation.
 \item \code{name}     (character(1)): label carried to the output.
 }}
 
@@ -64,7 +63,8 @@ outcome column names in \code{data}. Internally these are mapped to
 \code{"full_sample"} key is created.
 \item The disaggregation key is coerced to \code{character}.
 \item For each level of \code{model$disag}, the function keeps only levels that have
-\strong{at least 30 observations per \code{commodity_year}}. Levels failing this threshold are dropped.
+\strong{at least 30 observations in at least one \code{commodity_year}}. Levels
+failing this threshold are dropped; retained levels keep all their years.
 }
 
 \strong{Per-level estimation}

@@ -34,9 +34,9 @@ Each pool is uniquely identified by the combination of:
 # Default insurance pool fields
 FCIP_INSURANCE_POOL
 
-# Override to a subset of the original fields
-rFarmPolicySim:::FCIP_INSURANCE_POOL <- c(
-  "state_code", "county_code", "commodity_code"
+# Use a coarser grain by passing your own identifiers
+df <- fcip_demand_data_dispatcher(
+  identifiers = c("commodity_year", "state_code", "county_code", "commodity_code")
 )
 }
 }

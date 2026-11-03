@@ -20,7 +20,8 @@ adjust_agent_outcomes_by_elasticity(
   final_revenue_per_acre,
   assumption = 0,
   premium_subsidy_schedule = NULL,
-  rate_differential_schedule = NULL
+  rate_differential_schedule = NULL,
+  alternate_subsidy_per_premium = NULL
 )
 }
 \arguments{
@@ -40,7 +41,7 @@ adjust_agent_outcomes_by_elasticity(
 
 \item{baseline_premium_per_liability}{Numeric. Baseline premium per dollar of liability.}
 
-\item{baseline_subsidy_per_premium}{Numeric in (0,1). Subsidy share of total premium.}
+\item{baseline_subsidy_per_premium}{Numeric in [0,1]. Subsidy share of total premium.}
 
 \item{baseline_indemnity_per_acre}{Numeric. Baseline indemnity per acre.}
 
@@ -54,11 +55,15 @@ adjust_agent_outcomes_by_elasticity(
 
 \item{premium_subsidy_schedule}{Optional numeric vector of length 8 corresponding to
 coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
-\code{baseline_subsidy_per_premium} at the scenario coverage. Defaults to 1's.}
+the subsidy share at the scenario coverage. Defaults to 1's.}
 
 \item{rate_differential_schedule}{Optional numeric vector of length 8 corresponding to
 coverage levels \code{0.50, 0.55, ..., 0.85}. Multiplicative factors applied to
 \code{alternate_premium_per_liability} at the scenario coverage. Defaults to 1's.}
+
+\item{alternate_subsidy_per_premium}{Optional numeric in [0,1]. Subsidy share of
+total premium in the scenario, at the baseline coverage level. Defaults to
+\code{baseline_subsidy_per_premium} (no subsidy change).}
 }
 \value{
 A list with elements:
@@ -70,7 +75,7 @@ A list with elements:
 \item{\code{total_premium_amount}}{Total premium = liability * alt premium/liability.}
 \item{\code{subsidy_amount}}{Subsidy = total premium * subsidy share.}
 \item{\code{indemnity_amount}}{Total indemnity = acres * adjusted indemnity per acre.}
-\item{\code{price_change_pct}}{Percent price change used for elasticity adjustments.}
+\item{\code{price_change_pct}}{Percent change in the farmer-paid rate used for elasticity adjustments.}
 }
 }
 \description{
@@ -92,22 +97,33 @@ acres and/or coverage level.
 
 \subsection{Price response}{
 
-Price response is applied using the percent change in price:
-\deqn{\%\Delta p = 100 \times \left(\frac{\text{alt}}{\text{base}} - 1\right),}
-and for any baseline quantity \eqn{q} with elasticity \eqn{e_q}:
+The elasticities are estimated with respect to the farmer-paid premium rate,
+so the price signal is the percent change in the farmer-paid rate,
+premium per liability times one minus the subsidy share:
+\deqn{\%\Delta p = 100 \times \left(\frac{r_{alt}(1 - s_{alt})}{r_{base}(1 - s_{base})} - 1\right),}
+where \eqn{s_{alt}} is \code{alternate_subsidy_per_premium} (defaults to the
+baseline share, in which case this equals the percent change in the total
+rate). For any baseline quantity \eqn{q} with elasticity \eqn{e_q}:
 \deqn{q_{\text{new}} = q_{\text{base}} \left[1 + \left(e_q \times \frac{\%\Delta p}{100}\right)\right].}
+If the baseline farmer-paid rate is zero (fully subsidized), there is no
+price signal and \code{price_change_pct} is \code{0}.
 }
 
 \subsection{Coverage adjustment}{
 
-Coverage is rounded to the nearest 0.05 grid and truncated to the range
-\eqn{(0, 0.85)}. Values less than 0.50 are set to \code{0} (i.e., no
-coverage). Coverage type code is set to \code{"A"} for buy-up coverage and
-\code{"C"} for CAT coverage. For CAT policies, scenario coverage levels at
-0.50/0.55 are adjusted to reflect CAT rules.
+Buy-up coverage is rounded to the nearest 0.05 grid and capped at 0.85.
+A buy-up policy whose coverage falls below 0.50 moves to CAT: coverage type
+\code{"C"}, coverage level 0.50 at 55\\% of the price, with the premium fully
+subsidized.
+
+\strong{CAT policies never leave CAT.} Because CAT premium is fully subsidized,
+a baseline CAT policy does not respond to the price change: its coverage and
+insured acres stay at baseline under every assumption.
 
 Per-acre liability and indemnity are updated using
-\code{\link{adjust_indemnity_liability_per_acre}}.
+\code{\link{adjust_indemnity_liability_per_acre}}. Moves between CAT and buy-up
+rescale liability by the price election: CAT liability is 50\\% coverage at
+55\\% of the price, so buy-up to CAT multiplies by 0.55.
 }
 
 \subsection{Optional schedules}{
@@ -115,8 +131,8 @@ Per-acre liability and indemnity are updated using
 Coverage-specific scaling is possible via:
 \itemize{
 \item \code{premium_subsidy_schedule}: length-8 numeric for coverage levels
-\code{0.50, 0.55, ..., 0.85}. Multiplies the
-\code{baseline_subsidy_per_premium} at the scenario coverage.
+\code{0.50, 0.55, ..., 0.85}. Multiplies the subsidy share at the
+scenario coverage, relative to \code{baseline_subsidy_percent}.
 \item \code{rate_differential_schedule}: length-8 numeric for the same grid.
 Multiplies the \code{alternate_premium_per_liability} at the scenario coverage.
 }
@@ -124,12 +140,12 @@ Multiplies the \code{alternate_premium_per_liability} at the scenario coverage.
 
 \subsection{Missing or zero inputs}{
 
-If either \code{insured_acres} or \code{coverage_level_percent} is \code{NA}
-or \code{0} after adjustment, both are reset to \code{0} and all dollar
-outcomes are set to \code{0}.
+If \code{insured_acres} is \code{NA} or \code{0}, or the coverage level is
+\code{NA}, after adjustment, coverage and acres are reset to \code{0} and all
+dollar outcomes are set to \code{0}.
 
 Elasticities are applied multiplicatively to baseline quantities. Coverage
-levels are snapped to the 0.05 grid and truncated. When schedules are
+levels are snapped to the 0.05 grid and capped. When schedules are
 supplied, subsidy shares and premium rates are rescaled relative to the
 baseline coverage before applying to the scenario coverage.
 }

@@ -11,9 +11,30 @@ if(toupper(as.character(Sys.info()[["sysname"]])) %in% "WINDOWS"){
             to = "R/", overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
 }
 
-# Rebuild data/ from the manifest in data-raw/datasets.R.
+# Optional rebuilds of upstream inputs (slow; off by default)
+# - RUN_INSTRUMENTS: rebuilds data-raw/replications/crop_insurance_instruments/
+#   fcip_demand_instruments.rds. It is used by fcip_demand_data_dispatcher() only
+#   after you upload it to the `instruments` release (create_release.R).
+# - RUN_ELASTICITY_LIMITS: re-estimates the program-level elasticity limits and
+#   writes data/fcip_elasticity_limits.rda directly.
+# Each script runs in its own environment, so their rm(list = ls()) calls do not
+# clear this session.
+RUN_INSTRUMENTS       <- FALSE
+RUN_ELASTICITY_LIMITS <- FALSE
+
+if(RUN_INSTRUMENTS) {
+  source("data-raw/replications/crop_insurance_instruments/generate_fcip_instruments.R",
+         local = new.env())
+}
+
+if (RUN_ELASTICITY_LIMITS) {
+  library(data.table)
+  source("data-raw/scripts/estimate_fcip_elasticity_limits.R", local = new.env())
+}
+
+# Rebuild data/ from the manifest in data-raw/scripts/datasets.R.
 # Docs for the datasets are hand-written in R/data.R.
-source("data-raw/datasets.R")
+source("data-raw/scripts/datasets.R")
 
 # Sanity pass through R/ sources: shows any non-ASCII characters per file
 for (i in list.files("R", full.names = TRUE)) {
