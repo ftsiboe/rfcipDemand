@@ -9,8 +9,5 @@
 library(testthat)
 library(data.table)
 library(rfcipDemand)
-library(rfsa)
-# testthat auto-sources any files in tests/testthat/ that start with helper-*.R
-# source("testthat/helper-mocks.R")
 test_check("rfcipDemand")
 
