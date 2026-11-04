@@ -146,3 +146,25 @@
 #' @source USDA National Agricultural Statistics Service, Quick Stats, via
 #'   `get_state_rental_rates()`.
 "nassSurveyRentalRates"
+
+#' NASS monthly index of prices received
+#'
+#' Monthly index of prices received by farmers, for all agriculture, crop and
+#' livestock aggregates and selected commodities. Used by `get_price_indices()`
+#' in the downstream rfcip packages.
+#'
+#' @format A data frame with one row per index and month:
+#' \describe{
+#'   \item{year}{Calendar year.}
+#'   \item{month}{Month name (`"January"`, ...).}
+#'   \item{comm}{Index name, e.g. `"Agricultural"`, `"Food Grain"`, `"Corn"`.}
+#'   \item{index}{Index of prices received.}
+#'   \item{Date}{First day of the month.}
+#'   \item{Lab}{Plot label (year and abbreviated month, separated by a line break).}
+#'   \item{commX}{Index group: `"Agricultural"`, `"Crop"`, `"Livestock"` or
+#'     `"Commodity specific"`.}
+#'   \item{data_source}{Source description.}
+#' }
+#' @source USDA National Agricultural Statistics Service,
+#'   <https://www.nass.usda.gov/Charts_and_Maps/graphics/data>.
+"nassAgPriceMonthlyIndex"

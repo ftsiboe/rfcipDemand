@@ -47,8 +47,8 @@
 ## Other changes
 
 * Bundled datasets are now built from an explicit manifest in `data-raw/datasets.R` and
-  documented by hand in `R/data.R`. Eight datasets that no function used were removed:
-  `agCensusAcres`, `agCensusBFR`, `fcip_recodes_type`, `nassAgPriceMonthlyIndex`,
+  documented by hand in `R/data.R`. Seven datasets that no function used were removed:
+  `agCensusAcres`, `agCensusBFR`, `fcip_recodes_type`,
   `nassSeasonLengthState`, `nassSurveyInputApplications`, `nassSurveyMYAprice` and
   `prevented_planting_adm`.
 

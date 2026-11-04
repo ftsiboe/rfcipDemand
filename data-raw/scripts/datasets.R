@@ -47,7 +47,10 @@ datasets <- list(
   nassSurveyPriceRecivedIndex = list(
     root = "nass", keys = c("commodity_year", "index_for_price_recived"), unique_keys = FALSE),
   nassSurveyRentalRates = list(
-    root = "nass", keys = c("state_code", "commodity_year", "rent"), unique_keys = FALSE)
+    root = "nass", keys = c("state_code", "commodity_year", "rent"), unique_keys = FALSE),
+  # Not used inside rfcipDemand; read as rfcipDemand::nassAgPriceMonthlyIndex downstream
+  nassAgPriceMonthlyIndex = list(
+    root = "nass", keys = c("year", "month", "comm"), unique_keys = TRUE)
 )
 
 # ---- Helpers -----------------------------------------------------------------
